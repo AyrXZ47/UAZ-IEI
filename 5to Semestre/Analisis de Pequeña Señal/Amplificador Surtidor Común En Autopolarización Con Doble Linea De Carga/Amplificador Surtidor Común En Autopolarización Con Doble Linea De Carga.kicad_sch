@@ -984,22 +984,22 @@
 		(uuid "34bad541-6e94-467b-928a-c81ce6d4e750")
 	)
 	(junction
-		(at 101.6 123.19)
+		(at 165.1 88.9)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "771356c7-7915-4a30-9e9d-0dbbe3ccb02d")
+		(uuid "61858cd1-ac97-4621-b707-9ad378f59b99")
+	)
+	(junction
+		(at 154.94 123.19)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "69769ecd-a905-4e9b-9f91-29c7e2a771f5")
 	)
 	(junction
 		(at 127 97.79)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "9584feef-6774-4a2e-9b08-ee741d350e5e")
-	)
-	(junction
-		(at 127 123.19)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "a4492a4e-fb55-43ac-9ffc-106d21154df1")
 	)
 	(junction
 		(at 140.97 123.19)
@@ -1019,6 +1019,16 @@
 	)
 	(wire
 		(pts
+			(xy 165.1 123.19) (xy 154.94 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "19839955-154b-439b-b527-2490e92fb2dc")
+	)
+	(wire
+		(pts
 			(xy 140.97 82.55) (xy 140.97 88.9)
 		)
 		(stroke
@@ -1029,43 +1039,23 @@
 	)
 	(wire
 		(pts
-			(xy 101.6 111.76) (xy 101.6 123.19)
+			(xy 165.1 88.9) (xy 165.1 110.49)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "2735d215-b65d-4f29-81bb-281d4ce926f6")
+		(uuid "323d6437-e575-4665-b764-bfce4254ed10")
 	)
 	(wire
 		(pts
-			(xy 101.6 101.6) (xy 101.6 97.79)
+			(xy 82.55 121.92) (xy 82.55 125.73)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "27c2ee75-c019-400e-8997-6edb67c12214")
-	)
-	(wire
-		(pts
-			(xy 91.44 101.6) (xy 91.44 69.85)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "359e086a-6f37-4aa5-8a2c-0aa8db2a4992")
-	)
-	(wire
-		(pts
-			(xy 101.6 123.19) (xy 127 123.19)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3cd823b7-aa77-42b3-b639-816a6ec3b653")
+		(uuid "37b9935a-748a-4258-8a29-ca1af7e4c0e4")
 	)
 	(wire
 		(pts
@@ -1119,6 +1109,36 @@
 	)
 	(wire
 		(pts
+			(xy 107.95 97.79) (xy 111.76 97.79)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6bb7ca0a-2749-4285-bba5-d3d4b40089e5")
+	)
+	(wire
+		(pts
+			(xy 165.1 88.9) (xy 172.72 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6c55b5e6-c109-4a17-9c20-acd4f74e94e4")
+	)
+	(wire
+		(pts
+			(xy 82.55 97.79) (xy 82.55 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6d00cfdb-ec7c-4223-bbe5-c472b7be5f50")
+	)
+	(wire
+		(pts
 			(xy 154.94 123.19) (xy 140.97 123.19)
 		)
 		(stroke
@@ -1149,23 +1169,33 @@
 	)
 	(wire
 		(pts
-			(xy 140.97 69.85) (xy 140.97 74.93)
+			(xy 161.29 88.9) (xy 165.1 88.9)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "7bdca078-8ddf-44eb-a53d-720a63256919")
+		(uuid "83b41356-81be-4443-a1b3-255ee27bb0e4")
 	)
 	(wire
 		(pts
-			(xy 101.6 97.79) (xy 111.76 97.79)
+			(xy 140.97 66.04) (xy 140.97 74.93)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "a36c36ff-a261-447e-92e5-622a3f1df32a")
+		(uuid "86070027-3182-4622-bc6b-74ff8af9f285")
+	)
+	(wire
+		(pts
+			(xy 82.55 83.82) (xy 82.55 87.63)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a5d472a0-d909-4bd5-85df-1cec68c06c75")
 	)
 	(wire
 		(pts
@@ -1189,16 +1219,6 @@
 	)
 	(wire
 		(pts
-			(xy 91.44 69.85) (xy 140.97 69.85)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c435bddc-909d-4ad7-ab34-1c3cf1ee4cc9")
-	)
-	(wire
-		(pts
 			(xy 140.97 88.9) (xy 153.67 88.9)
 		)
 		(stroke
@@ -1219,6 +1239,16 @@
 	)
 	(wire
 		(pts
+			(xy 165.1 118.11) (xy 165.1 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dab86ff2-82a7-40d7-ab73-65569a28d06a")
+	)
+	(wire
+		(pts
 			(xy 127 97.79) (xy 133.35 97.79)
 		)
 		(stroke
@@ -1229,23 +1259,123 @@
 	)
 	(wire
 		(pts
-			(xy 91.44 111.76) (xy 91.44 123.19)
+			(xy 82.55 107.95) (xy 82.55 111.76)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "f31227a7-adfa-4eca-9d0f-8bb72ac6ab38")
+		(uuid "fa476539-288f-4fb8-997f-3b946288f6c8")
 	)
-	(wire
-		(pts
-			(xy 91.44 123.19) (xy 101.6 123.19)
+	(global_label "Vo"
+		(shape input)
+		(at 172.72 88.9 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
 		)
-		(stroke
-			(width 0)
-			(type default)
+		(uuid "8803a9e2-f08e-4a83-9ec4-aed61a3649c8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 177.9428 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
 		)
-		(uuid "f3da1a5b-8ae8-42be-a0c8-673395157dd9")
+	)
+	(global_label "Vdd"
+		(shape input)
+		(at 82.55 83.82 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "9f4935e9-c148-40c7-8f8e-b8c15354b0eb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 88.9218 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "Vi"
+		(shape input)
+		(at 107.95 97.79 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "affb455b-6fb4-4b13-9bb3-83f701f1dfb9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 103.2714 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "Vdd"
+		(shape input)
+		(at 140.97 66.04 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "c375e2b5-80fd-4bb7-a58d-b6bd92d9d529")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 147.3418 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "Vi"
+		(shape input)
+		(at 82.55 107.95 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e81905d2-e2f9-46de-acc5-3b5c7b617d8e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 87.2286 107.95 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -1257,7 +1387,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "03b63a7d-44bb-4552-84cc-7816992c8bca")
-		(property "Reference" "R2"
+		(property "Reference" "Rd1"
 			(at 143.51 77.4699 0)
 			(effects
 				(font
@@ -1266,7 +1396,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "6k"
+		(property "Value" "1k"
 			(at 143.51 80.0099 0)
 			(effects
 				(font
@@ -1311,7 +1441,73 @@
 		(instances
 			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
-					(reference "R2")
+					(reference "Rd1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Simulation_SPICE:0")
+		(at 82.55 101.6 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "074fdaf3-eea0-4202-bc61-ec859ad4e546")
+		(property "Reference" "#GND03"
+			(at 82.55 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "0"
+			(at 82.55 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 82.55 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://ngspice.sourceforge.io/docs/ngspice-html-manual/manual.xhtml#subsec_Circuit_elements__device"
+			(at 82.55 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "0V reference potential for simulation"
+			(at 82.55 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "bb841756-9e3d-4f54-b29d-e9286317c766")
+		)
+		(instances
+			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
+					(reference "#GND03")
 					(unit 1)
 				)
 			)
@@ -1384,6 +1580,7 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
 			)
 		)
 		(pin "2"
@@ -1470,6 +1667,7 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
 			)
 		)
 		(pin "1"
@@ -1489,16 +1687,15 @@
 	)
 	(symbol
 		(lib_id "Simulation_SPICE:VSIN")
-		(at 101.6 106.68 0)
+		(at 82.55 116.84 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "7095e373-7a43-4956-91a2-88cd25a021a0")
 		(property "Reference" "V1"
-			(at 105.41 104.0101 0)
+			(at 86.36 114.1701 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1507,7 +1704,7 @@
 			)
 		)
 		(property "Value" "VSIN"
-			(at 105.41 106.5501 0)
+			(at 86.36 116.7101 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1516,7 +1713,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 101.6 106.68 0)
+			(at 82.55 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1525,7 +1722,7 @@
 			)
 		)
 		(property "Datasheet" "https://ngspice.sourceforge.io/docs/ngspice-html-manual/manual.xhtml#sec_Independent_Sources_for"
-			(at 101.6 106.68 0)
+			(at 82.55 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1534,7 +1731,7 @@
 			)
 		)
 		(property "Description" "Voltage source, sinusoidal"
-			(at 101.6 106.68 0)
+			(at 82.55 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1543,7 +1740,7 @@
 			)
 		)
 		(property "Sim.Pins" "1=+ 2=-"
-			(at 101.6 106.68 0)
+			(at 82.55 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1551,8 +1748,8 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Params" "dc=0 ampl=1 f=10 td=0 theta=0 phase=0 ac=1"
-			(at 105.41 109.0901 0)
+		(property "Sim.Params" "dc=0 ampl=100m f=1k td=0 theta=0 phase=0 ac=1"
+			(at 60.452 131.318 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1561,7 +1758,7 @@
 			)
 		)
 		(property "Sim.Type" "SIN"
-			(at 101.6 106.68 0)
+			(at 82.55 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1570,7 +1767,7 @@
 			)
 		)
 		(property "Sim.Device" "V"
-			(at 101.6 106.68 0)
+			(at 82.55 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1779,17 +1976,17 @@
 		)
 	)
 	(symbol
-		(lib_id "Simulation_SPICE:VDC")
-		(at 91.44 106.68 0)
+		(lib_id "Device:R")
+		(at 165.1 114.3 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "ac79d092-557a-48ec-b9e5-dabedfbaf207")
-		(property "Reference" "V2"
-			(at 95.25 105.2801 0)
+		(uuid "9e1ffac2-7e7d-4f33-9c13-912d0bd7c1b1")
+		(property "Reference" "Rc1"
+			(at 167.64 113.0299 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1797,8 +1994,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "15"
-			(at 95.25 107.8201 0)
+		(property "Value" "100k"
+			(at 167.64 115.5699 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1807,7 +2004,77 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 91.44 106.68 0)
+			(at 163.322 114.3 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 165.1 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 165.1 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "405aaadc-a555-4b64-b37a-beb14cec9809")
+		)
+		(pin "1"
+			(uuid "252708aa-9958-4c59-b33a-af7dde1bacc2")
+		)
+		(instances
+			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
+					(reference "Rc1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Simulation_SPICE:VDC")
+		(at 82.55 92.71 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ac79d092-557a-48ec-b9e5-dabedfbaf207")
+		(property "Reference" "V2"
+			(at 86.36 91.3101 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "15"
+			(at 86.36 93.8501 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 82.55 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1816,7 +2083,7 @@
 			)
 		)
 		(property "Datasheet" "https://ngspice.sourceforge.io/docs/ngspice-html-manual/manual.xhtml#sec_Independent_Sources_for"
-			(at 91.44 106.68 0)
+			(at 82.55 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1825,7 +2092,7 @@
 			)
 		)
 		(property "Description" "Voltage source, DC"
-			(at 91.44 106.68 0)
+			(at 82.55 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1834,7 +2101,7 @@
 			)
 		)
 		(property "Sim.Pins" "1=+ 2=-"
-			(at 91.44 106.68 0)
+			(at 82.55 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1843,7 +2110,7 @@
 			)
 		)
 		(property "Sim.Type" "DC"
-			(at 91.44 106.68 0)
+			(at 82.55 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1852,7 +2119,7 @@
 			)
 		)
 		(property "Sim.Device" "V"
-			(at 91.44 106.68 0)
+			(at 82.55 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1877,6 +2144,72 @@
 		)
 	)
 	(symbol
+		(lib_id "Simulation_SPICE:0")
+		(at 82.55 125.73 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b0b1d978-c465-4125-8f0b-169114143b27")
+		(property "Reference" "#GND02"
+			(at 82.55 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "0"
+			(at 82.55 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 82.55 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://ngspice.sourceforge.io/docs/ngspice-html-manual/manual.xhtml#subsec_Circuit_elements__device"
+			(at 82.55 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "0V reference potential for simulation"
+			(at 82.55 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "67e10e31-c4d8-4acb-9358-9fbf8443f2d3")
+		)
+		(instances
+			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
+					(reference "#GND02")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 140.97 114.3 0)
 		(unit 1)
@@ -1886,7 +2219,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ba00c761-1d92-46eb-8105-4b6b095fabeb")
-		(property "Reference" "R3"
+		(property "Reference" "Rs1"
 			(at 143.51 113.0299 0)
 			(effects
 				(font
@@ -1895,7 +2228,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "300"
+		(property "Value" "1k"
 			(at 143.51 115.5699 0)
 			(effects
 				(font
@@ -1940,7 +2273,7 @@
 		(instances
 			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
-					(reference "R3")
+					(reference "Rs1")
 					(unit 1)
 				)
 			)
@@ -2004,6 +2337,7 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
 			)
 		)
 		(property "Sim.Pins" "1=+ 2=-"
@@ -2040,7 +2374,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e38e06b9-6bc8-494b-8f18-c8ae8fa57fac")
-		(property "Reference" "R1"
+		(property "Reference" "Rg1"
 			(at 129.54 113.0299 0)
 			(effects
 				(font
@@ -2085,12 +2419,14 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" "R"
-			(at 127 114.3 0)
+		(property "Sim.Device" "Rg"
+			(at 129.54 114.2999 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Sim.Pins" "1=+ 2=-"
@@ -2099,6 +2435,7 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
 			)
 		)
 		(pin "2"
@@ -2110,7 +2447,7 @@
 		(instances
 			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
-					(reference "R1")
+					(reference "Rg1")
 					(unit 1)
 				)
 			)

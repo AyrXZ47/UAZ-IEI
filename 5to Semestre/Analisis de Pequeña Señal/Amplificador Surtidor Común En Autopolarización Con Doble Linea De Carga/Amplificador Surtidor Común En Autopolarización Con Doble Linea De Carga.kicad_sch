@@ -996,6 +996,12 @@
 		(uuid "69769ecd-a905-4e9b-9f91-29c7e2a771f5")
 	)
 	(junction
+		(at 165.1 123.19)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "912c40a2-893c-4e96-b63b-ec3806c3b6e4")
+	)
+	(junction
 		(at 127 97.79)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1006,6 +1012,22 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "d0530ca9-8677-46e9-b932-df2cfd6a485f")
+	)
+	(junction
+		(at 175.26 88.9)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f3a75439-f407-423a-99d2-d97eac5345ae")
+	)
+	(wire
+		(pts
+			(xy 175.26 118.11) (xy 175.26 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0981e91d-b535-4df2-b9e6-24b6dc66f480")
 	)
 	(wire
 		(pts
@@ -1056,6 +1078,16 @@
 			(type default)
 		)
 		(uuid "37b9935a-748a-4258-8a29-ca1af7e4c0e4")
+	)
+	(wire
+		(pts
+			(xy 175.26 88.9) (xy 186.69 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3e95d876-4f02-4edc-8d84-003cd6ce66df")
 	)
 	(wire
 		(pts
@@ -1119,7 +1151,7 @@
 	)
 	(wire
 		(pts
-			(xy 165.1 88.9) (xy 172.72 88.9)
+			(xy 165.1 88.9) (xy 175.26 88.9)
 		)
 		(stroke
 			(width 0)
@@ -1149,6 +1181,16 @@
 	)
 	(wire
 		(pts
+			(xy 175.26 123.19) (xy 165.1 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "72040623-a692-4547-9c3a-f15567042a3d")
+	)
+	(wire
+		(pts
 			(xy 127 123.19) (xy 140.97 123.19)
 		)
 		(stroke
@@ -1156,6 +1198,16 @@
 			(type default)
 		)
 		(uuid "7788501e-6fc5-4a95-8a4c-df337fc1f30a")
+	)
+	(wire
+		(pts
+			(xy 175.26 88.9) (xy 175.26 110.49)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "797cfa7f-b0dd-4782-9179-4dd7d64389c7")
 	)
 	(wire
 		(pts
@@ -1269,7 +1321,7 @@
 	)
 	(global_label "Vo"
 		(shape input)
-		(at 172.72 88.9 0)
+		(at 186.69 88.9 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1279,7 +1331,7 @@
 		)
 		(uuid "8803a9e2-f08e-4a83-9ec4-aed61a3649c8")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 177.9428 88.9 0)
+			(at 191.9128 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2359,6 +2411,76 @@
 			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "C1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 175.26 114.3 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c8093e81-f5cd-4d96-862f-57d80a74c8f1")
+		(property "Reference" "C4"
+			(at 179.07 113.0299 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "1n"
+			(at 179.07 115.5699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 176.2252 118.11 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 175.26 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 175.26 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "f2894f96-ebce-4aa2-aead-be3db6c9c887")
+		)
+		(pin "2"
+			(uuid "127f04ca-96c6-4ae0-9bb1-4d171de5aa1e")
+		)
+		(instances
+			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
+					(reference "C4")
 					(unit 1)
 				)
 			)

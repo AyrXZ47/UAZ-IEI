@@ -38,7 +38,7 @@ def simular_correlador(s0, s1, varianzas, titulo_base, filename):
         ax.plot(k_steps, c0, marker='o', label='Correlador 0 (s0)')
         ax.plot(k_steps, c1, marker='x', linestyle='--', label='Correlador 1 (s1)')
         
-        ax.set_title(f"Varianza del Ruido: $\sigma^2 = {var}$")
+        ax.set_title(rf"Varianza del Ruido: $\sigma^2 = {var}$")
         ax.set_xlabel("Muestra (k)")
         ax.set_ylabel("Salida del Correlador")
         ax.set_xticks(k_steps)
@@ -50,6 +50,7 @@ def simular_correlador(s0, s1, varianzas, titulo_base, filename):
     plt.tight_layout()
     plt.savefig(filename)
     print(f"Gráfica guardada: {filename}")
+    plt.show()
 
 if __name__ == "__main__":
     # --- PROBLEMA 1 ---

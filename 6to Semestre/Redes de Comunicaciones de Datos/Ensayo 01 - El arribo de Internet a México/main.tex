@@ -1,0 +1,242 @@
+% ============================================================
+% Ensayo 01 — El arribo de Internet a México
+% Redes de Comunicaciones de Datos (6.º semestre)
+% UAZ · Unidad Académica de Ingeniería Eléctrica
+% Ing. Electrónica Industrial con especialidad en Telecomunicaciones
+% ============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,mexico]{babel}
+\usepackage{graphicx}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\onehalfspacing
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+% ---------------------------- PORTADA -----------------------
+\begin{titlepage}
+  \thispagestyle{empty}
+  \begin{center}
+    \vspace*{1cm}
+    \includegraphics[width=3.2cm]{../../../Assets/uaz.png}\hspace{2.5cm}%
+    \includegraphics[width=3.2cm]{../../../Assets/UIE.png}
+    \vspace{0.8cm}
+
+    {\large Universidad Autónoma de Zacatecas}\\[4pt]
+    {\large Unidad Académica de Ingeniería Eléctrica}\\[4pt]
+    {\normalsize Ingeniería Electrónica Industrial con especialidad en Telecomunicaciones}
+
+    \vspace{1.8cm}
+    {\LARGE\bfseries Ensayo 01}\\[10pt]
+    {\Large\bfseries El arribo de Internet a México:\\[4pt] tecnologías, velocidades y actores involucrados}
+  \end{center}
+
+  \vspace{2.2cm}
+  \begin{center}
+    \begin{tabular}{rl}
+      \textbf{Materia:} & Redes de Comunicaciones de Datos\\
+      \textbf{Docente:} & José Ricardo Gómez Rodríguez\\
+      \textbf{Alumno:}  & Arnold Yovick Ríos Zaldívar\\
+      \textbf{Fecha:}   & Agosto de 2026\\
+    \end{tabular}
+  \end{center}
+  \vfill
+\end{titlepage}
+
+% -------------------------- INTRODUCCIÓN --------------------
+\section*{Introducción}
+
+Durante las últimas cuatro décadas, Internet ha dejado de ser un experimento
+académico-militar para convertirse en la infraestructura sobre la que se
+organiza la economía, la educación y la vida social contemporánea. México no
+fue ajeno a esta transformación, aunque su incorporación a la red mundial fue
+tardía, desigual y protagonizada por actores que hoy parecen insospechados:
+universidades públicas, instituciones tecnológicas y pequeñas comunidades
+académicas. Comprender cómo llegó Internet al país exige responder, al menos,
+tres preguntas: a través de qué tecnología se estableció la primera conexión,
+cuál fue su velocidad inicial y cómo se compara con el contexto internacional
+de la época, y quiénes fueron los actores institucionales y académicos que
+hicieron posible ese hito.
+
+El presente ensayo aborda estas interrogantes con un enfoque que combina la
+historia técnica de las telecomunicaciones con su dimensión social e
+institucional. En el desarrollo se reconstruye primero el contexto
+internacional en que maduró Internet; después se narran las primeras
+conexiones mexicanas y la infraestructura que las sostuvo; posteriormente se
+analizan las velocidades de transmisión iniciales frente a las de otros
+países, y finalmente se examina el papel de los principales actores —UNAM,
+ITESM, IPN, CUDI, el Estado y las primeras empresas— en la consolidación de
+la red en México. Se cierra con una conclusión que valora el legado de aquel
+proceso para la conectividad actual del país.
+
+% --------------------------- DESARROLLO ---------------------
+\section*{Desarrollo}
+
+\subsection*{1. Antecedentes: la construcción global de Internet}
+
+Internet no nació como un servicio comercial, sino como un proyecto de
+investigación. Su núcleo primigenio, la red ARPANET, fue desarrollado en
+Estados Unidos a partir de 1969 con financiamiento de la agencia de
+investigación avanzada del Departamento de Defensa, y en 1983 adoptó el
+protocolo TCP/IP como estándar común (Abbate, 1999). El paso decisivo hacia
+su difusión académica se dio en 1986, cuando la National Science Foundation
+creó la red troncal NSFNET, que interconectó los centros de supercómputo y,
+progresivamente, a las universidades de ese país. Paralelamente, en Europa y
+en otras regiones prosperaron redes académicas como BITNET y EARN, dedicadas
+inicialmente al correo electrónico y a la transferencia de archivos, que
+fueron el puente natural por el que muchas universidades latinoamericanas
+dieron sus primeros pasos hacia la conectividad (Hauben y Hauben, 1997).
+
+América Latina se incorporó a este proceso de manera escalonada. Chile se
+conectó a Internet en 1987 y Brasil, Argentina y otros países lo hicieron en
+los años siguientes, en todos los casos por iniciativa de comunidades
+académicas antes que de gobiernos o empresas. México siguió la misma lógica,
+pero con particularidades propias que se describen a continuación.
+
+\subsection*{2. Las primeras conexiones en México: del correo electrónico a TCP/IP}
+
+La presencia de redes de datos en México se remonta a la segunda mitad de los
+años ochenta, cuando la Universidad Nacional Autónoma de México (UNAM) y el
+Instituto Tecnológico y de Estudios Superiores de Monterrey (ITESM)
+establecieron enlaces de la red BITNET para intercambiar correo electrónico
+con instituciones de Estados Unidos y Europa (CUDI, 2004). Se trataba de
+servicios de mensajería académica sobre protocolos anteriores a Internet, pero
+constituyeron la primera experiencia mexicana de interconexión digital
+internacional y formaron al personal técnico que luego protagonizaría el
+cambio a TCP/IP.
+
+El hito fundacional suele fecharse en febrero de 1989, cuando el ITESM, campus
+Monterrey, estableció el primer enlace de Internet en territorio mexicano
+mediante una línea telefónica dedicada hacia la Universidad Rice, en Houston,
+Texas, utilizando el protocolo UUCP (Unix-to-Unix Copy) (Tecnológico de
+Monterrey, 2019). Un año después, en 1990, la UNAM logró una conexión plena
+con el protocolo TCP/IP a través de un enlace satelital hacia Estados Unidos,
+lo que permitió por primera vez el acceso directo a los servicios de Internet
+de manera continua (UNAM, 2020). Poco después se incorporaron otras
+instituciones: el Instituto Politécnico Nacional (IPN), la Universidad Autónoma
+Metropolitana (UAM) y otras universidades del interior del país. En 1989 el
+organismo internacional IANA había delegado además al ITESM la operación del
+nodo México (NIC México), encargado de administrar el dominio \texttt{.mx};
+de esta manera, la gestión técnica de la identidad mexicana en Internet quedó
+también en manos del ámbito académico (NIC México, 2024).
+
+\subsection*{3. Tecnologías, infraestructura y velocidades iniciales}
+
+La tecnología que sostuvo estas primeras conexiones combinó dos grandes
+familias. La primera fue la de los enlaces satelitales: el enlace de la UNAM
+de 1990 utilizó un circuito satelital arrendado a la red de NASA, una opción
+técnicamente viable en un país con poca infraestructura terrestre de fibra
+óptica, aunque económicamente costosa y con el retardo inherente a la
+transmisión por satélite geoestacionario (CUDI, 2004). La segunda fue la de
+las líneas telefónicas dedicadas (circuitos de datos conmutados), sobre las
+cuales se implementaron protocolos de correo como UUCP, que operaban
+almacenando y reenviando mensajes por lotes en lugar de mantener una conexión
+permanente.
+
+La velocidad inicial de estas conexiones fue de aproximadamente 56 kilobits
+por segundo (kbps), tanto en el enlace de UUCP del ITESM como en el circuito
+satelital de la UNAM (Tecnológico de Monterrey, 2019; UNAM, 2020). Para
+dimensionar esta cifra cabe compararla con el contexto internacional de la
+época: la red troncal NSFNET de Estados Unidos fue actualizada en 1988 a una
+capacidad de 1.544 megabits por segundo (T1) y alcanzó los 45 megabits por
+segundo (T3) en 1991 (Abbate, 1999). Esto significa que la primera conexión
+mexicana disponía de una capacidad aproximadamente veintisiete veces menor que
+la del troncal estadounidense contemporáneo, aunque resultaba comparable con
+las velocidades de las primeras conexiones académicas de otros países
+latinoamericanos y de las redes europeas de acceso inicial. Conforme avanzó la
+década, los enlaces mexicanos se duplicaron primero a 128 kbps y después se
+elevaron a velocidades de rango T1, en particular a partir de los proyectos
+de interconexión estatal de mediados de los noventa.
+
+La infraestructura técnica usada en esos años —satélites arrendados, líneas
+dedicadas y protocolos asimétricos— revela un rasgo central del proceso
+mexicano: no se construyeron grandes redes troncales desde el inicio, sino que
+se aprovecharon la infraestructura de telecomunicaciones existente y los
+convenios académicos internacionales para lograr la conectividad.
+
+\subsection*{4. Los actores: universidades, Estado y sector privado}
+
+El protagonismo del proceso recayó, sin duda, en el sector académico. La UNAM,
+a través de su Instituto de Investigaciones en Matemáticas Aplicadas y en
+Sistemas (IIMAS) y de sus servicios de cómputo, aportó el enlace satelital de
+1990 y la continuidad operativa del servicio para la comunidad universitaria;
+el ITESM contribuyó con el primer enlace de 1989, la operación de NIC México
+y una comunidad técnica tempranamente capacitada en redes (NIC México, 2024;
+Tecnológico de Monterrey, 2019). El IPN y la UAM se sumaron en los años
+siguientes, ampliando la red académica del centro del país.
+
+El Estado participó de dos maneras. Primero, de forma indirecta, a través del
+Consejo Nacional de Ciencia y Tecnología (CONACYT), que financió y articuló en
+1992 la creación de la Corporación Universitaria para el Desarrollo de
+Internet (CUDI), el consorcio que agrupó a las universidades e instituciones
+de investigación conectadas y que durante años fue el corazón de la red
+académica nacional (CUDI, 2004). Segundo, de forma directa, mediante la
+Secretaría de Comunicaciones y Transportes (SCT), que a partir de 1994 impulsó
+proyectos de interconexión y la política de apertura del sector de
+telecomunicaciones (SCT, 1995). El sector privado llegó después: en la
+segunda mitad de la década aparecieron los primeros proveedores de acceso
+comercial y, hacia 1996, Telmex inició la oferta de servicio de Internet para
+el público, marcando la transición de una Internet académica a una Internet
+masiva. La secuencia es significativa: en México, la universidad pública fue
+la pionera y el mercado, el último en incorporarse.
+
+\subsection*{5. Del ámbito académico a la sociedad: el impacto social}
+
+La consecuencia más visible de este origen académico fue una adopción social
+desigual. Mientras las universidades mexicanas contaban con correo
+electrónico y acceso a la red mundial desde mediados de los noventa, la
+población general tuvo que esperar a la masificación comercial del acceso para
+incorporarse a Internet, y aun entonces la cobertura se concentró en las
+grandes ciudades y en los hogares de mayores ingresos (Castells, 2001). La
+brecha entre el país conectado y el país rezagado que se configuró en esos
+años anticipó el problema de la desigualdad digital que, en distintas
+proporciones, persiste hasta la actualidad.
+
+% --------------------------- CONCLUSIÓN ---------------------
+\section*{Conclusión}
+
+La llegada de Internet a México fue un proceso de naturaleza esencialmente
+académica, en el que la tecnología disponible —enlaces satelitales y líneas
+telefónicas dedicadas, primero con UUCP y después con TCP/IP— se adaptó a una
+infraestructura nacional aún incipiente. La velocidad inicial de transmisión,
+apenas 56 kbps, no fue un dato anecdótico: constituía la mitad de un grano de
+la capacidad del troncal estadounidense de la época y reflejaba con precisión
+el rezago estructural de las telecomunicaciones mexicanas frente a los países
+centrales. Ese margen inicial, sin embargo, no impidió que la comunidad
+académica —encabezada por la UNAM, el ITESM, el IPN y articulada por CUDI y
+NIC México— construyera las bases técnicas, institucionales y humanas sobre las
+que más tarde se montó el acceso comercial de la población.
+
+La lección de este proceso histórico es doble. Por un lado, demuestra que la
+innovación tecnológica en países periféricos suele adelantarse en el ámbito
+académico antes que en el mercado, y que invertir en ese ámbito produce
+infraestructuras de largo plazo. Por otro, advierte que el retraso inicial en
+capacidad y cobertura tiende a reproducirse si no existe una política pública
+decidida de interconexión y acceso universal. La historia de cómo México entró
+a Internet no es, en el fondo, la crónica de un enlace: es la crónica de las
+decisiones de algunos actores y de las deudas que esas decisiones dejaron
+pendientes.
+
+% --------------------------- REFERENCIAS --------------------
+\section*{Referencias}
+
+\begin{itemize}[leftmargin=2em, itemindent=-2em, label={}]
+  \item Abbate, J. (1999). \textit{Inventing the Internet}. MIT Press.
+  \item Castells, M. (2001). \textit{La galaxia Internet: Reflexiones sobre Internet, empresa y sociedad}. Plaza \& Janés.
+  \item Corporación Universitaria para el Desarrollo de Internet. (2004). \textit{Historia de Internet en México}. CUDI. \url{https://www.cudi.edu.mx}
+  \item Hauben, M. y Hauben, R. (1997). \textit{Netizens: On the history and impact of Usenet and the Internet}. IEEE Computer Society Press.
+  \item NIC México. (2024). \textit{Historia de NIC México}. \url{https://www.nic.mx}
+  \item Secretaría de Comunicaciones y Transportes. (1995). \textit{Hacia la supercarretera de la información: estrategia de telecomunicaciones de México}. SCT.
+  \item Tecnológico de Monterrey. (2019). \textit{El ITESM y la llegada de Internet a México}. \url{https://www.tec.mx}
+  \item Universidad Nacional Autónoma de México. (2020). \textit{La UNAM y 30 años de Internet en México}. Gaceta UNAM. \url{https://www.gaceta.unam.mx}
+\end{itemize}
+
+\end{document}

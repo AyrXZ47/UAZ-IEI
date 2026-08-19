@@ -60,6 +60,9 @@ fp-info-cache
 *.log
 *.tmp
 
+# --- GNU Octave ---
+octave-workspace
+
 
 # --- Agentes IA: memorias y estado local (NUNCA al repo) ---
 .serena/

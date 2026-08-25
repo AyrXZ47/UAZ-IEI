@@ -1,0 +1,231 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+\usepackage[spanish]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=3cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{amssymb}
+
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textit{Redes de Alta Velocidad}}
+\rhead{\textit{Actividad 1 -- Reporte de Lectura}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\makeatletter
+\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\quad}
+\makeatother
+
+\setlist[itemize]{label=\footnotesize$\blacksquare$, itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+\setlist[enumerate]{label=\alph*), itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+
+\begin{document}
+
+% ==========================================
+% PORTADA
+% ==========================================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\Large\bfseries Universidad Autónoma de Zacatecas\par}
+    \vspace{0.4cm}
+    {\large\bfseries Unidad Académica de Ingeniería Eléctrica\par}
+    {\large\bfseries Ing. Electrónica Industrial con Esp. en Telecomunicaciones\par}
+    \vspace{1.5cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1cm}
+    {\huge\bfseries Reporte de Lectura\par}
+    \vspace{0.7cm}
+    {\Large ``Redes de comunicaciones de alta velocidad: \\ ¿cómo funcionan?''\par}
+    \vspace{0.6cm}
+    {\normalsize José F. Duato Marín. \textit{Rev. R. Acad. Cienc. Exact. Fís. Nat.}, Vol.~109, N.º~1--2, pp.~75--86, 2016.\par}
+    \vspace{1cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1.8cm}
+
+    \begin{tabular}{r l}
+        \textbf{Materia:}    & Redes de Alta Velocidad \\[0.35cm]
+        \textbf{Actividad:}  & Actividad de apertura -- Lectura 1 \\[0.35cm]
+        \textbf{Alumno(a):}  & Arnold Yovick Rios Zaldivar \\[0.35cm]
+        \textbf{Matrícula:}  & 35167151 \\[0.35cm]
+        \textbf{Docente:}    & Jose Ricardo Gomez Rodriguez \\[0.35cm]
+        \textbf{Fecha:}      & 24 de agosto de 2026
+    \end{tabular}
+
+    \vfill
+    Ciclo escolar: Ago--Dic 2026
+    \vspace*{0.5cm}
+\end{titlepage}
+\setcounter{page}{1}
+
+% ==========================================
+% RESUMEN
+% ==========================================
+\section{Resumen de la lectura}
+
+El artículo de José F.~Duato Marín ofrece un recorrido estructurado por los principios de funcionamiento de las redes de interconexión que sostienen la era de Internet, adoptando un enfoque mixto ascendente y descendente: desde el punto de vista del usuario se parte de los servicios ofrecidos hasta llegar al detalle técnico, mientras que desde el punto de vista del diseño se construye la funcionalidad paso a paso. El autor muestra que, aunque estas redes son muy distintas (desde el enlace punto a punto hasta la red en chip con cientos de núcleos), todas comparten los mismos problemas de diseño. Comienza con la comunicación directa entre dos dispositivos mediante un enlace punto a punto, donde introduce el ancho de banda, la segmentación de canales, el control de flujo y la gestión de colas. Después aborda el conmutador, describiendo su arquitectura interna: puertos, colas, conmutador interno y la unidad de enrutamiento y arbitraje. A continuación analiza las redes con múltiples conmutadores, presentando las topologías directas (malla), multietapa (árbol gordo/Benes) e irregulares, junto con el enrutamiento y sus problemas asociados. El autor culmina explicando la relación entre las variables de diseño, destacando que los problemas y las soluciones no son independientes: una solución a un problema suele crear o agravar otros, y a la vez puede ayudar a resolver otros distintos. De esta manera, conceptos como congestión, interbloqueo, entrega fuera de orden, bloqueo de cabeza de línea, QoS y tolerancia a fallos quedan integrados en una visión sistémica que servirá de base para el resto de la materia.
+
+% ==========================================
+% CONCEPTOS
+% ==========================================
+\section{Conceptos fundamentales identificados}
+
+\begin{itemize}
+    \item \textbf{Ancho de banda y segmentación de canales.} El ancho de banda de un enlace es el producto de su frecuencia de reloj por su anchura. Para aprovechar relojes muy rápidos se pueden inyectar nuevos datos antes de que los anteriores lleguen al otro extremo (pipelining del enlace), permitiendo que varios bits o mensajes viajen simultáneamente por el mismo enlace.
+    \item \textbf{Control de flujo y flits.} Protocolo que evita el desbordamiento de las colas del receptor notificándole al transmisor el espacio disponible. La \emph{unidad de control de flujo} (flit) es la cantidad de datos sobre la que se aplica ese control.
+    \item \textbf{Gestión de colas y planificación.} Manejo del almacenamiento de los flujos multiplexados. Requiere planificador de transmisión (para elegir qué flujo transmitir y garantizar justicia) y planificador de recepción.
+    \item \textbf{QoS y control de admisión.} Garantías de ancho de banda y retardo para ciertos flujos. No pueden garantizarse si el ancho requerido total supera la capacidad del enlace, por lo que se requiere un control de admisión.
+    \item \textbf{Arquitectura de conmutador.} Puertos de entrada/salida, colas, conmutador interno y unidad de enrutamiento y arbitraje que configura rutas dinámicas y resuelve solicitudes simultáneas al mismo puerto de salida.
+    \item \textbf{Formato de paquete y técnicas de conmutación.} Los flits se agrupan en paquetes con cabecera de destino. La conmutación de paquetes espera el paquete completo antes de retransmitirlo; el \emph{wormhole} retransmite apenas llega la cabecera.
+    \item \textbf{Bloqueo de cabeza de línea (HOL).} Cuando un paquete bloqueado en una cola impide el avance de otros paquetes posteriores cuyo puerto de salida está libre, desperdiciando ancho de banda.
+    \item \textbf{Topologías.} Redes directas (malla), multietapa (árbol gordo/Benes) e irregulares, que definen cómo se interconectan los conmutadores.
+    \item \textbf{Enrutamiento.} Algoritmos determinista (una ruta por par), adaptativo (usa información local de tráfico) y multidestino (envío a varios destinos).
+    \item \textbf{Interbloqueo.} Situación en la que paquetes no pueden avanzar porque las colas solicitadas están permanentemente ocupadas por otros paquetes que, a su vez, solicitan las colas que ellos ocupan.
+    \item \textbf{Equilibrio de carga y control de congestión.} Técnicas para distribuir el tráfico entre rutas alternativas y para limitar la inyección de tráfico cuando ocurre una congestión.
+    \item \textbf{Tolerancia a fallos y reconfiguración.} Diseño para que un fallo no inutilice toda la red, mediante redundancia o enrutamiento tolerante a fallos, aprovechando los caminos alternativos.
+\end{itemize}
+
+% ==========================================
+% PROBLEMÁTICAS
+% ==========================================
+\section{Problemáticas de diseño al escalar una red}
+
+\subsection{Interbloqueo (deadlock)}
+
+Cuando la red crece y los paquetes deben cruzar varios conmutadores, el principal problema asociado al enrutamiento es el interbloqueo: ciertos paquetes no pueden avanzar porque las colas que solicitan están ocupadas de manera permanente por otros paquetes que, a su vez, requieren las colas que ellos ocupan, formándose un ciclo de esperas que bloquea para siempre a todos los implicados.
+
+\textbf{Causa raíz.} El uso de rutas que generan dependencias circulares entre los recursos (colas) reservados por los paquetes. En la Fig.~8 del artículo, una malla bidimensional muestra fragmentos de ruta cuyas colas quedan reservadas en un ciclo.
+
+\textbf{Soluciones propuestas.} Diseñar cuidadosamente el algoritmo de enrutamiento, imponiendo restricciones de enrutamiento que descarten ciertos caminos para llegar a ciertos destinos y rompan así cualquier ciclo posible. El costo es una posible reducción de prestaciones.
+
+\begin{center}
+\begin{tikzpicture}[]
+\node (A) [draw, circle, minimum size=1.0cm] at (0,0) {A};
+\node (B) [draw, circle, minimum size=1.0cm] at (3,0) {B};
+\node (C) [draw, circle, minimum size=1.0cm] at (3,-2.2) {C};
+\node (D) [draw, circle, minimum size=1.0cm] at (0,-2.2) {D};
+\draw[-latex] (A) -- node[above]{p1} (B);
+\draw[-latex] (B) -- node[right]{p2} (C);
+\draw[-latex] (C) -- node[below]{p3} (D);
+\draw[-latex] (D) -- node[left]{p4} (A);
+\node at (1.5,1.1) {\emph{Ciclo de espera circular}};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Congestión y árboles de congestión}
+
+La congestión aparece cuando una parte de la red se satura y su efecto acumulativo se propaga hacia los orígenes, formando un \emph{árbol de congestión} que crece desde el área saturada hasta los dispositivos que transmiten hacia ella.
+
+\textbf{Causa raíz.} El número de flujos que solicitan un mismo recurso supera su capacidad. Solo es grave si la carga media inyectada representa un porcentaje grande de la capacidad de la red; en tal caso los árboles de congestión degradan las prestaciones de forma significativa.
+
+\textbf{Soluciones propuestas.} El \emph{control de congestión}: detectar la congestión, notificar a los dispositivos origen y limitar su inyección de tráfico hasta que la congestión desaparezca. Adicionalmente, el equilibrado de carga y el enrutamiento adaptativo previenen la aparición de zonas saturadas.
+
+\begin{center}
+\begin{tikzpicture}[scale=0.9]
+\node (o) [draw, rectangle, minimum width=1.6cm, minimum height=0.6cm] at (0,2.2) {Origen};
+\node (s) [draw, rectangle, minimum width=1.2cm, minimum height=0.9cm] at (0,0) {Saturado};
+\fill[gray] (0.5,0.9) rectangle (1.4,1.7);
+\draw[-latex] (o) to[out=0,in=90] (0.8,0.1);
+\draw[-latex] (o) to[out=180,in=90] (-0.8,0.1);
+\node at (-2.3,2.2) {\textbf{X}};
+\node at (2.9,1.0) {\emph{Árbol de congestión}};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Entrega de paquetes fuera de orden}
+
+El enrutamiento adaptativo selecciona la ruta de cada paquete según la disponibilidad de recursos para equilibrar la carga y evitar zonas congestionadas. Como consecuencia, paquetes del mismo flujo pueden tomar rutas diferentes y llegar a su destino en un orden distinto al de envío.
+
+\textbf{Causa raíz.} La existencia de múltiples rutas con distintas longitudes y retrasos entre el mismo origen y destino, combinada con la decisión dinámica de qué ruta usar para cada paquete.
+
+\textbf{Soluciones propuestas.} El artículo señala este problema como el principal introducido por el enrutamiento adaptativo y advierte que la entrega fuera de orden no es aceptable en algunas áreas de aplicación, lo que obliga a recurrir al enrutamiento determinista (una sola ruta por par) o a incorporar mecanismos de reordenación en el receptor.
+
+\begin{center}
+\begin{tikzpicture}[]
+\node (o) [draw, rectangle, minimum width=1.4cm, minimum height=0.6cm] at (0,0) {Origen};
+\node (d) [draw, rectangle, minimum width=1.4cm, minimum height=0.6cm] at (8,0) {Destino};
+\node (a) [circle, draw, minimum size=0.75cm] at (2.6,0.8) {C};
+\node (b) [circle, draw, minimum size=0.75cm] at (2.6,-0.8) {D};
+\node (c) [circle, draw, minimum size=0.75cm] at (5.4,0.8) {E};
+\node (e2)[circle, draw, minimum size=0.75cm] at (5.4,-0.8) {F};
+\draw[-latex] (o) -- (a);
+\draw[-latex] (o) -- (b);
+\draw[-latex] (a) -- (c);
+\draw[-latex] (b) -- (e2);
+\draw[-latex] (c) -- (d);
+\draw[-latex] (e2) -- (d);
+\node at (3.4,-1.9) {\emph{El paquete 1 va por arriba, el 2 por abajo}};
+\node at (6.8,-2.6) {\emph{El 2 llega antes: fuera de orden}};
+\end{tikzpicture}
+\end{center}
+
+% ==========================================
+% INTERRELACIÓN
+% ==========================================
+\section{Interrelación entre las problemáticas identificadas}
+
+Las tres problemáticas analizadas no son fenómenos aislados, sino manifestaciones de un mismo hecho: las variables de diseño de la red no son independientes, y las soluciones a un problema suelen crear o agravar otro (Duato, sección 4). En la \textbf{Figura~\ref{fig:relaciones}} se resumen las relaciones más relevantes.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[node distance=1.6cm]
+        \node (escala) [draw, rounded corners, minimum width=2.6cm, minimum height=1cm, fill=gray!15, align=center] at (0,2.6) {\textbf{Escalar la red}\\ más conmutadores};
+        \node (cong)   [draw, rounded corners, minimum width=2.2cm, minimum height=0.8cm, align=center] at (-3.6,0) {Congestión y\\árboles};
+        \node (dead)   [draw, rounded corners, minimum width=2.2cm, minimum height=0.8cm, align=center] at (0,0) {Interbloqueo};
+        \node (orden)  [draw, rounded corners, minimum width=2.2cm, minimum height=0.8cm, align=center] at (3.6,0) {Entrega\\fuera de orden};
+        \node (adapt)  [draw, rounded corners, minimum width=2.4cm, minimum height=0.8cm, fill=blue!12, align=center] at (0,-2.6) {Enrutamiento\\adaptativo};
+        \node (conga)  [draw, rounded corners, minimum width=2.4cm, minimum height=0.8cm, fill=blue!12, align=center] at (-3.6,-2.6) {Equilibrio de\\carga};
+        \node (restr)  [draw, rounded corners, minimum width=2.4cm, minimum height=0.8cm, fill=green!14, align=center] at (3.6,-2.6) {Restricciones\\de enrutamiento};
+        \draw[-latex, thick] (escala) -- (dead);
+        \draw[-latex, thick] (escala) -- (cong);
+        \draw[-latex, thick, blue] (adapt) -- (orden);
+        \draw[-latex, thick, green!50!black] (dead) to[bend left=40] node[left]{crea\ agrava} (-1.2,-1.3);
+        \draw[-latex, thick, blue] (adapt) to[bend right=30] (-2.4,-1.2);
+        \draw[-latex, thick, green!50!black] (restr) to[bend left=35] node[right, align=center]{limita rutas\\agrava congestión} (1.4,-1.2);
+        \draw[-latex, thick, blue] (adapt) to[bend right=25] node[below]{mitiga} (-2.2,-1.4);
+    \end{tikzpicture}
+    \caption{Diagrama de relaciones entre la escala de la red y las problemáticas de diseño. Las flechas verdes indican efectos negativos (una solución genera o agrava otra problemática); las azules indican mecanismos que mitigan o dan origen a otras problemáticas.}
+    \label{fig:relaciones}
+\end{figure}
+
+En primer lugar, escalar la red (más conmutadores y más flujos compartiendo recursos) es la causa raíz común: más enrutamiento, más congestión y más interbloqueo. El enrutamiento \textbf{adaptativo} mejora el equilibrio de carga y mitiga la congestión, pero su principal costo es la \textbf{entrega fuera de orden}. Por otro lado, para evitar el \textbf{interbloqueo} se imponen \textbf{restricciones de enrutamiento} que limitan las rutas disponibles, lo que puede concentrar el tráfico en menos caminos y \emph{agravar la congestión}. Así, la solución a una problemática (evitar interbloqueo) puede generar o empeorar otra (congestión), mientras que una misma técnica (el control de admisión para QoS) puede ayudar a resolver varias a la vez. Por ello el autor insiste en que las variables de diseño deben sintonizarse conjuntamente.
+
+
+% ==========================================
+% REFLEXIÓN
+% ==========================================
+\section{Reflexión personal}
+
+El aspecto que más me sorprendió de la lectura fue descubrir que problemas aparentemente abstractos como el interbloqueo o la entrega fuera de orden aparecen en todos los niveles de una red, desde la diminuta red en chip con cientos de núcleos hasta los grandes centros de datos e Internet misma, y que siempre se resuelven con los mismos principios. Esta idea es poderosa: entender un enlace punto a punto vale para comprender un supercomputador completo, pues subyacen las mismas técnicas de control de flujo, enrutamiento y gestión de colas.
+
+Al pensar en mi experiencia cotidiana, me doy cuenta de que soy usuario constante de estas redes sin percibirlo. Cuando busco un video o juego en línea, mi tráfico cruza numerosos enrutadores y conmutadores que arbitran, enrutan y controlan el flujo de mis datos; cuando un video se ve intermitente o una página tarda en cargar, estoy experimentando problemas de congestión y de falta de equilibrio de carga. El bloqueo de cabeza de línea explica, por ejemplo, por qué una descarga pesada puede ralentizar el resto de mi conexión. Incluso la calidad de servicio se hace visible en las llamadas de voz o video, que requieren garantías de retardo y ancho de banda.
+
+A lo largo del curso me gustaría profundizar en el enrutamiento adaptativo y en las técnicas para evitar el interbloqueo en redes grandes, así como en el diseño de redes en chip, pues son los temas donde los conceptos toman forma práctica y se aprecian los compromisos entre prestaciones, coste y complejidad. Esta lectura me ha dado una visión global que me ayudará a contextualizar cada uno de los temas formales que veremos.
+
+% ==========================================
+% CONCLUSIONES
+% ==========================================
+\section{Conclusiones}
+
+El artículo constituye una base sólida para la materia de Redes de Alta Velocidad, pues presenta de forma accesible los principios que rigen todas las interconexiones de alta velocidad y demuestra que, independientemente de la escala o del ámbito de aplicación, los problemas de diseño son los mismos y las soluciones suelen transferirse entre áreas. La idea central es que las variables de diseño no son independientes: la tecnología y la topología definen el ancho de banda disponible, el enrutamiento y el equilibrio de carga maximizan su uso, y las garantías de QoS y la tolerancia a fallos requieren mecanismos adicionales que deben sintonizarse en conjunto. Comprender estas interrelaciones, y en particular las problemáticas del interbloqueo, la congestión y la entrega fuera de orden, me permitirá abordar con una visión sistémica los modelos formales y las implementaciones que desarrollaremos a lo largo del curso.
+
+% ==========================================
+% REFERENCIAS
+% ==========================================
+\begin{thebibliography}{9}
+    \bibitem{duato2016}
+    J. F. Duato Marín, ``Redes de comunicaciones de alta velocidad: ¿cómo funcionan?'', \textit{Rev. R. Acad. Cienc. Exact. Fís. Nat. (Esp)}, vol. 109, n.º 1--2, pp. 75--86, 2016.
+\end{thebibliography}
+
+\end{document}

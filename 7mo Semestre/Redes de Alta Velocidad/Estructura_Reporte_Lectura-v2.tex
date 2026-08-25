@@ -1,0 +1,198 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=3cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{amssymb}
+
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textit{Redes de Alta Velocidad}}
+\rhead{\textit{Actividad 1 -- Reporte de Lectura}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\makeatletter
+\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\quad}
+\makeatother
+
+\setlist[itemize]{label=\footnotesize$\blacksquare$, itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+\setlist[enumerate]{label=\alph*), itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+
+\begin{document}
+
+% ==========================================
+% PORTADA
+% ==========================================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\Large\bfseries [Nombre de la Institución]\par}
+    \vspace{0.4cm}
+    {\large\bfseries [Facultad / Departamento]\par}
+    \vspace{1.5cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1cm}
+    {\huge\bfseries Reporte de Lectura\par}
+    \vspace{0.7cm}
+    {\Large ``Redes de comunicaciones de alta velocidad: \\ ¿cómo funcionan?''\par}
+    \vspace{0.6cm}
+    {\normalsize José F. Duato Marín. \textit{Rev. R. Acad. Cienc. Exact. Fís. Nat.}, Vol.~109, N.º~1--2, pp.~75--86, 2016.\par}
+    \vspace{1cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1.8cm}
+
+    \begin{tabular}{r l}
+        \textbf{Materia:}    & Redes de Alta Velocidad \\[0.35cm]
+        \textbf{Actividad:}  & Actividad de apertura -- Lectura 1 \\[0.35cm]
+        \textbf{Alumno(a):}  & \underline{\hspace{6.5cm}} \\[0.35cm]
+        \textbf{Matrícula:}  & \underline{\hspace{6.5cm}} \\[0.35cm]
+        \textbf{Docente:}    & \underline{\hspace{6.5cm}} \\[0.35cm]
+        \textbf{Fecha:}      & \underline{\hspace{6.5cm}}
+    \end{tabular}
+
+    \vfill
+    Ciclo escolar: [XXXX--X]
+    \vspace*{0.5cm}
+\end{titlepage}
+\setcounter{page}{1}
+
+% ==========================================
+% ENUNCIADO DE LA ACTIVIDAD
+% ==========================================
+\section*{Enunciado de la actividad}
+
+Como punto de partida de la materia \textbf{Redes de Alta Velocidad}, se asigna la lectura del artículo de divulgación \textit{``Redes de comunicaciones de alta velocidad: ¿cómo funcionan?''}, de José F. Duato Marín (Rev. R. Acad. Cienc. Exact. Fís. Nat., Vol.~109, 2016). En este texto se presenta, de manera accesible y estructurada, el panorama completo de las interconexiones que sostienen la era de Internet: desde el enlace punto a punto entre dos dispositivos, pasando por la arquitectura interna de un conmutador, hasta las redes multietapa y las redes en chip que integran centenares de núcleos de procesamiento. A lo largo de la lectura se abordan conceptos fundamentales ---control de flujo, gestión de colas, técnicas de conmutación, enrutamiento, interbloqueo, equilibrio de carga, calidad de servicio (QoS) y tolerancia a fallos--- que constituirán el eje vertebrador de los temas que desarrollaremos durante el curso.
+
+Se solicita al estudiante realizar una \textbf{lectura comprensiva} del artículo y elaborar un reporte escrito siguiendo la estructura que se indica a continuación. En particular, deberá \textbf{identificar al menos tres problemáticas de diseño} que surgen al escalar una red (por ejemplo, congestión, interbloqueo y entrega fuera de orden) y \textbf{reflexionar sobre cómo se interrelacionan} entre sí. Esta actividad tiene como propósito que, antes de profundizar en los modelos formales y las implementaciones concretas, cada alumno cuente con una visión global e integradora de los desafíos que enfrenta el diseño de redes de alta velocidad, independientemente de su escala o ámbito de aplicación.
+
+\noindent\textbf{Fecha de entrega:} \underline{\hspace{4cm}} \quad \textbf{Valor:} \underline{\hspace{2cm}}~\% de la calificación parcial.
+
+\section*{Instrucciones generales}
+\begin{itemize}
+    \item El reporte debe redactarse en formato digital (PDF), con interlineado de 1.5, fuente de 12 pt y márgenes de 2.5 cm (superior/inferior) y 3 cm (izquierdo/derecho).
+    \item Extensión mínima: \textbf{4 páginas} de contenido (sin contar portada ni referencias).
+    \item Se evaluará la claridad expositiva, la profundidad del análisis y la correcta identificación de conceptos.
+    \item Las figuras o diagramas deben incluirse con su respectiva referencia al artículo original.
+    \item Se permite y fomenta la inclusión de esquemas propios elaborados por el alumno.
+\end{itemize}
+
+\newpage
+
+% ==========================================
+% ESTRUCTURA REQUERIDA DEL REPORTE
+% ==========================================
+\section*{Estructura requerida del reporte}
+A continuación se detalla cada sección que debe contener el reporte. El estudiante sustituirá los textos entre corchetes \texttt{[...]} por su propio contenido.
+
+\section{Resumen de la lectura}
+\textit{[Redactar un resumen de entre 200 y 300 palabras que capture la idea central del artículo: el papel de las interconexiones de alta velocidad en la era de Internet, desde el enlace punto a punto hasta las redes en chip. Mencionar el enfoque mixto ascendente/descendente empleado por el autor.]}
+
+\section{Conceptos fundamentales identificados}
+\textit{[Listar y definir con palabras propias los conceptos principales abordados en el artículo. Se sugiere incluir, como mínimo, los siguientes:]}
+\begin{itemize}
+    \item Ancho de banda y segmentación de canales (pipelining de enlace).
+    \item Control de flujo y unidades de control de flujo (\textit{flits}).
+    \item Gestión de colas y planificación de transmisión/recepción.
+    \item Calidad de servicio (QoS) y control de admisión.
+    \item Arquitectura de un conmutador: puertos, colas, conmutador interno, unidad de enrutamiento y arbitraje.
+    \item Formato de paquete y técnicas de conmutación (conmutación de paquetes vs. \textit{wormhole}).
+    \item Bloqueo de cabeza de línea (HOL blocking).
+    \item Topologías: redes directas (malla), redes multietapa (\textit{fat tree}/Benes), redes irregulares.
+    \item Algoritmos de enrutamiento: determinista, adaptativo, multidestino.
+    \item Interbloqueo (\textit{deadlock}).
+    \item Equilibrio de carga y control de congestión.
+    \item Tolerancia a fallos y reconfiguración de red.
+    \item Interfaz de red y sus servicios.
+\end{itemize}
+
+\section{Problemáticas de diseño al escalar una red}
+\textit{[Seleccionar \textbf{al menos tres} problemáticas de diseño que surgen al aumentar el tamaño y la complejidad de una red. Para cada una, se debe:]}
+\begin{enumerate}
+    \item Describir la problemática con claridad.
+    \item Explicar la causa raíz según lo expuesto en el artículo.
+    \item Mencionar las soluciones o mecanismos propuestos.
+    \item Incluir un ejemplo o esquema ilustrativo (propio o adaptado del texto).
+\end{enumerate}
+
+\textit{[Ejemplos sugeridos de problemáticas a elegir:]}
+\begin{itemize}
+    \item Interbloqueo (Fig.~8 del artículo).
+    \item Congestión y formación de árboles de congestión.
+    \item Entrega de paquetes fuera de orden por enrutamiento adaptativo.
+    \item Bloqueo de cabeza de línea (HOL blocking).
+    \item Degradación de la fiabilidad al crecer el número de componentes.
+    \item Limitaciones de ancho de banda en un bus compartido.
+\end{itemize}
+
+\section{Interrelación entre las problemáticas identificadas}
+\textit{[Analizar cómo las problemáticas elegidas en la Sección~3 se relacionan entre sí. Responder a preguntas como: ¿la solución a una problemática puede generar otra? ¿Existen mecanismos que aborden varias problemáticas simultáneamente? Se recomienda incluir un diagrama de relaciones elaborado por el alumno.]}
+
+\textit{[Ejemplo de guía: el enrutamiento adaptativo mejora el equilibrio de carga, pero introduce entrega fuera de orden; las restricciones para evitar interbloqueo pueden limitar las rutas disponibles y agravar la congestión; el control de admisión para QoS puede mitigar la congestión, etc.]}
+
+\section{Reflexión personal}
+\textit{[Escribir una reflexión de entre 200 y 300 palabras sobre:]}
+\begin{itemize}
+    \item ¿Qué aspecto del artículo resultó más relevante o sorprendente?
+    \item ¿Cómo se relaciona lo leído con la experiencia cotidiana del estudiante como usuario de Internet?
+    \item ¿Qué temas se desean profundizar a lo largo del curso?
+\end{itemize}
+
+\section{Conclusiones}
+\textit{[Sintetizar en un párrafo las ideas principales extraídas de la lectura y su importancia como base para el resto de la materia.]}
+
+% ==========================================
+% REFERENCIAS
+% ==========================================
+\begin{thebibliography}{9}
+    \bibitem{duato2016}
+    J. F. Duato Marín, ``Redes de comunicaciones de alta velocidad: ¿cómo funcionan?'', \textit{Rev. R. Acad. Cienc. Exact. Fís. Nat. (Esp)}, vol. 109, n.º 1--2, pp. 75--86, 2016.
+    \bibitem{extra}
+    \textit{[Cualquier referencia adicional consultada por el alumno.]}
+\end{thebibliography}
+
+\appendix
+\section{Material complementario (opcional)}
+\textit{[Espacio para incluir diagramas adicionales, tablas comparativas de topologías, capturas de figuras del artículo con comentarios propios, etc.]}
+
+\newpage
+% ==========================================
+% RÚBRICA DE EVALUACIÓN
+% ==========================================
+\section*{Rúbrica de evaluación}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{@{}p{7cm}cc@{}}
+        \toprule
+        \textbf{Criterio} & \textbf{Puntaje} & \textbf{Obtenido} \\
+        \midrule
+        Resumen claro y completo de la lectura & 15\,\% & \\
+        Identificación correcta de conceptos clave & 20\,\% & \\
+        Análisis de $\geq 3$ problemáticas de diseño & 25\,\% & \\
+        Interrelación y diagrama de relaciones & 15\,\% & \\
+        Reflexión personal argumentada & 10\,\% & \\
+        Redacción, formato y ortografía & 10\,\% & \\
+        Puntualidad en la entrega & 5\,\% & \\
+        \midrule
+        \textbf{Total} & \textbf{100\,\%} & \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\vspace{1.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5cm}
+
+\noindent\textit{Nota: Este documento constituye la guía de entrega. El reporte final debe contener únicamente las secciones 1 a 7 y, opcionalmente, el apéndice. La portada y este enunciado no forman parte de la extensión mínima requerida.}
+
+\end{document}

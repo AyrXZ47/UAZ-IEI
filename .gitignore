@@ -48,6 +48,8 @@ fp-info-cache
 *.log
 *.toc
 *.pdf
+*.dvi
+*.ps
 *.out
 *.synctex.gz
 *.fdb_latexmk

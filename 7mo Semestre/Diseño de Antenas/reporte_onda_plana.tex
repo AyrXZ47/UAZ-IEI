@@ -1,0 +1,147 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{siunitx}
+\sisetup{output-decimal-marker={,}}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\usepackage{mathtools}
+\usepackage{gensymb}
+
+\title{\textbf{Guía de lectura de la gráfica de una onda plana}\\[6pt]
+\large Material de apoyo — \textit{Diseño de Antenas}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-2.5em}
+
+\section{Qué representa la onda plana}
+Una \textbf{onda plana uniforme} es una onda electromagnética cuyo campo
+eléctrico y campo magnético son perpendiculares entre sí y perpendiculares a la
+dirección de propagación. Si se propaga en $+\hat{x}$, su expresión es
+\begin{equation}
+  \mathbf{E}(x,t) = A\cos(\omega t - kx)\,\hat{y},
+  \qquad\qquad
+  \mathbf{H}(x,t) = \frac{A}{\eta}\cos(\omega t - kx)\,\hat{z},
+  \label{eq:onda}
+\end{equation}
+donde el argumento $(\omega t - kx)$ es la \textbf{fase} de la onda. La gráfica
+que acompaña este documento muestra esta función de dos variables: la misma
+onda vista simultáneamente respecto de la \emph{distancia} y respecto del
+\emph{tiempo}.
+
+\subsection{Parámetros que aparecen en la figura}
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Símbolo} & \textbf{Significado} & \textbf{Valor (ejemplo 300\si{\mega\hertz})}\\
+\midrule
+$A$          & Amplitud del campo eléctrico      & $1\ \si{\volt\per\metre}$\\
+$f$          & Frecuencia de la onda             & $300\ \si{\mega\hertz}$\\
+$\omega = 2\pi f$ & Frecuencia angular          & $2\pi(300\times10^{6})\ \si{\radian\per\second}$\\
+$\lambda = \frac{c}{f}$ & Longitud de onda       & $\lambda = \frac{3\times10^{8}}{300\times10^{6}} = 1\ \si{\metre}$\\
+$k = \frac{2\pi}{\lambda}$ & Número de onda     & $k = 2\pi\ \si{\radian\per\metre}$\\
+$T = \frac{1}{f}$ & Periodo                     & $T = 3{,}33\ \si{\nano\second}$\\
+$\eta = \frac{E}{H}$ & Impedancia intrínseca   & $\eta \approx 377\ \si{\ohm}$ (vacío)\\
+\bottomrule
+\end{tabular}
+\end{center}
+La velocidad de fase es la velocidad a la que viaja una cresta:
+\begin{equation}
+  v_{\varphi} = \frac{\omega}{k} = \lambda f = c.
+  \label{eq:vel}
+\end{equation}
+
+\section{Cómo se lee el panel izquierdo (la superficie $E(x,t)$)}
+El panel izquierdo es la superficie de la ecuación \eqref{eq:onda}: el eje
+$x$ es \emph{distancia}, el eje $y$ es \emph{tiempo} y el eje vertical es
+\emph{el valor del campo} $E$ en $\si{\volt\per\metre}$.
+
+\begin{enumerate}[leftmargin=*, itemsep=2pt]
+  \item \textbf{Como onda respecto de la distancia.} Tomar un corte a \emph{un
+  tiempo fijo}, es decir, un plano paralelo al eje de distancia. Ese corte es la
+  onda vista en el espacio en un instante: es la \textbf{línea roja} animada. Su
+  forma es $E(x) = A\cos(kx - \omega t_0)$; es una sinusoide de periodo espacial
+  $\lambda$. Distancia entre dos crestas consecutivas $\Rightarrow$ $\lambda$.
+  \item \textbf{Como onda respecto del tiempo.} Tomar un corte a \emph{una
+  distancia fija} $x_0$. Ese corte es el historial del campo en un punto: es la
+  \textbf{línea celeste}. Su forma es $E(t) = A\cos(\omega t - kx_0)$; una
+  sinusoide de periodo temporal $T$. Duración de un ciclo completo $\Rightarrow$
+  $T$.
+  \item \textbf{Ambas son la misma onda.} La línea roja y la celeste se cruzan:
+  el punto de cruce es el valor del campo \emph{en esa distancia y ese tiempo}.
+  Mientras corre la animación, la roja se desliza sobre la celeste, lo que
+  muestra que un punto fijo del espacio “ve” oscilar el campo.
+  \item \textbf{La cresta blanca ($x = ct$).} Une los máximos (los “arbolitos”
+  verdes de la superficie, que son sencillamente los picos donde $E = +A$). Su
+  diagonal indica la velocidad de propagación \eqref{eq:vel}: la onda avanza
+  $1\ \si{\metre}$ cada $3{,}33\ \si{\nano\second}$.
+  \item \textbf{Marcas en la figura.} $\lambda$ y $T$ quedan señaladas entre
+  crestas; el texto ``valor negativo: $-A$'' muestra el semiciclo negativo (el
+  campo alterna signo, propiedad esencial de la onda).
+\end{enumerate}
+
+\section{Cómo se lee el panel derecho (orientación de los campos)}
+Aquí se dibujan los dos campos de la ecuación \eqref{eq:onda} por separado y
+perpendiculares entre sí:
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+  \item la \textbf{onda roja} es el campo eléctrico $E_y$, que oscila a lo
+  largo del eje $y$ (arriba/abajo);
+  \item la \textbf{onda azul} es el campo magnético $H_z$, que oscila a lo
+  largo del eje $z$ (dentro/fuera de la pantalla);
+  \item ambas avanzan hacia la derecha, en $+x$ (flecha blanca), y están
+  \textbf{en fase}: máximos y ceros coinciden en el espacio.
+\end{itemize}
+
+\subsection{El relleno y la perspectiva}
+El \textbf{relleno bajo la curva} (área entre la onda y su eje) es exactamente
+el recurso de la integral definida: visualmente lee la magnitud de la onda en
+cada punto sin esfuerzo. Cuando la animación corre, el relleno crece y decrece
+con el campo: su “altura” en cualquier $x$ es el valor instantáneo de $E$ o de
+$H$. Es convencional que la zona bajo $E$ quede teñida del color del campo para
+diferenciar las dos ondas sin confundirse.
+
+\subsection{La relación de amplitudes}
+La impedancia intrínseca relaciona ambas amplitudes:
+\begin{equation}
+  \eta = \frac{E}{H} = \sqrt{\frac{\mu_0}{\varepsilon_0}} \approx 377\ \si{\ohm}
+  \quad\Longrightarrow\quad
+  H_m = \frac{A}{\eta}.
+  \label{eq:eta}
+\end{equation}
+En la figura, $H$ se dibuja \emph{amplificada por $\eta$} para que su cresta
+coincida con la de $E$ (a escala real el campo magnético mediría
+$A/\eta \approx 2{,}65\ \si{\milli\ampere\per\metre}$, invisible frente a
+$1\ \si{\volt\per\metre}$). La ecuación \eqref{eq:eta} es la que da la magnitud
+real de $H$ a partir de la de $E$.
+
+\section{Resumen de verificación}
+\textbf{Para saber si se está leyendo bien la gráfica, comprobar:}
+\begin{enumerate}[leftmargin=*, itemsep=2pt]
+  \item \textbf{$\lambda$}: distancia horizontal entre dos picos de la onda
+  roja del panel derecho (y entre dos crestas de la superficie). A
+  $300\ \si{\mega\hertz}$ debe ser $1\ \si{\metre}$.
+  \item \textbf{$T$}: separación temporal entre dos máximos de la línea celeste
+  del panel izquierdo. Debe ser $3{,}33\ \si{\nano\second}$.
+  \item \textbf{Ortogonalidad}: $E_y \perp H_z \perp \hat{x}$; en el panel
+  derecho se ve que las oscilaciones usan dos ejes perpendiculares.
+  \item \textbf{Fase}: en el vacío ambos campos alcanzan el máximo y el cero
+  al mismo tiempo (no hay desfase).
+  \item \textbf{Sentido}: un observador fijo ve el campo oscilar; un
+  ``fotógrafo'' mueve el corte rojo y ve la onda viajar en $+x$, nunca en $-x$.
+\end{enumerate}
+
+\vspace{1em}
+\noindent\emph{Nota:} al rotar los paneles 3D con el ratón se confirma cada
+afirmación anterior desde cualquier ángulo; el relleno y las guías de $\pm A$
+aseguran que la lectura de la magnitud sea siempre posible.
+
+\end{document}

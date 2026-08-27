@@ -8,7 +8,7 @@ plt.style.use("cyberpunk")
 
 # ------------------------- Parámetros físicos de la onda plana -------------------------
 A = 1.0                        # amplitud del campo eléctrico [V/m]
-f = 300e6                      # frecuencia [Hz]  <-- cambia aquí la escala (ej. 300 MHz)
+f = 100e6                      # frecuencia [Hz]  <-- cambia aquí la escala (ej. 300 MHz)
 c = 3e8                        # velocidad de la luz en el vacío [m/s]
 w = 2 * np.pi * f              # ω = 2πf [rad/s]
 lam = c / f                    # λ = c/f [m]   (a 300 MHz → 1 m)

@@ -1,0 +1,281 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+\usepackage[spanish]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=3cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{amssymb}
+
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textit{Redes de Alta Velocidad}}
+\rhead{\textit{Ensayo -- Protocolo X.25}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\makeatletter
+\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\quad}
+\makeatother
+
+\setlist[itemize]{label=\footnotesize$\blacksquare$, itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+\setlist[enumerate]{label=\alph*), itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+
+\begin{document}
+
+% ==========================================
+% PORTADA
+% ==========================================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\Large\bfseries Universidad Autónoma de Zacatecas\par}
+    \vspace{0.4cm}
+    {\large\bfseries Unidad Académica de Ingeniería Eléctrica\par}
+    {\large\bfseries Ing. Electrónica Industrial con Esp. en Telecomunicaciones\par}
+    \vspace{1.5cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1cm}
+    {\huge\bfseries Ensayo\par}
+    \vspace{0.7cm}
+    {\Large ``El protocolo X.25: arquitectura, mecanismos y legado \\ del primer estándar de conmutación de paquetes''\par}
+    \vspace{0.6cm}
+    {\normalsize Análisis de su estructura jerárquica, la orientación a conexión, \\ el control de errores y su trascendencia histórica.\par}
+    \vspace{1cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1.8cm}
+
+    \begin{tabular}{r l}
+        \textbf{Materia:}    & Redes de Alta Velocidad \\[0.35cm]
+        \textbf{Actividad:}  & Ensayo analítico -- Protocolo X.25 \\[0.35cm]
+        \textbf{Alumno(a):}  & Arnold Yovick Rios Zaldivar \\[0.35cm]
+        \textbf{Matrícula:}  & 35167151 \\[0.35cm]
+        \textbf{Docente:}    & Jose Ricardo Gomez Rodriguez \\[0.35cm]
+        \textbf{Fecha:}      & 3 de septiembre de 2026
+    \end{tabular}
+
+    \vfill
+    Ciclo escolar: Ago--Dic 2026
+    \vspace*{0.5cm}
+\end{titlepage}
+\setcounter{page}{1}
+
+% ==========================================
+% RESUMEN
+% ==========================================
+\section{Resumen}
+
+El presente ensayo analiza el protocolo X.25, aprobado por el CCITT en 1976 como la primera normalización internacional de la interfaz entre equipos de usuario y redes públicas de conmutación de paquetes. Se examina su arquitectura jerárquica de tres niveles (físico, de enlace y de paquetes), con especial atención a los mecanismos de orientación a conexión mediante circuitos virtuales y al control de errores y de flujo implementado salto a salto. A partir de este análisis se efectúa un juicio técnico sobre la eficiencia de tales mecanismos: se demuestra que el diseño de X.25 constituyó una solución óptima para las líneas analíticas analógicas de su época, pero que sus supuestos de partida --- enlaces poco fiables, terminales simples y velocidades reducidas --- lo volvieron ineficiente en los enlaces digitales modernos. Finalmente, se sintetiza su legado: la estratificación que heredó el modelo OSI, la familia de protocolos de enlace que desembocó en Frame Relay, la conmutación de etiquetas de ATM y MPLS, y el principio extremo a extremo que la Internet de datagramas consolidó como respuesta a sus limitaciones.
+
+\noindent\textbf{Palabras clave:} X.25, conmutación de paquetes, circuitos virtuales, LAPB, control de flujo, Frame Relay, modelo OSI.
+
+% ==========================================
+% INTRODUCCIÓN
+% ==========================================
+\section{Introducción}
+
+A mediados de la década de 1970 las redes de computadoras vivían un momento fundacional: la conmutación de paquetes, madurada en los proyectos ARPANET y en los trabajos teóricos de Davies y Baran, prometía multiplicar la eficiencia de los enlaces frente a la conmutación de circuitos mediante la multiplexación estadística \cite{schwartz1987}. Sin embargo, cada fabricante y cada operadora proponía su propia arquitectura, de modo que conectar un equipo de un usuario a una red pública exigía desarrollos a medida. En este contexto, el CCITT aprobó en 1976 la recomendación X.25, que definió por primera vez de manera estándar la interfaz entre el equipo terminal de datos (DTE) y el equipo de terminación del circuito de datos (DCE) para terminales que operan en modo paquete conectados a redes públicas de datos \cite{itux25, rybczynski1980}. Puede afirmarse, sin exageración, que X.25 fue la primera tecnología de redes de conmutación de paquetes normalizada a escala internacional, el cimiento sobre el que se construyó la industria de las redes públicas de datos (TELENET, DATAPAC, TRANSPAC) y el antecedente directo de buena parte de la arquitectura de las redes actuales.
+
+El objetivo de este ensayo es analizar críticamente esa trascendencia. Para ello se estructura el trabajo en cuatro movimientos argumentales: primero, se reconstruye el contexto histórico que explica las decisiones de diseño de X.25; segundo, se estudia con detalle su estructura jerárquica de tres niveles, del medio físico al nivel de paquetes; tercero, se examinan a fondo los mecanismos de orientación a conexión y de control de errores, formulando juicios técnicos fundamentados sobre su eficiencia; y, por último, se evalúa el legado del protocolo en las tecnologías contemporáneas. La tesis que se sostiene es que X.25 debe comprenderse como un producto ejemplar de su tiempo: la coherencia interna de su arquitectura lo convirtió en la base de las redes de paquetes, y sus limitaciones --- derivadas de supuestos tecnológicos ya superados --- fueron precisamente las que orientaron la evolución hacia Frame Relay, ATM, MPLS y la arquitectura Internet.
+
+% ==========================================
+% CONTEXTO HISTÓRICO
+% ==========================================
+\section{Contexto histórico: el problema que X.25 vino a resolver}
+
+Para valorar las decisiones de diseño de X.25 es indispensable entender el escenario tecnológico de los años setenta. Los enlaces de transmisión disponibles eran en su mayoría circuitos analógicos conmutados o arrendados, diseñados para voz, con tasas de error del orden de $10^{-4}$ a $10^{-5}$ bits y velocidades modestas (típicamente de 2{,}4 a 64~kbps) \cite{schwartz1987, stallings2004}. En estas condiciones, un error de transmisión no era una eventualidad rara sino una contingencia cotidiana, y el almacenamiento y la capacidad de proceso de los nodos conmutadores eran recursos caros y limitados.
+
+Frente a la conmutación de circuitos, que reserva el ancho de banda del camino completo durante toda la sesión y lo desaprovecha en las largas pausas del tráfico de datos, la conmutación de paquetes divide la información en unidades independientes que se multiplexan estadísticamente sobre los enlaces, compartiendo los recursos entre muchos usuarios \cite{tanenbaum2012, duato2016}. Esta técnica, sin embargo, introduce problemas nuevos: congestión, retrasos variables, pérdida o duplicación de paquetes y necesidad de enrutar cada unidad de datos. X.25 fue la respuesta normalizada a la pregunta de cómo ofrecer un servicio de datos \emph{fiable} sobre esa infraestructura ruidosa y lenta. Su filosofía de diseño puede resumirse en un principio: \emph{la red es la responsable de la corrección}; cada conmutador comprueba y retransmite cada paquete en cada salto, de modo que el terminal de usuario --- caro, escaso y de capacidad limitada --- recibe un servicio prácticamente libre de errores. Como se argumentará en las secciones siguientes, este principio, coherente con su contexto, es exactamente el que la evolución tecnológica terminaría por invertir \cite{saltzer1984}.
+
+% ==========================================
+% ARQUITECTURA JERÁRQUICA
+% ==========================================
+\section{La arquitectura jerárquica de X.25: tres niveles de protocolo}
+
+La recomendación X.25 define una interfaz de tres niveles de protocolo que se comunican entre pares (peer-to-peer): un nivel físico, un nivel de enlace y un nivel de paquetes. Conviene subrayar desde el inicio un matiz estructural importante: estos tres niveles describen la relación entre el DTE del usuario y el DCE de la red, es decir, son \emph{protocolos de interfaz local}; la función de transporte extremo a extremo la proporciona la propia red mediante sus circuitos virtuales internos \cite{stallings2004, rybczynski1980}. Esta concepción resultó decisiva poco después: al construirse el modelo de referencia OSI (X.200), la estratificación de X.25 se proyectó de forma casi natural sobre sus tres niveles inferiores, y de hecho el propio modelo OSI debe mucho a la experiencia acumulada en la normalización de X.25 \cite{tanenbaum2012}.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \node (plpA) [draw, rounded corners, minimum width=4.6cm, minimum height=0.95cm, fill=blue!14, align=center] at (0,0)   {\textbf{Nivel de paquetes} (PLP)\\ circuitos virtuales};
+        \node (lapA) [draw, rounded corners, minimum width=4.6cm, minimum height=0.95cm, fill=blue!8, align=center]  at (0,-1.5) {\textbf{Nivel de enlace} (LAPB)\\ tramas fiables salto a salto};
+        \node (fisA) [draw, rounded corners, minimum width=4.6cm, minimum height=0.95cm, fill=gray!18, align=center] at (0,-3.0) {\textbf{Nivel físico} (X.21 / X.21bis)\\ señal eléctrica y conector};
+        \node (plpB) [draw, rounded corners, minimum width=4.6cm, minimum height=0.95cm, fill=blue!14, align=center] at (9,0)   {\textbf{Nivel de paquetes} (PLP)};
+        \node (lapB) [draw, rounded corners, minimum width=4.6cm, minimum height=0.95cm, fill=blue!8, align=center]  at (9,-1.5) {\textbf{Nivel de enlace} (LAPB)};
+        \node (fisB) [draw, rounded corners, minimum width=4.6cm, minimum height=0.95cm, fill=gray!18, align=center] at (9,-3.0) {\textbf{Nivel físico} (X.21 / X.21bis)};
+        \node (dte)  at (0,1.1)  {\textbf{DTE} (usuario)};
+        \node (dce)  at (9,1.1)  {\textbf{DCE} (red pública)};
+        \draw[-{Latex[length=2.5mm]}, thick, dashed] (plpA) -- node[above]{circuitos virtuales} (plpB);
+        \draw[-{Latex[length=2.5mm]}, thick, dashed] (lapA) -- node[above]{tramas} (lapB);
+        \draw[-{Latex[length=2.5mm]}, thick, dashed] (fisA) -- node[above]{bits} (fisB);
+        \draw[-{Latex[length=2.5mm]}] (plpA) -- (lapA);
+        \draw[-{Latex[length=2.5mm]}] (lapA) -- (fisA);
+        \draw[-{Latex[length=2.5mm]}] (plpB) -- (lapB);
+        \draw[-{Latex[length=2.5mm]}] (lapB) -- (fisB);
+    \end{tikzpicture}
+    \caption{Estructura jerárquica de X.25: tres niveles de protocolo entre el DTE del usuario y el DCE de la red. Las flechas discontinuas representan la comunicación de cada protocolo con su par remoto.}
+    \label{fig:arquitectura}
+\end{figure}
+
+\subsection{El nivel físico: X.21}
+
+El nivel físico de X.25 no constituye una recomendación propia: la recomendación remite a las especificaciones de la capa física del CCITT, principalmente X.21, y, como solución transitoria para enlaces analógicos, X.21bis (compatible con los interfaces V.24/RS-232-C y V.35) \cite{itux25, stallings2004}. X.21 define las características funcionales y procedurales de la interfaz física entre el DTE y el DCE sobre enlaces digitales síncronos: un conector de 15 contactos conforme a la norma ISO 4903 y un conjunto de circuitos de señalización --- entre ellos los circuitos T (transmisión de datos), R (recepción de datos), C (control) e I (indicación) --- mediante los cuales el terminal indica su disposición a operar y la red confirma que está lista \cite{schwartz1987}.
+
+La función de este nivel es deliberadamente minimalista: establecer, mantener y liberar el circuito físico que transporta un flujo de bits síncrono, sin interpretar su contenido. Aunque resulta tentador despacharlo como una simple descripción de conectores, su trascendencia es mayor: al normalizar la interfaz físico-eléctrica entre equipos de fabricantes distintos, X.25 cumplió en su estrato inferior la misma misión de interoperabilidad que definió al estándar completo. Cabe un juicio técnico: la dependencia de interfaces diseñados para el mundo analógico (X.21bis y V.24) prolongó artificialmente la vida del módem de voz en las redes de datos, pero fue a la vez una decisión pragmática acertada, pues permitió desplegar X.25 sobre la infraestructura telefónica existente sin esperar a la digitalización de la red pública.
+
+\subsection{El nivel de enlace: LAPB}
+
+El nivel de enlace garantiza que los datos crucen el enlace DTE--DCE de forma fiable, ordenada y con detección de errores. La versión original de 1976 definía el protocolo LAP (\emph{Link Access Procedure}), que resultó poco satisfactorio en la práctica; la revisión de 1980 lo sustituyó por LAPB (\emph{Link Access Procedure, Balanced}), un subconjunto del estándar HDLC operando en modo normal de respuesta equilibrada (ABM), en el que ambas estaciones son iguales y cualquiera puede iniciar la transmisión \cite{itux25, tanenbaum2012}. Las revisiones posteriores añadieron el procedimiento multienlace (MLP, 1984), que permite repartir el tráfico entre varios enlaces físicos paralelos presentando al nivel superior un único enlace lógico, técnica precursora de la agregación de enlaces moderna \cite{stallings2004}.
+
+LAPB organiza los datos en tramas con el formato clásico de HDLC: una bandera delimitadora (\texttt{01111110}), un campo de dirección que distingue la dirección del mandato de la de la respuesta, un campo de control, un campo de información y una secuencia de verificación de trama (FCS) con CRC de 16 bits \cite{tanenbaum2012, stallings2004}. El campo de control distingue tres tipos de tramas: las tramas \emph{I} (información) que transportan los paquetes del nivel superior numerados secuencialmente mediante los números N(S) y N(R) (módulo 8, o módulo 128 en el modo extendido establecido con el comando SABME); las tramas \emph{S} (supervisión) para el acuse de recibo y el control de flujo --- RR (listo para recibir), RNR (no listo para recibir) y REJ (rechazo) ---; y las tramas \emph{U} (no numeradas) para la gestión del enlace, como el establecimiento (SABM), la liberación (DISC) y su confirmación (UA) \cite{tanenbaum2012}.
+
+El mecanismo de fiabilidad combina la detección por CRC con la retransmisión \emph{go-back-$n$} a través de REJ: si una trama llega dañada, el receptor descarta la trama y todas las posteriores, y el emisor retransmite desde la primera errónea. La ventana de enlace limita el número de tramas I pendientes de confirmar. El juicio técnico sobre este diseño es claro: para enlaces analógicos de alta tasa de error, la corrección salto a salto era la única forma práctica de asegurar la integridad de extremo a extremo, pues de otro modo los errores se acumulaban sobre rutas de decenas de saltos. Su costo --- memoria en cada nodo para retener las tramas hasta su confirmación y latencia acumulada por las retransmisiones en cada salto --- se consideraba asumible a velocidades de decenas de kbps, pero se volvería inaceptable en los enlaces de fibra óptica posteriores \cite{bertsekas1992}.
+
+\subsection{El nivel de paquetes: el PLP}
+
+El nivel de paquetes (\emph{Packet Layer Protocol}, PLP) es el corazón de X.25 y el que define su identidad como red orientada a conexión. Sobre cada enlace DTE--DCE, el nivel de enlace multiplexa hasta 4095 circuitos virtuales, identificados por un número de circuito lógico de 12 bits (LCN, agrupable en grupos de 8 bits), de modo que un único acceso físico sostiene simultáneamente conversaciones con múltiples destinos remotos \cite{itux25, rybczynski1980}. La señalización de llamadas utiliza las direcciones X.121, de hasta 14 dígitos decimales: los tres primeros constituyen el código de red de datos (DNIC) asignado internacionalmente, y los diez restantes el número nacional del abonado \cite{itux121} --- un antecedente directo de la jerarquía de direccionamiento global que hoy aplica Internet.
+
+Cada paquete PLP comienza con una cabecera de tres octetos: el formato general (GFI), que indica la modalidad (módulo 8 o 128, calificadores de bit), el número de circuito lógico y el tipo de paquete. Los paquetes de datos transportan además los números de secuencia P(S) (envío) y P(R) (recepción), con los que se implementan la numeración, el acuse de recibo y la ventana de flujo del circuito virtual \cite{itux25, stallings2004}. Tres bits de servicio completan el mecanismo: el bit Q califica los datos del usuario (por ejemplo, para señalización de la capa de usuario); el bit D distingue entre confirmación local (por el DCE) y confirmación de extremo a extremo (por el DTE remoto); y el bit M (\emph{more}) permite encadenar paquetes que forman un mensaje lógico mayor, facilitando la segmentación y reensamblado cuando el terminal genera unidades de datos mayores que el tamaño de paquete negociado \cite{rybczynski1980}.
+
+El tamaño de paquete por defecto es de 128 octetos (negociable en la llamada: 16, 32, 64, 128, 256, \dots, 4096), y la ventana por defecto de 2 paquetes (negociable hasta 7 en módulo 8 o 127 en módulo 128). La tabla~\ref{tab:niveles} resume la correspondencia funcional de los tres niveles.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{l l X}
+        \toprule
+        \textbf{Nivel} & \textbf{Protocolo} & \textbf{Función principal} \\
+        \midrule
+        Físico    & X.21 / X.21bis / V.24 & Definir la interfaz eléctrica, funcional y procedimental del circuito de datos síncrono. \\
+        De enlace & LAPB (HDLC-ABM)       & Transferencia fiable, ordenada y con control de flujo de tramas sobre el enlace DTE--DCE. \\
+        De paquetes & PLP                 & Establecimiento de circuitos virtuales, direccionamiento X.121, multiplexación, control de flujo y recuperación de errores por circuito. \\
+        \bottomrule
+    \end{tabularx}
+    \caption{Niveles de la arquitectura X.25 y sus funciones.}
+    \label{tab:niveles}
+\end{table}
+
+% ==========================================
+% ORIENTACIÓN A CONEXIÓN Y CONTROL DE ERRORES
+% ==========================================
+\section{Orientación a conexión y control de errores: análisis crítico}
+
+\subsection{El servicio de circuitos virtuales}
+
+X.25 ofrece su servicio en modo de conexión mediante circuitos virtuales conmutados (SVC) y, desde la revisión de 1984, también circuitos virtuales permanentes (PVC) que evitan la fase de establecimiento en tráfico permanente entre puntos fijos \cite{itux25}. En un SVC, antes de transferir datos se ejecuta una fase de establecimiento equivalente a la señalización de una llamada telefónica: el DTE emisor envía un paquete \emph{Call Request} con la dirección X.121 destino y las facilidades solicitadas (cobro invertido, clases de rendimiento, grupos cerrados de usuarios, negociación de ventana y tamaño de paquete); la red enruta la llamada, reserva el camino y la entrega al DTE remoto como \emph{Incoming Call}; el aceptación del destino (\emph{Call Accepted}) completa el circuito y ambos extremos reciben los números de circuito lógico con que referirán la conversación. La liberación se ejecuta de forma simétrica con los paquetes \emph{Clear} \cite{rybczynski1980, stallings2004}. La figura~\ref{fig:svc} representa este ciclo de vida.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \node (a) at (0,0)   {\textbf{DTE A}};
+        \node (na) at (3,0)  {\textbf{DCE A}};
+        \node (nb) at (7,0)  {\textbf{DCE B}};
+        \node (b) at (10,0)  {\textbf{DTE B}};
+        \draw[gray!60] (a) -- (0,-7.2);
+        \draw[gray!60] (na) -- (3,-7.2);
+        \draw[gray!60] (nb) -- (7,-7.2);
+        \draw[gray!60] (b) -- (10,-7.2);
+        \draw[-{Latex[length=2.5mm]}, thick] (0,-0.7) -- node[above]{\footnotesize Call Request (dir.\ X.121)} (3,-1.4);
+        \draw[-{Latex[length=2.5mm]}, thick] (3,-1.4) -- node[above]{\footnotesize Incoming Call} (10,-2.1);
+        \draw[-{Latex[length=2.5mm]}, thick] (10,-2.8) -- node[above]{\footnotesize Call Accepted} (3,-3.5);
+        \draw[-{Latex[length=2.5mm]}, thick] (3,-3.5) -- node[above]{\footnotesize Call Connected} (0,-4.2);
+        \draw[-{Latex[length=2.5mm]}, blue] (0,-4.9) -- node[above]{\footnotesize Paquetes de datos (P(S), P(R))} (10,-5.6);
+        \draw[-{Latex[length=2.5mm]}, blue] (10,-5.6) -- (0,-6.3);
+        \draw[-{Latex[length=2.5mm]}, thick, red!70!black] (0,-6.6) -- node[above]{\footnotesize Clear Request / Indication} (10,-7.2);
+        \node at (1.5,0.5) {\footnotesize \emph{Establecimiento}};
+        \node at (5,-4.6)  {\footnotesize \emph{Transferencia}};
+        \node at (8.5,-7.5) {\footnotesize \emph{Liberación}};
+    \end{tikzpicture}
+    \caption{Ciclo de vida de un circuito virtual conmutado (SVC) en X.25: fases de establecimiento, transferencia de datos bidireccional y liberación.}
+    \label{fig:svc}
+\end{figure}
+
+La orientación a conexión conlleva un compromiso arquitectónico que merece un juicio técnico fundamentado. A favor: con el camino fijado en el establecimiento, los paquetes de datos viajan sin decidir nada --- basta con el número de circuito lógico, tres octetos de cabecera frente a las direcciones completas de los datagramas ---, el orden de entrega queda garantizado (no hay reordenación, a diferencia del enrutamiento adaptativo con datagramas) y la red puede reservar recursos y ofrecer parámetros de calidad de servicio negociados en la llamada \cite{bertsekas1992}. En contra: la robustez. Si un conmutador intermedio falla, todos los circuitos virtuales que lo atravesaban se destruyen y deben reestablecerse desde cero, mientras que en una red de datagramas los paquetes posteriores simplemente se reencaminan por otra ruta \cite{tanenbaum2012}. Esta fragilidad ante fallos internos es, históricamente, uno de los argumentos decisivos que inclinaron la balanza hacia la arquitectura de datagramas de Internet, más costosa por paquete pero radicalmente más tolerante a fallos.
+
+\subsection{Control de errores y de flujo salto a salto}
+
+El control de errores de X.25 opera en dos estratos complementarios. En el nivel de enlace, LAPB protege cada salto individual con su FCS y sus retransmisiones \emph{go-back-$n$}, como se describió. En el nivel de paquetes, cada circuito virtual mantiene su propia numeración P(S)/P(R) y su ventana de flujo: el receptor otorga permiso de transmisión confirmando el próximo número esperado (paquete RR) o suspende el flujo (RNR) cuando sus buffers se llenan; la ventana por defecto de 2 paquetes obliga a confirmaciones muy frecuentes, lo que garantiza un retención breve de datos en cada nodo pero penaliza el rendimiento \cite{itux25, stallings2004}. La novedad conceptual frente a otros esquemas es que el control de flujo de X.25 es \emph{de saldo a saldo} (hop-by-hop): no solo el DCE local regula al DTE, sino que cada conmutador intermedio regula al anterior, de modo que la congestión se contiene exactamente donde aparece y ningún nodo se desborda \cite{schwartz1987, bertsekas1992}.
+
+Para las anomalías que sobreviven a ambos mecanismos, X.25 define procedimientos de recuperación jerárquicos por circuito: el \emph{Reset} reinicializa los números de secuencia de un circuito virtual concreto (descartando los paquetes en tránsito de ese circuito); el \emph{Restart} hace lo propio con todos los circuitos del enlace, reservado para fallos graves de la interfaz; y la liberación \emph{Clear} finaliza la llamada. El bit D, al permitir confirmación de extremo a extremo, deja constancia de que el DTE remoto recibió realmente los datos, algo que ni LAPB ni los acuses locales pueden certificar \cite{itux25, rybczynski1980}.
+
+\subsection{Juicio técnico sobre la eficiencia}
+
+El análisis conjunto de ambos mecanismos permite formular tres juicios de eficiencia con fundamento cuantitativo.
+
+\begin{itemize}
+    \item \textbf{La fiabilidad salto a salto fue óptima para su contexto, y es redundante en el actual.} Con tasas de error de $10^{-4}$ en los enlaces de la época, no corregir en cada salto implicaba que la probabilidad de que un paquete atravesara diez nodos sin daño fuera del orden de $0{,}9999^{10}\approx 0{,}999$, aceptable, pero con retransmisiones extremo a extremo constantes y ventanas de retención de memoria prohibitivas en los conmutadores. Corregir en cada salto mantenía la probabilidad de pérdida extremo a extremo casi nula con memoria por nodo muy pequeña. Hoy, con enlaces ópticos de $10^{-9}$ o mejor, ese costo es puro despilfarro: el mismo argumento que justificó LAPB hizo que Frame Relay suprimiera la retransmisión de enlace y delegara la recuperación en los extremos \cite{stallings2004, tanenbaum2012}.
+    \item \textbf{El rendimiento está acotado por la ventana, independientemente del ancho de banda.} El producto $W \times T_p$ (ventana por tamaño de paquete) acota los datos en tránsito: con la configuración por defecto ($W=2$, 128 octetos) o incluso la máxima en módulo 8 ($W=7$), un circuito no puede tener más de 896 octetos sin confirmar. Sobre un enlace de 64~kbps con un retardo de propagación satelital de 600~ms, el rendimiento máximo resulta $896\times 8\ /\ 0{,}6 \approx 12$~kbps, es decir, una utilización inferior al 20\,\% de la línea. Solo el modo extendido (módulo 128, $W=127$, paquetes de 4096 octetos) paliaba el problema, y aún así la confirmación salto a salto sumaba la latencia de cada nodo \cite{bertsekas1992, schwartz1987}. Este es el argumento técnico decisivo del declive de X.25 ante redes de mayor producto ancho de banda--retardo.
+    \item \textbf{El tamaño de paquete de 128 octetos refleja un compromiso de su época.} Paquetes pequeños reducen la dilación de serialización y la memoria de los nodos, pero maximizan la sobrecarga de cabecera (3 octetos de PLP más 6--8 de LAPB por 128 de datos, del orden del 8\,\%); paquetes grandes hacen lo contrario y agravian a los flujos interactivos en los nodos con cola. El valor 128 era razonable para líneas de 64~kbps y memorias caras; en redes de alta velocidad resultaría inviable, como demostró ATM con sus celdas fijas de 53 octetos diseñadas precisamente para minimizar la dilación en conmutadores de hardware \cite{tanenbaum2012, stallings2004}.
+\end{itemize}
+
+En síntesis, X.25 compra fiabilidad y equidad con latencia, memoria de red y sobrecarga de protocolo. Bajo sus supuestos (enlaces ruidosos, nodos lentos, tráfico interactivo) el intercambio era impecable y su eficiencia real, excelente. Cuando las premisas cambiaron --- fibra óptica, conmutadores rápidos, tráfico masivo ---, la ecuación se invirtió, y la evolución de las redes consistió en gran medida en recortar de X.25, capa a capa, los mecanismos que ya no se pagaban solos.
+
+% ==========================================
+% LEGADO
+% ==========================================
+\section{Impacto histórico y legado tecnológico}
+
+El impacto de X.25 como cimiento de las redes de conmutación de paquetes se despliega en cuatro planos.
+
+\textbf{Normalización fundacional.} X.25 convirtió la conmutación de paquetes de un arte de laboratorio (ARPANET) en una industria de servicio público. Las redes públicas de datos de los ochenta (TELENET y DATAPAC en Norteamérica, TRANSPAC en Francia, y sus equivalentes nacionales) se construyeron sobre accesos X.25, con tariffs por paquete y direcciones X.121 jerárquicas que constituyeron la primera infraestructura global de datos accesible a cualquier suscriptor \cite{rybczynski1980, schwartz1987}. Bancos, sistemas de reserva, comercio electrónico incipiente y, más tarde, terminales punto de venta y cajeros automáticos dependieron de circuitos virtuales X.25 durante décadas; en ciertos sectores --- pagos, telemática marítima, redes financieras de países en desarrollo --- el protocolo siguió en operación bien entrado el siglo XXI, testimonio de la solidez de su diseño.
+
+\textbf{Arquitectura en capas.} La estructura jerárquica de tres niveles de X.25, aprobada ocho años antes del modelo OSI, demostró la viabilidad práctica de la estratificación y aportó la plantilla conceptual de las tres capas inferiores del modelo de referencia \cite{tanenbaum2012}. La disciplina de definir interfaces entre niveles con servicios bien delimitados --- cada nivel ignora el contenido del superior --- es herencia directa de esa experiencia de normalización.
+
+\textbf{Descendencia de protocolos.} La evolución de la propia familia X.25 narra la historia de las redes de paquetes de alta velocidad. LAPB dio lugar a LAPD (ISDN, Q.921) y de ahí al núcleo de Frame Relay (Q.922): Frame Relay es, esencialmente, ``X.25 sin control de errores de enlace'', pensado ya para fibra óptica \cite{stallings2004}. La conmutación de celdas de ATM hereda la conmutación de circuitos virtuales (sus canales y trayectos virtuales reproducen la jerarquía de circuitos lógicos) y el establecimiento con señalización. Y la conmutación de etiquetas de MPLS --- el mecanismo que hizo a IP conmutable y escalable --- es la reencarnación moderna de la idea central de X.25: fijar un camino y conmutar los paquetes por un identificador corto de circuito, en lugar de examinar la dirección completa en cada salto \cite{tanenbaum2012, kurose2017}.
+
+\textbf{El debate de diseño que definió Internet.} Finalmente, el legado más profundo de X.25 es dialéctico: su filosofía de \emph{red inteligente y fiable, terminales simples} stimuló la formulación contraria del principio extremo a extremo --- las funciones como la confirmación y la recuperación solo pueden implementarse con conocimiento completo en los extremos de la aplicación, y la red debe limitarse a transportar \cite{saltzer1984}. La Internet de datagramas y el modelo TCP son, en este sentido preciso, la respuesta histórica a X.25: el control de errores que aquel ejecutaba en cada nodo, TCP lo ejecuta una sola vez, de extremo a extremo, liberando al núcleo de la red y permitiendo su crecimiento exponencial \cite{kurose2017}. Ninguna de las dos filosofías es intrínsecamente superior: la de circuitos virtuales sobrevive cada vez que se necesita calidad de servicio, prestaciones garantizadas o conmutación eficiente (ATM, MPLS, y los circuitos virtuales de las redes 5G y de los centros de datos actuales); la de datagramas, cada vez que prima la tolerancia a fallos y la escalabilidad. Ese diálogo, abierto por X.25, sigue estructurando el diseño de redes hoy.
+
+% ==========================================
+% CONCLUSIONES
+% ==========================================
+\section{Conclusiones}
+
+El análisis efectuado permite sostener la tesis planteada en la introducción: X.25 fue el primer estándar fundamental de la conmutación de paquetes y su arquitectura explica tanto su éxito como su obsolescencia. Su estructura jerárquica de tres niveles --- la interfaz física de X.21, la transferencia fiable de tramas de LAPB y la multiplexación de circuitos virtuales del PLP --- constituyó la primera demostración normalizada de que una red pública de datos podía operar de forma interfuncional entre fabricantes y operadoras, y aportó a las capas inferiores del modelo OSI su plantilla conceptual. Sus mecanismos de orientación a conexión y control de errores salto a salto fueron una solución técnica impecable bajo los supuestos de su tiempo: enlaces analógicos ruidosos, terminales simples y velocidades de decenas de kbps. El examen cuantitativo muestra, sin embargo, que esos mismos mecanismos acotan el rendimiento por el producto ventana--tamaño de paquete, acumulan latencia en cada nodo y consumen memoria de red en proporciones inasumibles en redes de alta velocidad; su eficiencia era contingente a la tecnología, no intrínseca al diseño.
+
+Precisamente por ello, la trascendencia de X.25 no termina con su declive comercial sino que se intensifica: de LAPB descienden LAPD y Frame Relay; de sus circuitos virtuales, la conmutación de celdas de ATM y las etiquetas de MPLS; de su filosofía de red fiable, el principio extremo a extremo que estructura TCP/IP. Comprender X.25 es, en consecuencia, comprender el eje central del diseño de redes de paquetes: la tensión entre fiabilidad y rendimiento, entre red inteligente y extremos inteligentes, entre circuitos virtuales y datagramas, que sigue definiendo cada nueva tecnología --- de las redes 5G a las redes en chip --- como los problemas de diseño que la lectura de Duato \cite{duato2016} sitúa al origen de toda red de interconexión. El protocolo que abrió la era de la conmutación de paquetes dejó de transportar la mayor parte del tráfico mundial hace décadas, pero las preguntas que respondió --- y las respuestas que dio --- siguen operando bajo cada paquete que hoy transmite Internet.
+
+% ==========================================
+% REFERENCIAS
+% ==========================================
+\begin{thebibliography}{10}
+    \bibitem{itux25}
+    UIT-T, \textit{Recomendación X.25: Interfaz entre el equipo terminal de datos (DTE) y el equipo de terminación del circuito de datos (DCE) para terminales que operan en el modo paquete y conectados a una red pública de datos por circuito especial}, Ginebra, 1996.
+
+    \bibitem{itux121}
+    UIT-T, \textit{Recomendación X.121: Plan internacional de numeración para las redes públicas de datos}, Ginebra, 2000.
+
+    \bibitem{rybczynski1980}
+    A. Rybczynski, ``X.25 interface and end-to-end virtual circuit service characteristics'', \textit{IEEE Transactions on Communications}, vol.~28, n.º~7, pp.~1153--1161, 1980.
+
+    \bibitem{schwartz1987}
+    M. Schwartz, \textit{Telecommunication Networks: Protocols, Modeling and Analysis}. Reading, MA: Addison-Wesley, 1987.
+
+    \bibitem{stallings2004}
+    W. Stallings, \textit{Comunicaciones y Redes de Computadores}, 8.ª~ed. Madrid: Pearson Educación, 2004.
+
+    \bibitem{tanenbaum2012}
+    A. S. Tanenbaum y D. J. Wetherall, \textit{Redes de Computadoras}, 5.ª~ed. México D.F.: Pearson Educación, 2012.
+
+    \bibitem{bertsekas1992}
+    D. Bertsekas y R. Gallager, \textit{Data Networks}, 2.ª~ed. Englewood Cliffs, NJ: Prentice Hall, 1992.
+
+    \bibitem{kurose2017}
+    J. F. Kurose y K. W. Ross, \textit{Redes de Computadoras: Un enfoque descendente}, 7.ª~ed. México D.F.: Pearson Educación, 2017.
+
+    \bibitem{saltzer1984}
+    J. H. Saltzer, D. P. Reed y D. D. Clark, ``End-to-end arguments in system design'', \textit{ACM Transactions on Computer Systems}, vol.~2, n.º~4, pp.~277--288, 1984.
+
+    \bibitem{duato2016}
+    J. F. Duato Marín, ``Redes de comunicaciones de alta velocidad: ¿cómo funcionan?'', \textit{Rev. R. Acad. Cienc. Exact. Fís. Nat. (Esp)}, vol.~109, n.º~1--2, pp.~75--86, 2016.
+\end{thebibliography}
+
+\end{document}

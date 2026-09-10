@@ -1,0 +1,312 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+\usepackage[spanish]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=3cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{amssymb}
+
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textit{Redes de Alta Velocidad}}
+\rhead{\textit{Ensayo -- SONET/SDH}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\makeatletter
+\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\quad}
+\makeatother
+
+\setlist[itemize]{label=\footnotesize$\blacksquare$, itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+\setlist[enumerate]{label=\alph*), itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+
+\begin{document}
+
+% ==========================================
+% PORTADA
+% ==========================================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\Large\bfseries Universidad Autónoma de Zacatecas\par}
+    \vspace{0.4cm}
+    {\large\bfseries Unidad Académica de Ingeniería Eléctrica\par}
+    {\large\bfseries Ing. Electrónica Industrial con Esp. en Telecomunicaciones\par}
+    \vspace{1.5cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1cm}
+    {\huge\bfseries Ensayo\par}
+    \vspace{0.7cm}
+    {\Large ``SONET/SDH: la jerarquía digital síncrona que \\ estructuró la red de transporte de fibra óptica''\par}
+    \vspace{0.6cm}
+    {\normalsize Análisis de su arquitectura de tramas y capas, la sincronización de la red, \\ los anillos autorestaurantes y su comparación con las alternativas de transporte.\par}
+    \vspace{1cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1.8cm}
+
+    \begin{tabular}{r l}
+        \textbf{Materia:}    & Redes de Alta Velocidad \\[0.35cm]
+        \textbf{Actividad:}  & Ensayo analítico -- SONET/SDH \\[0.35cm]
+        \textbf{Alumno(a):}  & Arnold Yovick Rios Zaldivar \\[0.35cm]
+        \textbf{Matrícula:}  & 35167151 \\[0.35cm]
+        \textbf{Docente:}    & Jose Ricardo Gomez Rodriguez \\[0.35cm]
+        \textbf{Fecha:}      & 3 de septiembre de 2026
+    \end{tabular}
+
+    \vfill
+    Ciclo escolar: Ago--Dic 2026
+    \vspace*{0.5cm}
+\end{titlepage}
+\setcounter{page}{1}
+
+% ==========================================
+% RESUMEN
+% ==========================================
+\section{Resumen}
+
+El presente ensayo analiza la jerarquía digital síncrona --- estandarizada en Norteamérica como SONET y adoptada internacionalmente por la UIT-T como SDH --- surgida en la década de 1980 para superar la fragmentación de las jerarquías multiplex pleisócronas (PDH) y dotar a la red de fibra óptica de una arquitectura de transporte común. Se examina su estructura: la trama básica de 125~\textmu s y su escalonamiento jerárquico (de OC-1/STM-1 a OC-768/STM-256), el modelo de administración por capas (física, de sección, de línea y de trayecto), el mecanismo del apuntador que permite extraer tributarios directamente del agregado y los esquemas de protección lineal y en anillo. A partir de este análisis se efectúa un juicio técnico: el diseño demostró una eficiencia excepcional para el transporte de circuitos TDM de voz, y su disciplina de supervisión y resiliencia figura entre los aportes más sólidos de la ingeniería de telecomunicaciones; pero su rígida granularidad de 8~kHz, herencia del canal de voz, se volvió un despilfarro ante el tráfico paquetizado, lo que explica su adaptación sucesiva (concatenación virtual, Ethernet sobre SDH) y su eventual relevo por DWDM y la red óptica de transporte (OTN). Se sintetiza, además, su alcance social --- la resiliencia y planificación de la infraestructura sobre la que descansa la economía digital --- y las implicaciones éticas de la gestión del capital instalado ante la obsolescencia tecnológica.
+
+\noindent\textbf{Palabras clave:} SONET, SDH, jerarquía digital síncrona, PDH, TDM, fibra óptica, apuntador, anillos autorestaurantes, DWDM, OTN.
+
+% ==========================================
+% INTRODUCCIÓN
+% ==========================================
+\section{Introducción}
+
+En la década de 1980, las redes de telecomunicaciones enfrentaban una paradoja de su propio éxito: la digitalización de la red telefónica había creado una red troncal de fibra de enorme capacidad, pero su aprovechamiento estaba fragmentado por jerarquías de multiplexación pleisócronas (PDH) que, en su variante norteamericana (T1/T3) y en su contraparte europea (E1/E3/E4), carecían de un estándar intercontinental interoperable y de relojes reconciliables entre redes \cite{stallings2004, tanenbaum2012}. Extraer un solo canal de 64~kbps de un agregado PDH de tercer nivel exigía desmultiplexar en cascada toda la jerarquía, y cada operadora mantenía variantes nacionales del formato que dificultaban la interconexión directa. En respuesta, el organismo de estandarización norteamericano (ANSI, con soporte técnico de Bellcore) definió en 1984 SONET (\emph{Synchronous Optical Network}); la UIT-T lo retomó, lo armonizó con las jerarquías europeas y lo internacionalizó como SDH (\emph{Synchronous Digital Hierarchy}) en las recomendaciones G.707/G.708/G.709 (1988) y sus posteriores \cite{itug707, stallings2004}. Puede afirmarse, sin exageración, que SONET/SDH fue la primera arquitectura de transporte normalizada para la red óptica digital mundial, la ingeniería que volvió industrial el despliegue de la fibra troncal y el vehículo sobre el que, casi paradójicamente, viajaron después las redes de paquetes de ATM, de Frame Relay y de la propia Internet.
+
+El objetivo de este ensayo es analizar críticamente esa trascendencia. Para ello se estructura el trabajo en cinco movimientos argumentales: primero, se reconstruye el contexto técnico que explica el nacimiento de la jerarquía síncrona frente al problema pleisócrono; segundo, se estudia con detalle la arquitectura de tramas, las capas de administración y los mecanismos de multiplexación de SONET/SDH; tercero, se examinan a fondo la sincronización de la red y los esquemas de protección, formulando juicios técnicos fundamentados sobre su eficiencia; cuarto, se evalúan sus impactos técnicos, sociales y éticos y se compara críticamente con las alternativas existentes (Ethernet de operador, DWDM, OTN); y, por último, se sintetiza su legado. La tesis que se sostiene es que SONET/SDH debe comprenderse como un producto ejemplar de su tiempo: la coherencia de su arquitectura convirtió el transporte en un recurso medible, supervisable y protegible --- hasta entonces materia de ingeniería artesanal ---, y sus limitaciones, derivadas de supuestos de tráfico ya superados, fueron precisamente las que orientaron la evolución hacia las redes de transporte paquetizado y óptico que hoy la sustituyen funcionalmente sin desdecir sus principios.
+
+% ==========================================
+% CONTEXTO HISTÓRICO
+% ==========================================
+\section{Contexto histórico: el problema pleisócrono que SDH vino a resolver}
+
+Para valorar las decisiones de diseño de SDH es indispensable entender el escenario tecnológico de las jerarquías digitálicas de los setenta y ochenta. La red telefónica digitalizada organiza la voz en canales de 64~kbps (codificación PCM: muestreo a 8~kHz y 8~bits por muestra) y los agrega en cascada: 24 canales conforman un T1 (1{,}544~Mbps) en Norteamérica y 30 canales más señalización conforman un E1 (2{,}048~Mbps) en Europa; a su vez, cuatro T1 o E1 conforman T2/E2, y a partir de ahí T3 (44{,}736~Mbps)/E3 (34{,}368~Mbps) y E4 (139{,}264~Mbps) \cite{stallings2004, tanenbaum2012}. El punto crucial del problema es el reloj: cada multiplexor de cada nivel de la cascada dispone de su propio oscilador, ligeramente distinto del del extremo remoto, ya que la red presenta un reloj no jerárquicamente sincronizado a todos los nodos. La solución con que se concertó fue la de insertar bits de \emph{justificación} (\emph{stuffing}) que absorben las diferencias entre relojes; pero esa solución impone una consecuencia operativa adversa: la posición de un tributario de bajo nivel dentro del agregado de alto nivel depende de la historia de la justificación y, por tanto, no es determinística \cite{itug707, tanenbaum2012}.
+
+Este diseño, además, traía consigo tres problemas operativos mayores. Primero, la sobrecarga funcional de la extracción: para insertar o extraer un T1 de una señal T3, el equipo debía desmultiplexar en cascada todos los niveles y remultiplexarlos, con la consiguiente pérdida de eficiencia, cantidad de equipo intermedio y capital instalado \cite{stallings2004}. Segundo, la carencia de una supervisión estandarizada: los bits de administración disponibles en PDH eran escasos y heterogéneos, de modo que no había una capa común de gestión de alarmas, desempeño y configuración de la red troncal \cite{tanenbaum2012, ituG803}. Tercero, la ausencia de una interfaz fotónica normalizada: cada fabricante definía su propia óptica y su propio formato, lo que impedía interconectar redes de operadoras distintas con equipos sin conversión. A ello se sumó, a mediados de los ochenta, la consolidación de la fibra monomodo como medio dominante del transporte de larga distancia, que multiplicó por órdenes de magnitud la capacidad por enlace y convirtió en insostenible la operación PDH fragmentada de la troncal \cite{stallings2004, tanenbaum2012}.
+
+La respuesta fue uno de los mayores empeños de normalización de la historia de las telecomunicaciones. En Estados Unidos, la ANSI aprobó en 1984 la familia de estándares SONET, sobre la base de propuestas de labooperadores de red (Bellcore) comprometidos a desplegar la interconexión troncal sobre fibra SONET \cite{ansi}. Poco después la UIT-T reconsideró el diseño, lo amplió para acomodar las jerarquías europeas y lo internacionalizó como SDH en la Recomendación G.707 y su familia, fijando de paso una única jerarquía mundial de transporte \cite{itug707}. La diferencia entre ambas versiones es en esencia una: la granularidad de su primer nivel. SONET se asienta en la señal STS-1 de 51{,}84~Mbps y escala por grupos de tres, doce, cuarenta y ocho; SDH, elaborada sobre la base de la señalización de la telefonía europea, define la señal base STM-1 de 155{,}52~Mbps --- que abarca exactamente tres STS-1 concatenados (STS-3c) --- y escala a múltiplos de cuatro \cite{itug707, stallings2004}. La identidad central de ambos estándares, en cambio, es compartida y define su era: una multiplexación síncrona, con todos los relojes de la red derivados de una referencia primaria común; una trama estructurada con abundante sobrecarga para administración y supervisión por secciones y por trayectos; y la capacidad de identificar la posición de cada tributario dentro del agregado sin demultiplexado en cascada, gracias al apuntador \cite{itug707, ituG803, tanenbaum2012}.
+
+% ==========================================
+% ARQUITECTURA DE TRAMAS Y CAPAS
+% ==========================================
+\section{La arquitectura de SONET/SDH: tramas, capas y multiplexación}
+
+\subsection{La jerarquía de velocidades}
+
+SONET organiza su espacio de transporte en tramas de 125~\textmu s --- la cadencia del canal de voz PCM --- generadas a 8{,}000 tramas por segundo. La trama básica STS-1 se compone de 810 octetos organizados en 9 filas de 90 columnas, lo que da una tasa de 51{,}84~Mbps; de ella se derivan, por concatenación de grupos, las señales STS-$n$ ($n=3$, 12, 48, 192, 768), denominadas en su versión fotónica OC-$n$ (\emph{Optical Carrier}) \cite{ansi, itug707}. SDH toma como base STM-1 (\emph{Synchronous Transport Module}) de 155{,}52~Mbps y escala a múltiplos de cuatro: STM-4 (622{,}08~Mbps), STM-16 (2{,}488{,}32~Gbps), STM-64 (9{,}953{,}28~Gbps) y STM-256 (39{,}813{,}12~Gbps) \cite{itug707}. La tabla~\ref{tab:jerarquia} resume la correspondencia entre ambas jerarquías.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{l l l l X}
+        \toprule
+        \textbf{Nivel} & \textbf{SONET} & \textbf{SDH} & \textbf{Tasa (Mbps)} & \textbf{Capacidad típica} \\
+        \midrule
+        1   & OC-1    & ---     & 51{,}84        & 28 T1 o 1 E3 \\
+        3   & OC-3    & STM-1   & 155{,}52       & 84 T1 o 63 E1 (1~Gbps de Ethernet con overhead) \\
+        12  & OC-12   & STM-4   & 622{,}08       & 336 T1 o 252 E1 \\
+        48  & OC-48   & STM-16  & 2{,}488{,}32   & transporte troncal estándar de los noventa \\
+        192 & OC-192  & STM-64  & 9{,}953{,}28    & 16× OC-48; transporte de los 2000 \\
+        768 & OC-768  & STM-256 & 39{,}813{,}12   & tope de la jerarquía TDM clásica \\
+        \bottomrule
+    \end{tabularx}
+    \caption{Correspondencia entre la jerarquía SONET (ANSI) y la SDH (UIT-T).}
+    \label{tab:jerarquia}
+\end{table}
+
+El hecho esencial es que la tasa de cada nivel es exacta, sin riesgo de divergencia entre relojes: existe un plan de sincronización de toda la red, de modo que la multiplexación de niveles no requiere justificación de bits, y la posición de cada tributario máximo es fija y computable a partir del apuntador \cite{itug707}.
+
+\subsection{Estructura de la trama y capas de administración}
+
+La trama STS-1 se organiza en un bloque rectangular de 9~filas por 90~columnas de octetos que se transmite fila a fila. Las tres primeras columnas conforman la sobrecarga de transporte (\emph{transport overhead}, TOH), de modo que las 6 primeras filas de esas columnas constituyen la sobrecarga de sección (RSOH, \emph{regenerator section overhead}) y las 6 restantes la sobrecarga de línea (LOH, \emph{line overhead}). El bloque de carga (\emph{payload}) ocupa las 87 columnas restantes y forma el SPE (\emph{Synchronous Payload Envelope}) de SONET o el contenedor virtual VC-4 de SDH. Un octeto particular de la LOH (de hecho, dos octetos, H1 y H2) conforma el \emph{apuntador}, que indica en qué octeto de la trama comienza el SPE: el SPE puede ``flotar'' dentro de la trama (no está alineado con su inicio) y ese desplazamiento se declara explícitamente \cite{itug707, stallings2004}.
+
+Sobre esa base física, la UIT-T (G.803, G.783) definió un modelo de administración estratificado, de abajo a arriba \cite{ituG803}:
+
+\begin{itemize}
+    \item \textbf{Capa física.} Especifica la transmisión sobre fibra monomodo en 1310~nm o 1550~nm con rangos de alcance normalizados (SR, SR-LR, SR-IR, SR-LR-2\dots) en G.957/G.691, o interfaces eléctricas cortas STS-1/STM-1 sobre coaxial conforme a G.703 \cite{itug957}.
+    \item \textbf{Capa de sección regeneradora (RSOH).} Supervisa los tramos entre regeneradores: incluye el enmarcado (A1--A2), la identificación de regenerador (J0), la supervisión de paridad de sección (B1) y un canal de datos de gestión.
+    \item \textbf{Capa de sección multiplexora (MSOH).} Supervisa los tramos entre multiplexores de extremo: paridad de línea (B2), identificación de línea (J1 en algunos arreglos), señalización de protección (K1/K2), orden de sincronización (S1), canal de datos e indicadores de defecto remoto \cite{itug707, stallings2004}.
+    \item \textbf{Capa de trayecto.} Supervisa el circuito extremo a extremo desde el primer multiplexor hasta el último: paridad de trayecto (B3), indicadores de inspección de trayecto y canales de administración de la conexión, con etiquetas de ruta (J1/J2, POH).
+    \item \textbf{Capa de teletransporte.} Se encarga de la adaptación de tributarios (T3, E1, E3, canal de video, etcétera) en los contenedores (VC-11, VC-12, VC-3, VC-4), su ajuste de frecuencia y su emplazamiento en la carga útil del VC-4.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \draw[thick] (0,0) rectangle (9,3.9);
+        \fill[red!25]   (0,1.05) rectangle (1,2.55);
+        \fill[red!40]   (0,0)    rectangle (1,1.05);
+        \fill[orange!40](0,2.55) rectangle (1,3.9);
+        \fill[blue!15]  (1,0)    rectangle (1.9,3.9);
+        \fill[green!16] (1.9,0)  rectangle (9,3.9);
+        \draw (1,0) -- (1,3.9); \draw (1.9,0) -- (1.9,3.9);
+        \node at (0.5,3.3)  {\footnotesize RSOH};
+        \node at (0.5,1.8)  {\footnotesize LOH};
+        \node at (0.5,0.5)  {\footnotesize};
+        \node at (1.45,1.95){\footnotesize\rotatebox{90}{apuntador (H1--H2)}};
+        \node at (5.4,1.95) {\footnotesize SPE (SONET) / VC-4 (SDH)};
+        \node at (4.5,4.3)  {\footnotesize 9 filas $\times$ 90 columnas de octetos; 125\,\textmu s};
+        \node at (-1.1,1.8) {\footnotesize TOH};
+    \end{tikzpicture}
+    \caption{Estructura de la trama STS-1: sobrecarga de transporte (RSOH+LOH), columna de apuntador y SPE.}
+    \label{fig:trama}
+\end{figure}
+
+La combinación de estos conceptos revela la genialidad funcional del formato: al incorporar en la propia trama la administración (sección, línea, trayecto), SDH no es solo una jerarquía de multiplexación sino un sistema de gestión homogéneo \cite{ituG803, stallings2004}. Cada segmento de red tiene su propio plano de supervisión, y es por ello que la ingeniería de operación --- detección de fallas, medición de errores, verificación de relojes --- se ejecuta no como tarea adicional de la capa de bits crudos, sino como servicio inherente de la propia arquitectura.
+
+\subsection{El apuntador y la extracción aditiva y a la medida (\emph{add--drop}) de tributarios}
+
+La característica funcional más singular de SONET/SDH es el \emph{apuntador}: el campo H1--H2 de la sobrecarga de línea contiene el desplazamiento, en octetos, entre el inicio de la trama y el arranque del SPE (en STS-1, módulo 783). Ese desplazamiento es \emph{dinámico}: si el reloj del cliente de un tributario no coincide exactamente con el del transporte, el SPE se desplaza por un octeto entero por trama, y el apuntador lo indica en la primera línea de la trama siguiente. Con ello se resuelve el dilema de la pleisocronía: si el tributario va retrasado, se aplica \emph{justificación} --- se encierra un octeto de relleno o se adelanta el SPE --- y el apuntador se ajusta en una única octava de la trama. Esta es la clave de la sincronía ``flexible'' de SDH: la justificación que en PDH se ejecutaba por pila de stuffing en cascada se reduce aquí a un mecanismo simple en la cabeza del agregado \cite{itug707, stallings2004}.
+
+De ahí emana una diferencia funcional de primer orden con PDH: la \emph{extracción aditiva y a la medida} (\emph{add--drop}) de tributarios. En la trama síncrona, un tributario (por ejemplo un E1 o un canal de 64~kbps) puede identificarse sin demultiplexar todo el agregado, pues el apuntador y la estructura de contenedores señalan su posición exacta. El elemento de red canónico de SDH, el \emph{multiplexor aditivo-sustractivo} (ADM, \emph{add--drop multiplexor}), extrae directamente de una señal de tercer nivel un VC-12 (o un conjunto de ellos) y lo reemplaza por otro, sin afectar al resto del agregado \cite{tanenbaum2012, stallings2004}. Esta capacidad redujo sustancialmente el costo de la troncal: la cadena de multiplexadores y demultiplexadores que PDH exigía en cada punto de acceso se sustituyó por un único ADM, reducción del costo de centrado de interconexión y multiplicación de la flexibilidad de las redes de operadoras. La red de transporte moderna se organizó en torno a esta operación: el conmutador de cruzado digital (DXC, \emph{digital cross-connect}) generalizó el principio del ADM a la commutación de tributarios entre rutas en nodos de gran escala; pero su función de origen --- la inserción y extracción de tributarios sin demultiplexado en cascada --- es herencia directa del ADM de SDH \cite{tanenbaum2012}.
+
+\subsection{Tributarios, contenedores y concatenación}
+
+El despliegue funcional de la red síncrona se concretó en una jerarquía de contenedores: la UIT-T estandarizó una relación de contenedores pleisócronos (C-11, C-12, C-3, C-4) que acomodan los tributarios existentes (T1/E1, E3/T3, 140~Mbps), los adapta mediante un byte de justificación de frecuencia y los encapsula en unidades de tributario virtual (VC-11, VC-12, VC-3, VC-4). Los VC de bajo orden se agrupan en \emph{tributary unit groups} (TUG) y se posicionan en el VC-4 correspondiente, cuyos apuntadores cobijan la posición exacta de cada tributario \cite{itug707, stallings2004}. El mecanismo de \emph{concatenación} permite, además, agrupar señales SPE en una única entidad de mayor capacidad: la concatenación contigua (STS-3c) hace que varios VC-4 adyacentes se traten como un único transporte de mayor tamaño; la \emph{concatenación virtual} (VCAT, G.707/G.709, y su protocolo de capacidad LCAS) generalizó esta idea al caso de contenedores no contiguos, antecedente directo del \emph{bonding} de enlaces moderno \cite{itug707, ituG709}.
+
+% ==========================================
+% SINCRONIZACIÓN Y PROTECCIÓN
+% ==========================================
+\section{Sincronización y protección: análisis crítico}
+
+\subsection{El plan de sincronización}
+
+El carácter síncrono de la red se sostiene en el plan de sincronización global: las recomendaciones G.811 (reloj primario de referencia, PRC), G.812 (relojes secundarios) y G.813/G.823 (características de relojes de nodos y de equipos) definen una jerarquía de relojes con estratos de calidad y prestaciones estrictas, de modo que todos los osciladores de la red se tracen hacia una única referencia primaria \cite{ituG811, ituG823}. Cada nodo SDH adquiere su sincronía de una señal de la trama de entrada de mejor calidad disponible y la distribuye hacia los nodos aguas abajo, comunicando el nivel de calidad de su reloj (SSM, \emph{Synchronization Status Message}) en un octeto de la sobrecarga (S1). El juicio técnico sobre este plan es favorable: la sincronía, que en PDH era una habilidad artesanal de cada operadora, se convirtió en una infraestructura normalizada internacionalmente, y hoy es la base de la sincronía de las redes de transporte de paquetes (SyncE, G.8261/G.8262), herencia directa del plan de SDH \cite{ituG8261}.
+
+\subsection{Protección y resiliencia: anillos autorestaurantes}
+
+La segunda contribución diferencial de SONET/SDH es el esquema de protección y restauración. La arquitectura contempla la protección lineal 1+1 (dedicada) sobre un enlace, la protección de sección SNC (\emph{subnetwork connection protection}) y, como creación propia de la arquitectura, los \emph{anillos autorestaurantes}: SONET/SDH estableció dos estructuras canónicas, el anillo bidireccional de protección de línea (BLSR, en dos o cuatro fibras) y el anillo de protección de trayecto unidireccional (UPSR) \cite{ansi, stallings2004}. En el BLSR de dos fibras, la mitad de la capacidad se reserva para protección y los canales de señalización de línea (K1/K2) comunican entre nodos la presencia de una falla; cuando un tramo de línea se interrumpe, los nodos extremos conmutan el tráfico por el tramo de protección en el sentido inverso del anillo, con un objetivo clásico de restauración de 50~ms heredado de la telefonía \cite{ansi, ituG823}.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[scale=0.9]
+        \node[draw, circle, fill=blue!10, minimum size=1.1cm] (A) at (0,0)   {ADM 1};
+        \node[draw, circle, fill=blue!10, minimum size=1.1cm] (B) at (4,0)   {ADM 2};
+        \node[draw, circle, fill=blue!10, minimum size=1.1cm] (C) at (4,-3)  {ADM 3};
+        \node[draw, circle, fill=blue!10, minimum size=1.1cm] (D) at (0,-3)  {ADM 4};
+        \draw[thick] (A) -- node[above]{\footnotesize tramo 1} (B);
+        \draw[thick] (B) -- node[right]{\footnotesize tramo 2} (C);
+        \draw[thick] (C) -- node[below]{\footnotesize tramo 3} (D);
+        \draw[thick] (D) -- node[left]{\footnotesize tramo 4} (A);
+        \draw[red!70!black, very thick] (2.7,-1.7) -- (3.3,-1.1);
+        \draw[red!70!black, very thick] (2.7,-1.1) -- (3.3,-1.7);
+        \node[red!70!black] at (3.4,-1.9) {\footnotesize falla};
+        \draw[-{Latex}, red!70!black, dashed, very thick] (B) to[bend right=25] (C);
+        \draw[-{Latex}, red!70!black, dashed, very thick] (D) to[bend right=25] (A);
+        \node at (2,-4.1) {\footnotesize conmutación de protección vía K1/K2, $<$~50 ms};
+    \end{tikzpicture}
+    \caption{Anillo autorestaurante BLSR: ante la falla del tramo 3, los nodos extremos conmutan el tráfico por la ruta de protección en menos de 50~ms.}
+    \label{fig:anillo}
+\end{figure}
+
+El juicio técnico en este punto es nítido. La protección de SONET/SDH fue una de las razones que sustentaron la inversión en la fibra troncal durante décadas: la red se volvió planificable, cuantificable y probada en la práctica. Por contraste, hay que señalar su limitación: la protección de SDH es de \emph{línea} o de \emph{trayecto} previamente planificados, con topología de red cerrada; en la red de paquetes moderna, la restauración se ejecuta dinámicamente por el protocolo de encaminamiento y por técnicas de ingeniería de tráfico en redes de malla \cite{kurose2017}. La protección de la línea de SDH es eficaz en el anillo y en el enlace dedicado, pero inflexible frente a topologías cambiantes; su descendiente funcional en las redes actuales es la protección de subred de OTN y la ingeniería de tráfico dinámica de las redes de malla \cite{ituG803}.
+
+\subsection{Juicio técnico sobre la eficiencia}
+
+El análisis conjunto de la arquitectura de tramas, la sincronización y la protección permite formular tres juicios de eficiencia con fundamento cuantitativo.
+
+\begin{itemize}
+    \item \textbf{La sobrecarga administrativa es notable pero bien empleada.} En una STS-1, la sobrecarga de transporte ocupa 27 octetos de 810 por trama (3{,}3\,\% del ancho de banda), y a ello se suman los octetos de supervisión de la SPE (POH). El sobrecosto total, del orden del 6--7\,\%, tiene un rédito evidente: sin esos octetos no existiría una capa homogénea de gestión de fallas, de medición de errores a nivel de sección, línea y trayecto (paridades B1/B2/B3) ni señalización de protección; las arquitecturas de transporte más recientes (OTN, con su sobrecarga de supervisión, su monitoreo en cascada TCM y su corrección de errores FEC) reproducen de forma muy directa los octetos de supervisión de SDH \cite{itug707, ituG803, ituotn}.
+    \item \textbf{La granularidad de 8~kHz es una herencia de la voz que se cobra caro en paquetes.} La trama de 125~\textmu s se trazó para el canal de 64~kbps, y todo el resto de la jerarquía se construyó como múltiplo exacto de ella. Mientras el tráfico de datos se empaquetaba en tributarios circuitos de la jerarquía TDM (T1, E1, E3), la granularidad resultaba adecuada; con el crecimiento del tráfico de paquetes, la alineación síncrona mostró su rigidez: transportar una Ethernet de 1~Gbps en una STM-16 de 2{,}5~Gbps exigía asignar siete VC-4 completos (de unos 149~Mbps cada uno), desperdiciando cerca de la mitad del ancho de banda asignado. Ese despilfarro operationa históricamente la concatenación virtual, el LCAS y, en última instancia, la surgencia de un transporte óptico nuevo \cite{itug707, ituotn}.
+    \item \textbf{El apuntador eliminó la cascada de multiplexación de PDH, pero se encarece en los niveles superiores.} En niveles bajos, la extracción de un tributario es una operación de lectura directa y única. En los niveles superiores, por el contrario, cada STM contiene varios VC-4 señalados y cada uno de ellos su propio árbol de contenedores de bajo orden; la cascada de apuntadores (uno por nivel) revela la limitación del diseño cuando la red requiere extraer de manera fina un tributario en señales de 10 o 40~Gbps, lo que constituye también una de las razones de la reingeniería que la OTN ejecutó en el transporte \cite{ituotn}.
+\end{itemize}
+
+En síntesis, SONET/SDH compra solidez, supervisión y protección con una granularidad temporal rígida heredada del circuito de voz. Bajo sus supuestos (troncal de circuitos, tráfico previsible, la voz YDM como aplicación dominante), su eficiencia real fue sobresaliente: la red se volvió planificable, cuantificable y administrable de manera industrial, y anillos autorestaurantes la convirtieron en un recurso confiable. Cuando las premisas cambiaron --- tráfico paquetizado, multicapas DWDM, señales de 10--100~Gbps --- el costo de la rigidez estructural y del apuntador se expresó en ineficiencia y complejidad, y las capas de protección sobradas de la red óptica avanzaron hacia OTN, que retoma la lógica de supervisión y protección sin la rigidez de 8~kHz \cite{ituotn, ituG803}.
+
+% ==========================================
+% IMPACTOS ÉTICOS, SOCIALES Y TÉCNICOS
+% ==========================================
+\section{Impactos técnicos, sociales y éticos; alternativas tecnológicas}
+
+\subsection{Impacto técnico y social: la columna vertebral de la digitalización}
+
+El impacto técnico de SONET/SDH se despliega en cuatro planos. Primero, la ingeniería de supervisión: las capas de sección, línea y trayecto construyeron la norma internacional de detección temprana de defectos y monitoreo de rendimiento, y la idea de supervisar la red con la propia señal concatenada se convirtió en patrimonio universal de las redes de transporte \cite{ituG803, ituotn}. Segundo, la resiliencia: los anillos autorestaurantes y la protección de líneas llevaban la disponibilidad al orden del 99{,}999\,\%, y ese estándar se diseñó en favor de los servicios críticos: las redes de voz de emergencia, los servicios financieros y los sistemas distribuidos de misión crítica se desplegaron sobre SONET/SDH precisamente por su disponibilidad \cite{ansi, stallings2004}. Tercero, la infraestructura física: el despliegue masivo de fibra monomodo sobre interfaces OC-$n$ estandarizadas abrió la competencia entre fabricantes de equipos de transporte y el desarrollo económico de la red física \cite{stallings2004, tanenbaum2012}. Cuarto, la sincronización: el plan de reloj jerárquicos de SDH es la base de la sincronía de las redes móviles de última generación, en la que las superestaciones de radio de 5G requieren detección de tiempo por debajo del microsegundo \cite{ituG8261, ituG823}.
+
+El impacto social es considerable. La fibra troncal SONET/SDH fue la columna vertebral de la infraestructura de la red telefónica digital, del comercio electrónico, de las comunicaciones financieras de alta velocidad y del tráfico actual de voz y datos. Sin la sincronización y supervisión que ella aportó, el despliegue de las redes de paquetes (ATM, en su momento, y el transporte Ethernet de operador después) habría carecido de un canal de transporte con calidad conocible y supervisable. En el plano institucional, la normalización internacional de SONET/SDH es un caso sobresaliente de cooperación técnico-económica: un estándar mundial en una época de celos nacionales, que abrió el mercado de equipos de transporte a contiendas globales y cuyo detalle de funcionamiento --- hasta la resolución exacta de la columna de carga --- se describe hoy en las recomendaciones de la UIT-T en el detalle \cite{itug707, ituG803}.
+
+\subsection{Impacto ético}
+
+En el plano ético, el legado de la red síncrona plantea tres cuestiones de interés contemporáneo. Primera, la cuestión del ciclo de vida del capital infraestructural: la red de fibra, ADM, regeneradores y multiplexores desplegada durante décadas constituye un capital de miles de millones, cuya depreciación no es solo un problema de contabilidad sino de responsabilidad: la sustitución prematura de equipos operativos genera desperdicio material y ambiental, mientras que la retención innecesaria de tecnología obsoleta impone sobrecostos de operación y riesgo. La ingeniería de transporte contemporánea enfrenta, así, el dilema ético de gestión de la transición: la migración de SDH a OTN/Ethernet exige un plan de coexistencia que respete la inversión pasada sin bloquear el futuro \cite{tanenbaum2012, ituotn}. Segunda, la ética de la operatividad de infraestructura esencial: la disponibilidad 99{,}999\,\% no es una métrica técnica neutral, sino una carta sociopolítica que se sostiene en la ingeniería de protección: los servicios de emergencia, la banca y las telecomunicaciones dependen de ella; el diseño de protección de SDH, al haberse convertido en patrimonio universal, constituye uno de los ejemplos de ingeniería que incorpora deliberadamente el bienestar social como criterio técnico \cite{stallings2004}. Tercera, la cuestión del acceso y la neutralidad de la infraestructura: la concentración de la fibra troncal en unas pocas operadoras, propiciada por la gran escala de las redes SONET/SDH, planteó la cuestión de la regulación del transporte dominante, un debate que hoy reaparece con las redes de transporte óptico de las grandes proveedoras de servicios en la nube \cite{kurose2017}.
+
+\subsection{Alternativas tecnológicas y comparación crítica}
+
+La evaluación de SONET/SDH exige su comparación crítica con las alternativas que la disputaron y, en buena medida, la reemplazaron.
+
+\begin{itemize}
+    \item \textbf{Ethernet de operador y redes de transporte de paquetes (MPLS-TP).} Cuando los servicios dejaron de ser circuitos y pasaron a ser paquetes, la adecuación de SDH al transporte de paquetes (vía \emph{Packet over SONET}/POS, encapsulando PPP sobre HDLC, y después Ethernet sobre SDH/VCAT) fue un parche de transición \cite{stallings2004}. El transporte paquetizado completo (MPLS-TP de UIT-T, Ethernet de operador según G.8011) retomó la función de SDH con hardware nativo de conmutación de paquetes, mayor eficiencia estadística y adaptación natural a los protocolos IP \cite{kurose2017, ituG803}.
+    \item \textbf{DWDM (\emph{Dense Wavelength Division Multiplexing}).} La multiplexación por longitud de onda multiplica adicionalmente la capacidad del enlace de fibra: un solo par de fibras admite decenas o centenas de portadoras ópticas de 10--100~Gbps cada una \cite{ituG694}. SONET/SDH no resuelve esta capa: su diseño es de multiplexación TDM por el tiempo, y su capa física, aunque nacida en la fibra, no escala a la discontinuidad del esquema DWDM. La relación de DWDM con SDH sería, históricamente, la de un par: DWDM aumentó la capacidad bruta por fibra; SDH mantuvo la ingeniería del contenido \cite{ituG694, ituotn}.
+    \item \textbf{OTN (\emph{Optical Transport Network}).} La UIT-T, con G.709/G.798/G.8201 \cite{ituotn}, introdujo la síntesis de las ventajas de SDH en un transporte óptico moderno: contenedores de granularidad escalable (ODU2, ODU2e, ODU3, ODU4), supervisión completa por tramo (los octetos de supervisión de SDH reencarnados en la sobrecarga de OTN, con la novedad del monitoreo de conexión cruzada TCM), protección de subred, y ajuste de frecuencia para tributarios de cualquier origen. OTN es, en esencia, la síntesis de las capas de supervisión de SDH con la supresión de la granularidad rígida de 8~kHz, y hoy constituye la base de la mayoría del transporte de fibra nueva \cite{ituotn}.
+    \item \textbf{ATM y las redes de transporte de paquetes en general.} En ciertos periodos se argumentó que ATM, con sus celdas de 53 octetos y conmutación en hardware, iba a convertirse en el contenido dominante de la troncal SONET/SDH \cite{tanenbaum2012}. El desarrollo de las técnicas de paquete, no obstante, se encaminó al otro extremo: el transporte hoy es de paquetes de magnitud variable sobre troncales Ethernet o de OTN, y ATM, como tecnología de transporte, desapareció; su legado, no obstante, es la ingeniería de calidad de servicio de las redes de transporte modernas \cite{kurose2017}.
+\end{itemize}
+
+La evaluación comparativa no puede reducirse a la formulación de superior: las tecnologías de transporte no son mejores en abstracto, sino más o menos adecuadas a un determinado escenario. SDH fue la solución funcional del transporte de circuitos de voz de su época y, ante la troncal de paquetes y de DWDM, se convirtió en un obstáculo estructural; su legado, no obstante, es la ingeniería de supervisión y protección que las redes de transporte actuales reencarnan \cite{ituotn, ituG803, kurose2017}.
+
+% ==========================================
+% CONCLUSIONES
+% ==========================================
+\section{Conclusiones}
+
+El análisis efectuado permite sostener la tesis planteada en la introducción: SONET/SDH fue la primera arquitectura de transporte óptico normalizada mundialmente, diseñada para resolver un problema técnico concreto --- la fragmentación pleisócrona de la red troncal --- y cuya estructura terminó constituyendo la base de toda la red de transporte de la era digital. Su arquitectura de tramas de 125~\textmu s, sobrecarga de transporte por secciones (regeneradoras, multiplexoras y de trayecto), apuntador y extracción aditiva y a la medida de tributarios, y su plan de sincronización global, constituyeron una solución de excelencia para el transporte de circuitos TDM, al despliegue industrial de la fibra troncal, y a la operatividad supervisable y resiliencia de una red troncal de voz y de datos de finales del siglo XX. El análisis cuantitativo muestra, sin embargo, que esa misma granularidad rígida de 8~kHz acotó una eficiencia decreciente ante el crecimiento del tráfico de paquetes y del transporte de multiples de señales DWDM, y que las limitaciones de su diseño derivan de la base circuito con la que se trazó: la concatenación virtual, la Ethernet de operador y las redes de OTN fueron sus answers a medida que las premisas de la carga útil cambiaban.
+
+Precisamente por ello, la trascendencia de SONET/SDH no termina con su declive comercial sino que se intensifica: sus capas de supervisión constituyen la disciplina de ingeniería de operación de la red de transporte moderna; su resiliencia (anillos autorestaurantes y protección de línea) es la base de los servicios altamente disponibles de la infraestructura de telecomunicaciones; su plan de sincronización se hereda en la sincronía de las redes móviles de 5G; y el espíritu de la normalización internacional de una arquitectura de transporte común es la razón institucional de la ingeniería de telecomunicaciones de hoy. Estudiar SONET/SDH, en consecuencia, es estudiar la manera en que la ingeniería de redes ataca simultáneamente tres problemas: sincronía, supervisión y protección \cite{itug707, ituG803, ituotn, ituG8261}. La jerarquía que dejó de capturar la mayor parte del tráfico de la red de transporte hace una década sigue marcando, sin embargo, la base de la disciplina de ingeniería de transporte: ésa es su verdadera actualización.
+
+% ==========================================
+% REFERENCIAS
+% ==========================================
+\begin{thebibliography}{10}
+    \bibitem{itug707}
+    UIT-T, \textit{Recomendación G.707: Interfaz de red de nodos para la jerarquía digital síncrona (SDH)}, Ginebra, 2007.
+
+    \bibitem{ituG709}
+    UIT-T, \textit{Recomendación G.709 (indicación de concatenación virtual y asignación de \emph{Virtual Tributary})}, Ginebra, 2001.
+
+    \bibitem{ituG803}
+    UIT-T, \textit{Recomendación G.803: Arquitectura de las redes de transporte basadas en la jerarquía digital síncrona (SDH)}, Ginebra, 2000.
+
+    \bibitem{ituG811}
+    UIT-T, \textit{Recomendación G.811: Características de temporización de los relojes de referencia primarios (PRC)}, Ginebra, 1997.
+
+    \bibitem{ituG823}
+    UIT-T, \textit{Recomendación G.823: Control del jitter y del \emph{wander} en redes digitales basadas en la jerarquía de 2048 kbps}, Ginebra, 2000.
+
+    \bibitem{ituG8261}
+    UIT-T, \textit{Recomendación G.8261: Aspectos de sincronización y temporización en las redes de transporte de paquetes}, Ginebra, 2019.
+
+    \bibitem{ansi}
+    American National Standards Institute, \textit{ANSI T1.105: Synchronous Optical Network (SONET) --- Basic Description including Multiplex Structures, Rates and Formats}, Washington, D.C., 2001.
+
+    \bibitem{itug957}
+    UIT-T, \textit{Recomendación G.957: Dispositivos e interfaces de equipos para sistemas de transmisión digital por fibra óptica}, Ginebra, 2007.
+
+    \bibitem{ituG694}
+    UIT-T, \textit{Recomendación G.694.1: Rejas espectrales para aplicaciones WDM: rejilla de frecuencias DWDM}, Ginebra, 2020.
+
+    \bibitem{ituotn}
+    UIT-T, \textit{Recomendación G.709: Interfaces para la red de transporte óptico (OTN)}, Ginebra, 2020.
+
+    \bibitem{stallings2004}
+    W. Stallings, \textit{Comunicaciones y Redes de Computadores}, 8.ª~ed. Madrid: Pearson Educación, 2004.
+
+    \bibitem{tanenbaum2012}
+    A. S. Tanenbaum y D. J. Wetherall, \textit{Redes de Computadoras}, 5.ª~ed. México D.F.: Pearson Educación, 2012.
+
+    \bibitem{kurose2017}
+    J. F. Kurose y K. W. Ross, \textit{Redes de Computadoras: Un enfoque descendente}, 7.ª~ed. México D.F.: Pearson Educación, 2017.
+
+    \bibitem{duato2016}
+    J. F. Duato Marín, ``Redes de comunicaciones de alta velocidad: ¿cómo funcionan?'', \textit{Rev. R. Acad. Cienc. Exact. Fís. Nat. (Esp)}, vol.~109, n.º~1--2, pp.~75--86, 2016.
+\end{thebibliography}
+
+\end{document}

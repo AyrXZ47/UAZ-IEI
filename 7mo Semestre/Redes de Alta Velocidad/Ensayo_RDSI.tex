@@ -1,0 +1,376 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+\usepackage[spanish]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=3cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{amssymb}
+
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textit{Redes de Alta Velocidad}}
+\rhead{\textit{Ensayo -- RDSI y migración a VoIP}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\makeatletter
+\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\quad}
+\makeatother
+
+\setlist[itemize]{label=\footnotesize$\blacksquare$, itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+\setlist[enumerate]{label=\alph*), itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+
+\begin{document}
+
+% ==========================================
+% PORTADA
+% ==========================================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\Large\bfseries Universidad Autónoma de Zacatecas\par}
+    \vspace{0.4cm}
+    {\large\bfseries Unidad Académica de Ingeniería Eléctrica\par}
+    {\large\bfseries Ing. Electrónica Industrial con Esp. en Telecomunicaciones\par}
+    \vspace{1.5cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1cm}
+    {\huge\bfseries Ensayo\par}
+    \vspace{0.7cm}
+    {\Large ``RDSI: la primera red de servicios integrados y el tránsito \\ hacia la telefonía IP''\par}
+    \vspace{0.6cm}
+    {\normalsize Análisis de sus canales, interfaces y limitaciones técnicas, \\ y evaluación del impacto operativo y económico de la migración a VoIP.\par}
+    \vspace{1cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1.8cm}
+
+    \begin{tabular}{r l}
+        \textbf{Materia:}    & Redes de Alta Velocidad \\[0.35cm]
+        \textbf{Actividad:}  & Ensayo analítico -- RDSI \\[0.35cm]
+        \textbf{Alumno(a):}  & Arnold Yovick Rios Zaldivar \\[0.35cm]
+        \textbf{Matrícula:}  & 35167151 \\[0.35cm]
+        \textbf{Docente:}    & Jose Ricardo Gomez Rodriguez \\[0.35cm]
+        \textbf{Fecha:}      & 10 de septiembre de 2026
+    \end{tabular}
+
+    \vfill
+    Ciclo escolar: Ago--Dic 2026
+    \vspace*{0.5cm}
+\end{titlepage}
+\setcounter{page}{1}
+
+% ==========================================
+% RESUMEN
+% ==========================================
+\section{Resumen}
+
+El presente ensayo analiza la Red Digital de Servicios Integrados (RDSI), la normalización con la que el CCITT materializó en 1984 la visión de una única red digital de extremo a extremo para voz y datos. Se examina con rigor su arquitectura de acceso --- los canales B, D y H, las interfaces básica (2B+D) y primaria (30B+D y 23B+D), la configuración de referencia con sus puntos R, S, T y U, y la pila de protocolos I.430/I.431, LAPD y Q.931 --- y se formula un juicio crítico sobre sus prestaciones: RDSI resolvió con acierto la digitalización del bucle de abonado y la señalización por canal común, pero acopló toda la red a la velocidad de la voz digitalizada (64 kbps) y al paradigma de la conmutación de circuitos, techo insalvable ante la demanda de banda ancha. Sobre esa base se argumentan las causas, los desafíos técnicos y las ventajas de la migración hacia la telefonía sobre el protocolo de Internet (VoIP), y se evalúa su impacto operativo y económico: la convergencia en una única red de paquetes, la reducción del caudal por llamada, la consolidación de costes operativos y los apagones programados de la red conmutada que, medio siglo después, cierran el ciclo y cumplen la visión integradora que RDSI prometió.
+
+\noindent\textbf{Palabras clave:} RDSI, ISDN, canales B y D, LAPD, Q.931, VoIP, SIP, calidad de servicio, migración all-IP.
+
+% ==========================================
+% INTRODUCCIÓN
+% ==========================================
+\section{Introducción}
+
+A comienzos de la década de 1980 la red telefónica pública vivía una paradoja arquitectónica. Su núcleo había sido digitalizado con éxito: la modulación por impulsos codificados (PCM, normalizada en G.711) convertía cada conversación en un caudal fijo de 64~kbps, y las tramas T1 y E1 transportaban decenas de esos canales por los troncales entre centrales. Pero ese núcleo digital desembocaba, en cada abonado, en un par de cobre analógico dimensionado para la banda vocal de 300 a 3400~Hz, sobre el que los datos solo podían cruzar por módems incipientes --- 9,6~kbps con V.32 en 1984 --- tras decenas de segundos de negociación \cite{schwartz1987, tanenbaum2012}. Quien necesitaba voz, datos y teletex contrataba, además, redes distintas: la telefónica conmutada, la red pública de paquetes X.25, las líneas arrendadas. Cada servicio, una red; cada red, una interfaz, una tarifa y una inversión \cite{stallings1999}.
+
+La respuesta normalizadora fue declarativa y ambiciosa: en lugar de especializar redes, digitalizar una sola de extremo a extremo y hacerla capaz de todos los servicios. Así nació la Red Digital de Servicios Integrados, aprobada como familia de recomendaciones por el CCITT en 1984 \cite{itui120}. El objetivo de este ensayo es analizar esa promesa y su desenlace a lo largo de cuatro movimientos argumentales: primero, se reconstruye el contexto histórico que la explica; segundo, se estudia su arquitectura --- canales, interfaces y niveles de protocolo ---; tercero, se formula un juicio crítico sobre sus prestaciones y limitaciones; y, por último, se argumentan las causas, los desafíos y el impacto operativo y económico de la migración hacia VoIP e IP. La tesis que se sostiene es doble. Primera: la arquitectura de RDSI resolvió correctamente el problema de la digitalización del bucle de abonado y dejó estructuras que perduran. Segunda: su limitación fue acoplar toda la red a la velocidad de la voz digitalizada y al paradigma de la conmutación de circuitos, un techo que solo el paradigma de paquetes de Internet pudo romper; la migración a VoIP no fue, por tanto, una simple sustitución de tecnología, sino el cumplimiento, con otros medios, de la propia visión integradora de RDSI.
+
+% ==========================================
+% CONTEXTO HISTÓRICO
+% ==========================================
+\section{Contexto histórico: la promesa de una red única}
+
+Para valorar las decisiones de diseño de RDSI conviene recordar la trayectoria de la digitalización telefónica. Desde los años sesenta, la PCM y los portadores T1 (24 canales, 1,544~Mbps) y E1 (32 canales, 2,048~Mbps) hicieron de la trama digital la divisa universal de la interconexión entre centrales \cite{schwartz1987}. El núcleo de la red se volvió digital en la mayoría de los países desarrollados durante los setenta y primeros ochenta, pero el último tramo --- el bucle de abonado --- permaneció analógico, con la señal de voz modulada sobre el par de cobre y los datos confinados a los anchos de banda de un módem. La alternativa para el usuario profesional era contratar servicios en redes especializadas paralelas: telex, conmutación de circuitos de datos, redes X.25, líneas punto a punto. Cada una exigía su propio terminal, su tarifa y su proceso de alta; la integración era un deseo, no una infraestructura \cite{stallings1999}.
+
+La respuesta del CCITT fue convertir ese deseo en programa. El concepto de RDSI se gestó en sus estudios desde principios de los setenta y cristalizó en 1984 con la recomendación I.120, que definió la RDSI como la evolución de la red telefónica digital hacia una red digital de extremo a extremo, articulada en cuatro principios: la unidad básica de transporte es el canal de 64~kbps; la red soporta conmutación de circuitos y de paquetes, y conexiones conmutadas y permanentes; los servicios nuevos se integran en la misma infraestructura; y el usuario accede mediante interfaces normalizadas en las que pueden conectarse tanto terminales RDSI como los ya existentes \cite{itui120, stallings1999}. El despliegue comercial siguió pronto: Japón lanzó INS-Net 64 en 1988, Francia comercializó Numéris desde 1987 y Alemania alcanzó una penetración notable en los noventa. En 1988, la recomendación I.121 proyectó además la RDSI de banda ancha (B-RDSI) sobre fibra óptica y conmutación de celdas ATM, reconociendo tácitamente que la banda estrecha nacía con fecha de caducidad \cite{itui121}.
+
+La historia registró una ironía que este ensayo tomará como hilo conductor: RDSI transportaba \emph{datos} sobre la red de la \emph{voz}; dos décadas más tarde, VoIP transportaría la \emph{voz} sobre la red de los \emph{datos} \cite{werbach2014}. Ambas migraciones se cruzaron en sentidos opuestos: la digitalización del bucle que RDSI persiguió con circuitos de 64~kbps la consumaría el xDSL con paquetes, y el servicio de paquetes que RDSI ofrecía como colateral en su canal D (X.31) dio a X.25 un último refugio comercial antes de su declive. Comprender RDSI es, así, comprender el primer intento serio de construir la red integrada que hoy parece tan natural.
+
+% ==========================================
+% ARQUITECTURA
+% ==========================================
+\section{La arquitectura de RDSI: canales, interfaces y niveles de protocolo}
+
+La serie I.400 de recomendaciones convirtió la interfaz usuario-red en el corazón de la normalización: no se normalizaba la red interna de cada operadora, sino el punto de encuentro con el usuario. La figura~\ref{fig:config} muestra la configuración de referencia.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \node[draw, rounded corners, minimum width=3.0cm, minimum height=1.1cm, fill=blue!14, align=center] (te1) at (0,1.0)  {\textbf{TE1}\\ \footnotesize terminal RDSI};
+        \node[draw, rounded corners, minimum width=3.0cm, minimum height=1.1cm, fill=blue!14, align=center] (te2) at (0,-1.0) {\textbf{TE2}\\ \footnotesize terminal no RDSI};
+        \node[draw, rounded corners, minimum width=2.2cm, minimum height=1.1cm, fill=blue!8,  align=center] (ta)  at (3.4,-1.0) {\textbf{TA}};
+        \node[draw, rounded corners, minimum width=2.6cm, minimum height=1.1cm, fill=blue!8,  align=center] (nt2) at (6.9,0)   {\textbf{NT2}\\ \footnotesize (centralita)};
+        \node[draw, rounded corners, minimum width=2.6cm, minimum height=1.1cm, fill=blue!8,  align=center] (nt1) at (10.0,0)  {\textbf{NT1}\\ \footnotesize terminación\\ \footnotesize del bucle};
+        \node[draw, rounded corners, minimum width=3.0cm, minimum height=1.1cm, fill=gray!18, align=center] (lt)  at (13.0,0)  {\footnotesize Central local\\\footnotesize (LT / ET)};
+        \draw[-{Latex[length=2.5mm]}] (te2.east) -- node[above]{R} (ta.west);
+        \draw[thick] (te1.east) -- (4.9,1.0) -- (4.9,-1.0) -- (ta.east);
+        \node at (4.2,1.35) {\textbf{S}};
+        \draw[-{Latex[length=2.5mm]}] (4.9,0) -- node[above]{S} (nt2.west);
+        \draw[-{Latex[length=2.5mm]}] (nt2) -- node[above]{T} (nt1);
+        \draw[-{Latex[length=2.5mm]}] (nt1) -- node[above]{U} (lt);
+        \node[align=center] at (4.9,-2.1) {\footnotesize Sin NT2 (instalaciones domésticas), los puntos S y T coinciden.};
+    \end{tikzpicture}
+    \caption{Configuración de referencia de la interfaz usuario--red RDSI y sus puntos de referencia R, S, T y U.}
+    \label{fig:config}
+\end{figure}
+
+\subsection{La configuración de referencia: puntos R, S, T y U}
+
+La configuración distingue dos familias de equipos de usuario y dos funciones de red. El terminal RDSI (TE1) conecta directamente en el punto S; el terminal anterior a RDSI (TE2) --- un equipo X.25, un interfaz V.24 o X.21 --- necesita un adaptador (TA) para colgarse del mismo bus, y lo hace a través del punto R. En el lado de la red, el equipo de terminación de red 1 (NT1) termina físicamente el bucle en el punto U --- con codificación 2B1Q en Norteamérica, donde el NT1 pertenece al cliente, o residendo en la operadora en Europa ---, y el equipo NT2, típicamente una centralita privada, concentra el tráfico de varios terminales entre los puntos S y T \cite{itui430, stallings1999}. El juicio estructural merece subrayarse: al normalizar cuatro puntos de referencia con funciones y protocolos asignados a cada uno, RDSI garantizó que cualquier terminal conforme funcionara en cualquier operadora, la misma misión de interoperabilidad que X.25 cumplió en su interfaz DTE--DCE \cite{schwartz1987}.
+
+\subsection{Los canales normalizados}
+
+El transporte se organiza en canales de capacidades fijas, definidos por la propia lógica de la telefonía digital (tabla~\ref{tab:canales}). El canal B ofrece 64~kbps transparentes --- nacidos, como se verá, de la propia G.711 --- y soporta voz digitalizada o datos en modo conmutado, semipermanente o permanente. El canal D concentra la señalización fuera de banda: 16~kbps en la interfaz básica y 64 en la primaria; por él viajan los mensajes de llamada (Q.931) y, como servicio colateral, paquetes X.25 de hasta 9,6~kbps (acceso X.31). Los canales H agrupan caudales de 384~kbps (H0, seis canales B) a 1920~kbps (H12, solo en tramas E1 europeas) para vídeo y datos de alta velocidad \cite{stallings1999}.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{l l X}
+        \toprule
+        \textbf{Canal} & \textbf{Caudal} & \textbf{Función principal} \\
+        \midrule
+        B  & 64 kbps                  & Voz (G.711) o datos transparentes; conmutado, semipermanente o permanente. \\
+        D  & 16 (básica) / 64 (primaria) & Señalización Q.931 fuera de banda; servicio de paquetes X.25 (X.31) hasta 9,6 kbps. \\
+        H0 & 384 kbps (6B)            & Datos de alta velocidad y videoconferencia. \\
+        H11 & 1536 kbps (24B)         & Troncales sobre portador T1. \\
+        H12 & 1920 kbps (30B)         & Troncales sobre portador E1 (solo Europa). \\
+        \bottomrule
+    \end{tabularx}
+    \caption{Canales normalizados de la RDSI de banda estrecha.}
+    \label{tab:canales}
+\end{table}
+
+La decisión arquitectónica más duradera fue la del canal D: separar la señalización de la conversación en un canal dedicado, siempre activo y disponible aunque ambos canales B estén ocupados. Era la filosofía de la señalización por canal común (SS7) que la red ya aplicaba en su núcleo, llevada por primera vez hasta el abonado: la llamada se establece en uno o dos segundos, se ofrecen servicios suplementarios (identificación de llamada, retención, desvío) y la conexión puede gestionarse como una transacción, no como un cable \cite{stallings1999, ituq931}.
+
+\subsection{Las interfaces de acceso: básica y primaria}
+
+Los canales se empaquetan en dos accesos normalizados. La interfaz básica (2B+D) cabe en un solo par de cobre: la recomendación I.430 organiza tramas de 48 bits repetidas 4000 veces por segundo (figura~\ref{fig:trama}), que reproducen 16 bits de cada canal B, 4 del canal D y 12 de sobrecarga (alineación, eco del canal D y mantenimiento): 192~kbps en la línea para 144 útiles. La interfaz primaria reutiliza sin cambios las tramas físicas E1 y T1: 30 canales B más uno D (en el intervalo 16) sobre los 2,048~Mbps europeos, y 23B+D sobre los 1,544~Mbps norteamericanos y japoneses; solo el estándar E1 ofrece el canal H12 completo \cite{itui431, ituq921}. La tabla~\ref{tab:interfaces} compara ambas.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{l l l X}
+        \toprule
+        \textbf{Interfaz} & \textbf{Estructura} & \textbf{Caudal total} & \textbf{Detalles} \\
+        \midrule
+        Básica (BRI)   & 2B+D   & 192 kbps   & Un par de cobre; 144 kbps útiles; uso universal. \\
+        Primaria T1    & 23B+D  & 1,544 Mbps & Norteamérica y Japón; D en el intervalo 24. \\
+        Primaria E1    & 30B+D  & 2,048 Mbps & Europa; D en el intervalo 16; único acceso con H12. \\
+        \bottomrule
+    \end{tabularx}
+    \caption{Interfaces de acceso de la RDSI.}
+    \label{tab:interfaces}
+\end{table}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \node[draw, fill=blue!14, minimum width=4.8cm, minimum height=1.15cm, align=center] (b1) at (2.4,0)   {\textbf{B1} --- 16 bits};
+        \node[draw, fill=blue!14, minimum width=4.8cm, minimum height=1.15cm, align=center] (b2) at (7.2,0)   {\textbf{B2} --- 16 bits};
+        \node[draw, fill=blue!8,  minimum width=1.2cm, minimum height=1.15cm, align=center] (d)  at (10.2,0)  {\textbf{D}\\\footnotesize (4 bits)};
+        \node[draw, fill=gray!18, minimum width=3.6cm, minimum height=1.15cm, align=center] (oh) at (12.6,0) {Sobrecarga\\\footnotesize (12 bits)};
+    \end{tikzpicture}
+    \caption{Trama física de 48 bits de la interfaz básica (I.430): repetida 4000 veces por segundo, reproduce los canales B1, B2 y D (144 kbps útiles) junto con 12 bits de alineación y mantenimiento, para un caudal de línea de 192 kbps.}
+    \label{fig:trama}
+\end{figure}
+
+La aritmética delata el origen: la interfaz básica es, en rigor, dos conversaciones telefónicas y su señalización; 144~kbps pensados por y para la voz de 64~kbps. No era una puerta de banda ancha, sino el último eslabón digitalizado de la telefonía.
+
+\subsection{Los niveles de protocolo: I.430/I.431, LAPD y Q.931}
+
+La pila de protocolos reproduce la estratificación de su época. El nivel físico lo definen I.430 (básica: activación de la línea, tramas de 48 bits, eco del canal D para arbitrar el bus pasivo compartido) e I.431 (primaria: la trama G.703/G.704 de E1 o T1 sin cambios) \cite{itui430, itui431}. El nivel de enlace es LAPD (Q.921), descendiente directo de LAPB, el protocolo de enlace de X.25: tramas HDLC cuya dirección se desdobla en dos campos, el SAPI (el servicio: 0 para señalización, 16 para paquetes) y el TEI (el terminal), lo que permite multiplexar hasta ocho terminales sobre el mismo bus S, cada uno con su TEI asignado dinámicamente \cite{ituq921}. El nivel de red es la señalización Q.931, que gobierna el ciclo de vida de la llamada con los mensajes SETUP, CALL PROCEEDING, ALERTING, CONNECT y DISCONNECT: el mismo modelo de la telefonía, transportado fuera de banda y ejecutado en segundos, frente a los veinte o treinta que un módem consumía en sincronizarse \cite{ituq931}.
+
+La descendencia de esta pila confirma su solidez estructural: de LAPD nació, recortando la corrección de errores de enlace, el protocolo de Frame Relay (Q.922), y el propio X.25 encontró en el canal D su último refugio comercial mediante el acceso X.31 \cite{stallings1999, stallings2004}.
+
+% ==========================================
+% ANÁLISIS CRÍTICO
+% ==========================================
+\section{Prestaciones y limitaciones: análisis crítico}
+
+El balance de prestaciones fue real y sustancial: fin del canal analógico en el bucle, con la voz y los datos digitales hasta la central; establecimiento de llamada en uno o dos segundos; identificación de la llamada entrante; dos conversaciones, o voz y datos, simultáneas sobre el mismo par; 128~kbps agregando ambos canales B; videoconferencia a 384~kbps con seis canales; y troncales de centralita y enlaces de respaldo de calidad alta y previsible. Para la banca, las empresas y el mercado profesional de los noventa, RDSI fue el primer acceso digital universal al abonado y un éxito técnico innegable.
+
+Sus limitaciones, sin embargo, resultaron estructurales.
+
+\begin{itemize}
+    \item \textbf{El techo de los 64 kbps.} El canal B nació del códec G.711 y toda la arquitectura quedó acoplada a la velocidad de la voz. Para 2~Mbps de datos hacían falta 32 canales B, es decir, un acceso primario entero; para los megabits que la multimedia prometía, decenas de accesos primarios. La banda ancha por ese camino era aritméticamente inviable.
+    \item \textbf{La economía del circuito aplicada al tráfico en ráfagas.} El circuito reserva y cobra la totalidad de los 64 kbps durante toda la sesión, aunque la actividad sea intermitente; la tarificación por canal y por minuto --- heredada del modelo telefónico --- convertía sostener una conexión de datos en un contrato de telefonía. Ante la tarifa plana que la Internet de los noventa normalizó, el modelo resultó inviable para el abonado.
+    \item \textbf{La fragmentación normativa y el ritmo del despliegue.} Cada operadora llegó con su variante de señalización (1TR6 alemana, VN3 francesa, National ISDN-1 norteamericana, INS-Net japonesa); la interoperabilidad solo llegó con Euro-ISDN (ETSI, 1993), cuando el estándar llevaba una década de promesas. La lección fue tan managerial como técnica: un estándar fragmentado se despliega tarde y se despliega caro.
+    \item \textbf{El paradigma equivocado para la demanda real.} RDSI resolvió el problema correcto --- digitalizar el bucle --- con el mecanismo equivocado para los datos: circuitos dedicados. Su respuesta a la banda ancha fue la recomendación I.121 (1988): B-RDSI sobre fibra óptica y celdas ATM \cite{itui121}. La B-RDSI nunca llegó al abonado; la digitalización con economía de paquetes la ejecutaría el xDSL (G.992, comercial desde 1999), que sobre el mismo par entregaba de 512~kbps a 8~Mbps a tarifa plana \cite{tanenbaum2012}.
+\end{itemize}
+
+El juicio cuantitativo es contundente: los 8~Mbps de una línea ADSL equivalen a 125 canales B, es decir, a más de cuatro accesos primarios completos sobre el mismo par de cobre que RDSI sabía explotar a 144~kbps. RDSI digitalizó el bucle, pero no lo liberó. Su valor duradero no está en los canales B, sino en la señalización y en la interfaz normalizada; y esa es precisamente la clave del siguiente apartado, donde la migración a VoIP completa la inversión del diseño.
+
+% ==========================================
+% MIGRACIÓN A VOIP
+% ==========================================
+\section{La migración hacia VoIP e IP: causas, desafíos e impacto}
+
+\subsection{Causas técnicas y económicas}
+
+Las causas de la migración se ordenan en dos planos. El tecnológico: hacia mediados de los noventa, la microelectrónica hizo barato en un procesador digital lo que antes exigía hardware dedicado, y aparecieron los códecs de voz comprimidos --- G.723.1 (1995, 5,3/6,3~kbps) y G.729 (1996, 8~kbps) --- capaces de meter la conversación en paquetes de 10 a 30~ms; la UIT-T normalizó H.323 (1996) para multimedia sobre redes de paquetes \cite{ituh323}, la IETF definió el transporte en tiempo real RTP (hoy RFC 3550) \cite{rfc3550} y la señalización SIP (RFC 3261) \cite{rfc3261}; y en paralelo, la Internet comercial de tarifa plana convertía a IP en la única red universal de datos \cite{goode2002}.
+
+El plano económico fue decisivo. Una llamada TDM reserva 64~kbps permanentes aunque la actividad vocal apenas alcance el 40\,\% del tiempo; una llamada G.729 con encapsulado RTP/UDP/IP (40 octetos de cabecera en paquetes de 20~ms) consume unos 24~kbps, y con supresión de silencios baja por debajo de 12: más de cinco llamadas por paquetes caben en el caudal de una sola de circuito \cite{karapantazis2009, goode2002}. Para el operador, mantener dos redes paralelas --- la de conmutación TDM con su SS7 y la de paquetes --- era un coste operativo duplicado que ningún modelo de negocio justificaba; para la empresa, sustituir troncales RDSI de bloques fijos por troncales SIP elásticos reducía factura y tiempos de provisión; y para el mercado, la aparición de la voz sobre Internet como aplicación ajena a los operadores (Skype, desde 2003) convirtió la migración en una carrera defensiva antes que en una elección \cite{werbach2014}.
+
+\subsection{Desafíos: la conversación en una red de datagramas}
+
+Llevar la voz a una red de mejor esfuerzo exigía resolver un cuarteto de patologías: el \emph{retardo} (la UIT-T fija en 150~ms unidireccionales el límite de calidad de conversación \cite{itug114}); la \emph{variación} del retardo (jitter), corregida con buffers de amortiguación que añaden a su vez retardo; la \emph{pérdida} de paquetes, mitigada con redundancia, corrección y ocultación; y el \emph{eco}, que en los circuitos la red cancelaba y en VoIP deben cancelar los terminales con filtros adaptativos. A ello se añadieron las herramientas de ingeniería de calidad que IP no traía de fábrica: DiffServ para clasificar la voz en el borde, MPLS para dimensionar los troncales y control de admisión en el núcleo \cite{kurose2017, karapantazis2009}. La figura~\ref{fig:pila} muestra la pila resultante.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \node[align=center, font=\small\bfseries] at (0,1.3)  {Flujo de voz (tiempo real)};
+        \node[align=center, font=\small\bfseries] at (7.8,1.3) {Señalización};
+        \node[draw, rounded corners, minimum width=5.6cm, minimum height=0.95cm, fill=blue!14,  align=center] (v1) at (0,0)     {Voz: códec\\ \footnotesize G.711 / G.729 / G.723.1};
+        \node[draw, rounded corners, minimum width=5.6cm, minimum height=0.95cm, fill=blue!8,   align=center] (v2) at (0,-1.4) {RTP / RTCP \footnotesize (RFC 3550)};
+        \node[draw, rounded corners, minimum width=5.6cm, minimum height=0.95cm, fill=gray!18,  align=center] (v3) at (0,-2.8) {UDP};
+        \node[draw, rounded corners, minimum width=5.6cm, minimum height=0.95cm, fill=gray!18,  align=center] (v4) at (0,-4.2) {IP};
+        \node[draw, rounded corners, minimum width=5.6cm, minimum height=0.95cm, fill=orange!18, align=center] (s1) at (7.8,0)    {SIP \footnotesize (RFC 3261)};
+        \node[draw, rounded corners, minimum width=5.6cm, minimum height=0.95cm, fill=orange!8,  align=center] (s2) at (7.8,-1.4) {UDP / TCP};
+        \node[draw, rounded corners, minimum width=5.6cm, minimum height=0.95cm, fill=gray!18,   align=center] (s3) at (7.8,-2.8) {IP};
+        \draw[-{Latex[length=2.5mm]}] (v1) -- (v2);
+        \draw[-{Latex[length=2.5mm]}] (v2) -- (v3);
+        \draw[-{Latex[length=2.5mm]}] (v3) -- (v4);
+        \draw[-{Latex[length=2.5mm]}] (s1) -- (s2);
+        \draw[-{Latex[length=2.5mm]}] (s2) -- (s3);
+        \node[align=center, font=\footnotesize] at (4.0,-3.5) {Cabeceras: 12+8+20\\ $= 40$ octetos por paquete};
+    \end{tikzpicture}
+    \caption{Pila de protocolos de VoIP: el flujo de voz (códec, RTP sobre UDP e IP) y la señalización SIP viajan por la misma red de paquetes, en lugar de por un circuito dedicado de 64 kbps.}
+    \label{fig:pila}
+\end{figure}
+
+La señalización planteó el debate de filosofías más sustancioso, y en él se contrastan las dos industrias. La de las telecomunicaciones, por boca de la UIT, propuso H.323: descendiente directo de Q.931, completo, binario y pesado, fiel a la gramática de la telefonía \cite{ituh323}. La de Internet respondió con SIP (RFC 2543, 1999; RFC 3261, 2002): protocolo textual al estilo HTTP, ligero, extensible y de extremo a extremo, heredero del principio que había vencido a X.25 \cite{rfc3261}. La adopción de SIP por el 3GPP como columna vertebral de IMS lo consagró: incluso en la conquista de la telefonía, el paradigma de datagramas impuso su gramática \cite{karapantazis2009}. Quedaban retos operativos que RDSI resolvía de fábrica y VoIP debía pagar: los teléfonos alimentados por el par de la central frente a terminales dependientes de la corriente local; las llamadas de emergencia sin circuito dedicado; la seguridad (fraude en troncales, cifrado SRTP) y la traducción entre la numeración E.164 y las direcciones IP.
+
+\subsection{Impacto operativo y económico}
+
+El impacto operativo fue doble. En la empresa, la centralita PBX --- hardware dedicado colgado de accesos primarios RDSI --- se convirtió en IP-PBX software sobre la misma red de datos, y la telefonía se fundió con el correo, la mensajería y la videollamada en las plataformas de comunicaciones unificadas: los cambios de puesto dejan de ser obra de un técnico y pasan a ser configuración \cite{goode2002}. El troncal SIP reemplazó al acceso primario: en lugar de bloques fijos de 30 (o 23) canales contratados por meses, caudal elástico canal a canal y tarifa por uso. En el abonado residencial, el resultado fue la integral de la promesa: banda ancha a tarifa plana --- megabits ADSL en lugar de 144~kbps medidos por minuto --- con la voz como una aplicación más. La tabla~\ref{tab:comparacion} contrasta ambos paradigmas.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{l X X}
+        \toprule
+        \textbf{Aspecto} & \textbf{RDSI (TDM)} & \textbf{VoIP sobre IP} \\
+        \midrule
+        Paradigma             & Circuito dedicado de 64 kbps por llamada & Paquetes con multiplexación estadística \\
+        Caudal por llamada    & 64 kbps fijos (más el 60\,\% de silencios) & 8--80 kbps según códec; 24 kbps típico (G.729 + cabeceras) \\
+        Señalización          & Q.931 sobre canal D dedicado & SIP sobre UDP/TCP en el mismo medio \\
+        Infraestructura       & Red dual: conmutación TDM + red de datos & Red única de paquetes \\
+        Escalabilidad         & Bloques fijos de 23/30 canales & Troncales elásticas, canal a canal \\
+        Tarificación          & Por canal y por minuto & Tarifa plana o por uso marginal \\
+        \bottomrule
+    \end{tabularx}
+    \caption{Contraste entre el paradigma RDSI--TDM y la telefonía sobre IP.}
+    \label{tab:comparacion}
+\end{table}
+
+En el operador, la migración fue de reino a reino: softswitches y pasarelas de medios --- las redes de nueva generación --- sustituyeron a los conmutadores TDM, cuyo mantenimiento (máquinas dedicadas, repuestos a medida, personal especializado) no se amortizaba con una voz reducida a fracción marginal del tráfico total \cite{werbach2014}. El desenlace son los apagones programados: Deutsche Telekom completó su migración all-IP en 2018; BT, que había fijado el cierre de su red conmutada para 2025, lo aplazó a 2027 precisamente por los efectos sociales --- alarmas, emergencia, líneas de personas vulnerables --- que la medida arrastra; Orange anunció el fin de su red conmutada hacia 2030. La figura~\ref{fig:cronologia} sitúa la secuencia completa. La economía de la retirada es la prueba definitiva del argumento de este ensayo: la red que RDSI quiso digitalizar no se cierra porque la voz dejara de ser rentable, sino porque sobre la red de paquetes es más rentable todavía.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \draw[-{Latex[length=2.5mm]}, thick] (-0.3,0) -- (13.9,0);
+        \foreach \x in {0.6, 2.4, 4.6, 6.9, 9.0, 10.8, 12.8} {
+            \draw[thick] (\x,0.09) -- (\x,-0.09);
+        }
+        \node[align=center, font=\footnotesize] at (0.6,0.85)  {\textbf{1984}\\ I.120:\\ recomendaciones RDSI};
+        \node[align=center, font=\footnotesize] at (2.4,-0.85) {\textbf{1988}\\ I.121: B-RDSI\\ y ATM};
+        \node[align=center, font=\footnotesize] at (4.6,0.85)  {\textbf{1987--1995}\\ despliegues\\ comerciales 2B+D};
+        \node[align=center, font=\footnotesize] at (6.9,-0.9)  {\textbf{1996--2002}\\ H.323, RTP, G.729,\\ SIP (RFC 3261)};
+        \node[align=center, font=\footnotesize] at (9.0,0.85)  {\textbf{años 2000}\\ NGN: softswitches\\ y migración all-IP};
+        \node[align=center, font=\footnotesize] at (10.8,-0.85) {\textbf{2018}\\ DT completa\\ su migración all-IP};
+        \node[align=center, font=\footnotesize] at (12.8,0.85) {\textbf{2025--2030}\\ apagones del PSTN\\ (BT 2027, Orange 2030)};
+    \end{tikzpicture}
+    \caption{Cronología del tránsito de RDSI a la telefonía sobre IP y a los apagones de la red conmutada.}
+    \label{fig:cronologia}
+\end{figure}
+
+% ==========================================
+% LEGADO
+% ==========================================
+\section{Legado}
+
+Tres estructuras de RDSI sobreviven a sus canales. La señalización fuera de banda que el canal D llevó al abonado es hoy la gramática universal de la voz: SIP ocupa su lugar y las pasarelas siguen hablando con la red legada en dialectos derivados de Q.931. La pila de enlace dejó línea sucesoria verificable: de LAPB (X.25) a LAPD (RDSI) y de ahí a Frame Relay (Q.922), el eslabón que se documentó al examinar el legado de X.25 \cite{stallings2004, stallings1999}. Y el modelo de interfaz normalizada --- puntos de referencia con funciones asignadas --- es el que toda interfaz de acceso posterior (xDSL, fibra hasta el hogar) reprodujo conceptualmente. Durante décadas, además, el acceso básico y primario RDSI fue el troncal estándar de las centralitas y el enlace de respaldo de las sedes críticas, nicho que los apagones del PSTN están cerrando en la presente década.
+
+Pero el legado mayor es dialéctico. La visión de 1984 --- una red, todos los servicios --- fracasó como mecanismo (64~kbps, circuitos, tarifa telefónica) y triunfó como meta: las redes all-IP y la segmentación de red de 5G son, en rigor, RDSI cumplida, una única infraestructura de paquetes que integra voz, datos y servicios dedicados con calidad diferenciada. RDSI construyó el puente --- digitalizó el bucle, normalizó el acceso, enseñó la señalización --- y la voz sobre IP lo cruzó en el sentido contrario al previsto: no los datos hacia la red de la voz, sino la voz hacia la red de los datos \cite{werbach2014}.
+
+% ==========================================
+% CONCLUSIONES
+% ==========================================
+\section{Conclusiones}
+
+El análisis efectuado permite sostener la doble tesis planteada. Primera: la arquitectura de RDSI fue un logro de normalización de primer orden --- canales B, D y H bien delimitados; interfaces básica y primaria coherentes con las tramas T1/E1 existentes; puntos de referencia R, S, T y U que garantizaban la interoperabilidad entre fabricantes y operadoras; y una señalización por canal común (LAPD y Q.931) cuya descendencia --- Frame Relay, SIP, IMS --- sigue viva. Con ella, la industria resolvió correctamente el problema de digitalizar el bucle de abonado y unificar el acceso de voz y datos bajo interfaces estándar.
+
+Segunda: sus limitaciones fueron estructurales, no accidentales. El acoplamiento de toda la red a la voz digitalizada de 64~kbps, la economía del circuito aplicada a un tráfico en ráfagas, la fragmentación normativa del despliegue y la tarificación telefónica fijaron un techo que ni la B-RDSI de ATM pudo romper; el xDSL demostró que el mismo par de cobre, explotado con paradigma de paquetes, multiplicaba por más de cincuenta el caudal útil. La migración hacia VoIP e IP --- de H.323 a SIP, de los troncales RDSI a los troncales SIP, de los conmutadores TDM a los softswitches --- fue la consecuencia técnica y económica de esa inversión de paradigma: caudal compartido en lugar de reservado, 24~kbps por llamada frente a 64, una red en lugar de dos, tarifa plana en lugar de medición por minuto. Sus desafíos --- retardo, jitter, pérdidas, eco, calidad de servicio, seguridad, emergencia --- se resolvieron con la misma disciplina de ingeniería que la telefonía había construido, y su impacto culmina en los apagones del PSTN ya programados. La primera red de servicios integrados no logró integrar los servicios, pero preparó a la red que sí lo hizo: la que prometía integrar todos los servicios fue superada por la que, no prometiendo ninguno, acabó integrándolos todos.
+
+% ==========================================
+% REFERENCIAS
+% ==========================================
+\begin{thebibliography}{18}
+    \bibitem{itui120}
+    UIT-T, \textit{Recomendación I.120: Red digital de servicios integrados (RDSI) --- Aspectos generales}, Ginebra, 1984.
+
+    \bibitem{itui121}
+    UIT-T, \textit{Recomendación I.121: Aspectos de banda ancha de la RDSI}, Ginebra, 1988.
+
+    \bibitem{itui430}
+    UIT-T, \textit{Recomendación I.430: Interfaz usuario-red de la RDSI de banda estrecha. Interfaz de tarifa básica. Nivel físico}, Ginebra, 1993.
+
+    \bibitem{itui431}
+    UIT-T, \textit{Recomendación I.431: Interfaz usuario-red de la RDSI de banda estrecha. Interfaz de tarifa primaria. Nivel físico}, Ginebra, 1993.
+
+    \bibitem{ituq921}
+    UIT-T, \textit{Recomendación Q.921: Especificaciones ISDN de acceso usuario-red. Interfaz de acceso digital. Procedimiento de acceso a enlace (LAPD)}, Ginebra, 1997.
+
+    \bibitem{ituq931}
+    UIT-T, \textit{Recomendación Q.931: Especificaciones ISDN de acceso usuario-red. Protocolo del nivel 3 para el control básico de llamadas}, Ginebra, 1998.
+
+    \bibitem{ituh323}
+    UIT-T, \textit{Recomendación H.323: Sistemas de comunicación multimedia, y terminales para el tráfico de tiempo real, basados en paquetes}, Ginebra, 1996 (rev. 2009).
+
+    \bibitem{itug114}
+    UIT-T, \textit{Recomendación G.114: Tiempo de transmisión unidireccional}, Ginebra, 2003.
+
+    \bibitem{stallings1999}
+    W. Stallings, \textit{ISDN and Broadband ISDN with Frame Relay and ATM}, 4.ª~ed. Upper Saddle River, NJ: Prentice Hall, 1999.
+
+    \bibitem{stallings2004}
+    W. Stallings, \textit{Comunicaciones y Redes de Computadores}, 8.ª~ed. Madrid: Pearson Educación, 2004.
+
+    \bibitem{schwartz1987}
+    M. Schwartz, \textit{Telecommunication Networks: Protocols, Modeling and Analysis}. Reading, MA: Addison-Wesley, 1987.
+
+    \bibitem{tanenbaum2012}
+    A. S. Tanenbaum y D. J. Wetherall, \textit{Redes de Computadoras}, 5.ª~ed. México D.F.: Pearson Educación, 2012.
+
+    \bibitem{kurose2017}
+    J. F. Kurose y K. W. Ross, \textit{Redes de Computadoras: Un enfoque descendente}, 7.ª~ed. México D.F.: Pearson Educación, 2017.
+
+    \bibitem{goode2002}
+    B. Goode, ``Voice over Internet Protocol (VoIP)'', \textit{Proceedings of the IEEE}, vol.~90, n.º~9, pp.~1495--1517, 2002.
+
+    \bibitem{karapantazis2009}
+    N. Karapantazis y F.-N. Pavlidou, ``VoIP: A comprehensive survey on a promising technology'', \textit{Computer Communications}, vol.~32, n.º~14, pp.~2231--2249, 2009.
+
+    \bibitem{rfc3261}
+    J. Rosenberg, H. Schulzrinne, G. Camarillo, A. Johnston, J. Peterson, R. Sparks, M. Handley y E. Schooler, ``SIP: Session Initiation Protocol'', RFC 3261, IETF, 2002.
+
+    \bibitem{rfc3550}
+    H. Schulzrinne, S. Casner, R. Frederick y V. Jacobson, ``RTP: A Transport Protocol for Real-Time Applications'', RFC 3550, IETF, 2003.
+
+    \bibitem{werbach2014}
+    K. Werbach, ``No dialtone: The end of the public switched telephone network'', \textit{Federal Communications Law Journal}, vol.~66, n.º~1, pp.~33--58, 2014.
+\end{thebibliography}
+
+\end{document}

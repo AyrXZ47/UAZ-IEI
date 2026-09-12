@@ -1,0 +1,78 @@
+$date
+  Fri Sep 11 21:42:42 2026
+$end
+$version
+  GHDL v0
+$end
+$timescale
+  1 fs
+$end
+$scope module standard $end
+$upscope $end
+$scope module std_logic_1164 $end
+$upscope $end
+$scope module numeric_std $end
+$upscope $end
+$scope module tb_circuito $end
+$var reg 1 ! a $end
+$var reg 1 " b $end
+$var reg 1 # c $end
+$var reg 1 $ f $end
+$scope module uut $end
+$var reg 1 % a $end
+$var reg 1 & b $end
+$var reg 1 ' c $end
+$var reg 1 ( f $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+0!
+0"
+0#
+1$
+0%
+0&
+0'
+1(
+#100000000
+1#
+1'
+#200000000
+1"
+0#
+0$
+1&
+0'
+0(
+#300000000
+1#
+1$
+1'
+1(
+#400000000
+1!
+0"
+0#
+0$
+1%
+0&
+0'
+0(
+#500000000
+1#
+1$
+1'
+1(
+#600000000
+1"
+0#
+0$
+1&
+0'
+0(
+#700000000
+1#
+1$
+1'
+1(

@@ -1,0 +1,7 @@
+v 4
+file . "tb_circuito.vhd" "5111d4a08e2c70193783c94e3fac9906d0c4f3ab" "20260912230209.494":
+  entity tb_circuito at 2( 57) + 0 on 13;
+  architecture t of tb_circuito at 9( 167) + 0 on 14;
+file . "circuito.vhd" "ee68ae0d4a2447761243d06d8788aa1e1b754fdc" "20260912230209.489":
+  entity shift_wci_23400357 at 5( 243) + 0 on 11;
+  architecture arqui_shift_wci of shift_wci_23400357 at 19( 687) + 0 on 12;

@@ -1,0 +1,128 @@
+$date
+  Sat Sep 12 15:42:49 2026
+$end
+$version
+  GHDL v0
+$end
+$timescale
+  1 fs
+$end
+$scope module standard $end
+$upscope $end
+$scope module std_logic_1164 $end
+$upscope $end
+$scope module numeric_std $end
+$upscope $end
+$scope module tb_circuito $end
+$var reg 4 ! ent[3:0] $end
+$var reg 2 " ctrl[1:0] $end
+$var reg 4 # sal[3:0] $end
+$scope module uut $end
+$var reg 4 $ ent[3:0] $end
+$var reg 2 % ctrl[1:0] $end
+$var reg 4 & sal[3:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+b0000 !
+b00 "
+b0000 #
+b0000 $
+b00 %
+b0000 &
+#100000000
+b0001 !
+b0001 #
+b0001 $
+b0001 &
+#200000000
+b0010 !
+b0010 #
+b0010 $
+b0010 &
+#300000000
+b0011 !
+b0011 #
+b0011 $
+b0011 &
+#400000000
+b0100 !
+b0100 #
+b0100 $
+b0100 &
+#500000000
+b0101 !
+b0101 #
+b0101 $
+b0101 &
+#600000000
+b0110 !
+b0110 #
+b0110 $
+b0110 &
+#700000000
+b0111 !
+b0111 #
+b0111 $
+b0111 &
+#800000000
+b1000 !
+b1000 #
+b1000 $
+b1000 &
+#900000000
+b1001 !
+b1001 #
+b1001 $
+b1001 &
+#1000000000
+b1010 !
+b1010 #
+b1010 $
+b1010 &
+#1100000000
+b1011 !
+b1011 #
+b1011 $
+b1011 &
+#1200000000
+b1100 !
+b1100 #
+b1100 $
+b1100 &
+#1300000000
+b1101 !
+b1101 #
+b1101 $
+b1101 &
+#1400000000
+b1110 !
+b1110 #
+b1110 $
+b1110 &
+#1500000000
+b1111 !
+b1111 #
+b1111 $
+b1111 &
+#1600000000
+b1010 !
+b1010 #
+b1010 $
+b1010 &
+#1700000000
+b01 "
+b0101 #
+b01 %
+b0101 &
+#1800000000
+b10 "
+b0100 #
+b10 %
+b0100 &
+#1900000000
+b11 "
+b0101 #
+b11 %
+b0101 &

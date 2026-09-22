@@ -1,0 +1,324 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing,shapes.symbols}
+\usepackage[spanish]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=3cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{amssymb}
+
+\setlength{\headheight}{14.5pt}
+\setlength{\emergencystretch}{1.5em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textit{Redes de Alta Velocidad}}
+\rhead{\textit{Ensayo -- Protocolo Frame Relay}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\makeatletter
+\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\quad}
+\makeatother
+
+\setlist[itemize]{label=\footnotesize$\blacksquare$, itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+\setlist[enumerate]{label=\alph*), itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+
+\begin{document}
+
+% ==========================================
+% PORTADA
+% ==========================================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\Large\bfseries Universidad Autónoma de Zacatecas\par}
+    \vspace{0.4cm}
+    {\large\bfseries Unidad Académica de Ingeniería Eléctrica\par}
+    {\large\bfseries Ing. Electrónica Industrial con Esp. en Telecomunicaciones\par}
+    \vspace{1.5cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1cm}
+    {\huge\bfseries Ensayo\par}
+    \vspace{0.7cm}
+    {\Large ``El protocolo Frame Relay: la red ligera que enseñó \\ a Internet a confiar en los extremos''\par}
+    \vspace{0.6cm}
+    {\normalsize Análisis de su arquitectura de capa 2, su control de congestión, \\ sus implicaciones éticas y sociales, y su legado en MPLS y el ECN.\par}
+    \vspace{1cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1.8cm}
+
+    \begin{tabular}{r l}
+        \textbf{Materia:}    & Redes de Alta Velocidad \\[0.35cm]
+        \textbf{Actividad:}  & Ensayo analítico -- Protocolo Frame Relay \\[0.35cm]
+        \textbf{Alumno(a):}  & Arnold Yovick Rios Zaldivar \\[0.35cm]
+        \textbf{Matrícula:}  & 35167151 \\[0.35cm]
+        \textbf{Docente:}    & Jose Ricardo Gomez Rodriguez \\[0.35cm]
+        \textbf{Fecha:}      & 18 de septiembre de 2026
+    \end{tabular}
+
+    \vfill
+    Ciclo escolar: Ago--Dic 2026
+    \vspace*{0.5cm}
+\end{titlepage}
+\setcounter{page}{1}
+
+% ==========================================
+% RESUMEN
+% ==========================================
+\section{Resumen}
+
+Frame Relay dominó la interconexión WAN corporativa en los años noventa. Este ensayo sostiene que su trascendencia no radica en su vigencia comercial ---ya extinta--- sino en haber consumado el cambio de paradigma de las redes de alta velocidad: sustituir la fiabilidad salto a salto de X.25 por un transporte ligero que delega el control de errores y de flujo en los extremos, confiando en la baja tasa de error de los enlaces digitales. A partir de su arquitectura de capa~2, su formato de trama con el identificador DLCI, sus circuitos virtuales y sus mecanismos de congestión (FECN, BECN, DE) y de tráfico (CIR, Bc, Be), se evalúan sus implicaciones técnicas, económicas y éticas: la multiplexación estadística abarató la conectividad, pero introdujo riesgos de seguridad, opacidad en la priorización y una escalabilidad acotada por la malla de PVC. Se concluye que su ADN ---conmutación por etiqueta, notificación explícita de congestión y fiabilidad en los extremos--- sobrevive en MPLS, en el ECN de IP y en las WAN actuales.
+
+\noindent\textbf{Palabras clave:} Frame Relay, LAPF, DLCI, PVC, control de congestión, FECN, BECN, CIR, MPLS, X.25.
+
+% ==========================================
+% INTRODUCCIÓN
+% ==========================================
+\section{Introducción}
+
+Al final de los años ochenta, conectar sucursales exigía costosas líneas dedicadas, cuya capacidad quedaba ociosa entre ráfagas, o accesos X.25, robustos pero lentos. Ninguna opción satisfacía a una industria en la que las redes de área local ya multiplicaban las estaciones de trabajo \cite{stallings2014, kurose2017}. Frame Relay surgió en esa brecha: conectividad virtual entre múltiples sitios sobre un único acceso físico, a una fracción del costo de las líneas dedicadas y con una eficiencia muy superior a la de X.25.
+
+La tesis que sostiene este ensayo es que Frame Relay no fue un simple ``X.25 recortado'', sino el punto de inflexión en el que la industria aceptó un principio de diseño distinto: \emph{la red no debe proteger al usuario de enlaces ya fiables; debe limitarse a transportar y a avisar de la congestión, delegando el control de errores en los extremos} \cite{saltzer1984}. Ese principio gobierna hoy ATM, MPLS y la propia Internet, y es el criterio con el que este trabajo juzga a Frame Relay: no por su desaparición comercial, sino por la validez de las ideas que legó. El texto se organiza en cinco movimientos: el contexto histórico; los fundamentos técnicos (arquitectura, trama, circuitos virtuales y congestión); un análisis crítico frente a X.25 y ATM; la evaluación de sus impactos éticos, sociales y técnicos con alternativas viables; y su legado en las tecnologías contemporáneas.
+
+% ==========================================
+% CONTEXTO HISTÓRICO
+% ==========================================
+\section{Contexto histórico: de X.25 a la fibra óptica}
+
+X.25 fue aprobado por el CCITT en 1976 para operar sobre circuitos analógicos de cobre con tasas de error de $10^{-4}$ a $10^{-5}$ y velocidades de decenas de kilobits por segundo. Ante un medio tan hostil, apostó por una \emph{red inteligente y fiable}: cada conmutador verificaba la trama, confirmaba y retransmitía cada paquete salto a salto y mantenía ventanas de flujo, garantizando integridad extremo a extremo a costa de latencia acumulada, sobrecarga de cabecera y un rendimiento acotado por la ventana, no por el ancho de banda \cite{rybczynski1980, itux25, tanenbaum2012}.
+
+La digitalización invirtió esa ecuación. Con la fibra óptica las tasas de error cayeron a $10^{-9}$ o mejor, la corrección por salto se volvió redundante y los terminales, ya provistos de pilas de protocolo completas, podían recuperar por sí mismos las pérdidas \cite{stallings2014}. En ese marco ---la digitalización de la red telefónica y la RDSI--- Eric Scace (Sprint International) propuso a mediados de los ochenta simplificar X.25 eliminando su capa~3 para interfaces digitales y dejando la recuperación de errores a los extremos \cite{buckwalter1999}. La idea cristalizó en las normas ANSI T1.606/T1.617/T1.618 y en las recomendaciones I.233 y Q.922/Q.933 de la UIT-T \cite{ansi1617, itui233, ituq922}. En 1990, el consorcio de Cisco, DEC, Northern Telecom y StrataCom ---el \emph{Gang of Four}--- desarrolló la extensión LMI para interconectar equipos de distintos fabricantes, y en 1991 se constituyó el Frame Relay Forum, cuyas especificaciones FRF.1.1 y FRF.10 consolidaron el despliegue \cite{frf1, frf10, cisco}.
+
+Conviene subrayar una consecuencia de este origen: Frame Relay no nació como protocolo extremo a extremo, sino como \emph{servicio de red} ofrecido por un operador, con la misma lógica comercial de una línea arrendada. Esa naturaleza ---una nube compartida y administrada--- explica a la vez su eficiencia económica y los dilemas éticos que se discuten más adelante.
+
+% ==========================================
+% FUNDAMENTOS TÉCNICOS
+% ==========================================
+\section{Fundamentos técnicos}
+
+\subsection{Una arquitectura de dos capas: el núcleo LAPF}
+
+La diferencia esencial entre X.25 y Frame Relay se aprecia al comparar sus pilas. X.25 define tres niveles ---físico, de enlace (LAPB) y de paquetes (PLP)--- y ejerce control de errores y de flujo en cada uno; Frame Relay opera únicamente en la capa de enlace, es decir, es un protocolo de capa~2 \cite{ituq922, stallings2014}. El estándar Q.922 distingue el \emph{núcleo} (DL-CORE), que delimita tramas, garantiza la transparencia de bits, detecta errores por CRC y multiplexa conexiones, de una parte \emph{no núcleo} que en la práctica se omite. La capa~3 no desaparece: sus funciones ---secuenciación, acuse de recibo extremo a extremo, retransmisión y control de flujo--- se trasladan a los extremos, donde protocolos como TCP las desempeñan con conocimiento completo de la aplicación, como prescribe el argumento de extremo a extremo \cite{saltzer1984}. Frame Relay no elimina la fiabilidad: \emph{la reubica}. Cuando una trama llega con errores, el conmutador la descarta sin pedir retransmisión; si la aplicación requiere fiabilidad, el transporte del extremo detecta la ausencia y solicita de nuevo el segmento. El resultado es una red mucho más simple, rápida y barata por trama, apta para enlaces digitales que rara vez introducen errores. La figura~\ref{fig:capas} ilustra esta transición.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[every node/.style={font=\footnotesize}]
+        \node (x3) [draw, rounded corners, minimum width=3.9cm, minimum height=0.85cm, fill=blue!14, align=center] at (0,0) {\textbf{Capa 3} -- Paquetes (PLP)\\circuitos virtuales};
+        \node (x2) [draw, rounded corners, minimum width=3.9cm, minimum height=0.85cm, fill=blue!8, align=center, below=0.3cm of x3] {\textbf{Capa 2} -- LAPB\\tramas fiables salto a salto};
+        \node (x1) [draw, rounded corners, minimum width=3.9cm, minimum height=0.85cm, fill=gray!18, align=center, below=0.3cm of x2] {\textbf{Capa 1} -- Física\\X.21 / V.35};
+        \node[above=0.2cm of x3, font=\bfseries] {X.25 (1976)};
+
+        \node (f3) [draw, rounded corners, dashed, minimum width=3.9cm, minimum height=0.85cm, fill=green!16, align=center] at (8.5,0) {\textbf{Fiabilidad en los extremos}\\TCP / IP};
+        \node (f2) [draw, rounded corners, minimum width=3.9cm, minimum height=0.85cm, fill=green!20, align=center, below=0.3cm of f3] {\textbf{Capa 2} -- Núcleo LAPF (Q.922)\\tramas, sin retransmisión};
+        \node (f1) [draw, rounded corners, minimum width=3.9cm, minimum height=0.85cm, fill=gray!18, align=center, below=0.3cm of f2] {\textbf{Capa 1} -- Física\\interfaz digital};
+        \node[above=0.2cm of f3, font=\bfseries] {Frame Relay (1990)};
+
+        \draw[-{Latex[length=2.5mm]}, thick, dashed, red!65!black] (x3.east) -- node[above, font=\scriptsize, align=center]{se elimina\\la capa 3} (f3.west);
+    \end{tikzpicture}
+    \caption{Transición de X.25 a Frame Relay. La capa de paquetes y la corrección salto a salto desaparecen del interior de la red; las funciones de fiabilidad se desplazan a los extremos.}
+    \label{fig:capas}
+\end{figure}
+
+\subsection{El formato de trama y el identificador DLCI}
+
+La unidad de datos de Frame Relay es una trama de longitud variable, de hasta 4096 octetos de datos, delimitada por banderas y protegida por una secuencia de verificación de trama (FCS) de 16 bits \cite{ituq922, frf1}. Entre la bandera inicial y los datos aparece un campo de dirección de dos octetos ---extensible a cuatro--- que contiene el \emph{Data Link Connection Identifier} (DLCI), número de 10 bits (23 en formato extendido) que identifica la conexión virtual dentro del enlace local \cite{frf1}. El DLCI solo tiene significado entre el equipo terminal (DTE) y el equipo de red (DCE): funciona como etiqueta, pues el conmutador asocia \emph{puerto y DLCI de entrada} con \emph{puerto y DLCI de salida} y reenvía sin examinar direcciones de red \cite{cisco}.
+
+El campo de dirección incluye, además del DLCI, tres bits de control de congestión: FECN (\emph{Forward Explicit Congestion Notification}), BECN (\emph{Backward Explicit Congestion Notification}) y DE (\emph{Discard Eligibility}). Los bits C/R y EA completan el campo; este último indica el final del campo de dirección. La figura~\ref{fig:trama} detalla su estructura.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[every node/.style={font=\tiny, inner sep=1pt}]
+        \def\u{0.62}
+        \def\h{0.6}
+        \draw (0,0) rectangle (8*\u,-\h);
+        \draw (0,-\h-0.15) rectangle (8*\u,-2*\h-0.15);
+        \draw (\u,0) -- (\u,-\h);
+        \draw (2*\u,0) -- (2*\u,-\h);
+        \foreach \x in {1,2,3,4,5,6,7} {\draw (\x*\u,-\h-0.15) -- (\x*\u,-2*\h-0.15);}
+        \node at (0.5*\u,-0.5*\h) {EA};
+        \node at (1.5*\u,-0.5*\h) {C/R};
+        \node at (5*\u,-0.5*\h) {DLCI (bits 9--4)};
+        \node at (2*\u,-1.5*\h-0.15) {DLCI (bits 3--0)};
+        \node at (4.5*\u,-1.5*\h-0.15) {FECN};
+        \node at (5.5*\u,-1.5*\h-0.15) {BECN};
+        \node at (6.5*\u,-1.5*\h-0.15) {DE};
+        \node at (7.5*\u,-1.5*\h-0.15) {EA};
+        \node[left=3pt] at (0,-0.5*\h) {Octeto 1:};
+        \node[left=3pt] at (0,-1.5*\h-0.15) {Octeto 2:};
+        \draw[decorate, decoration={brace, amplitude=3pt}] (2*\u,0.05) -- (8*\u,0.05);
+        \node[above=2pt] at (5*\u,0.05) {\scriptsize DLCI $\Rightarrow$ 10 bits};
+    \end{tikzpicture}
+    \caption{Campo de dirección de Frame Relay (dos octetos). El DLCI identifica la conexión virtual local; los bits FECN, BECN y DE transportan la señalización de congestión sin añadir octetos de cabecera.}
+    \label{fig:trama}
+\end{figure}
+
+\subsection{Conexiones virtuales: PVC, SVC y la interfaz LMI}
+
+Frame Relay ofrece su servicio mediante dos tipos de conexiones virtuales. Los \emph{circuitos virtuales permanentes} (PVC) se configuran administrativamente y permanecen activos sin fase de llamada, por lo que son la opción habitual del tráfico corporativo continuo; los \emph{circuitos virtuales conmutados} (SVC), normalizados en Q.933, añaden establecimiento y liberación de llamada para conexiones esporádicas \cite{ituq933, frf10}. Sobre un único puerto físico, un router sostiene simultáneamente centenares de circuitos, cada uno con su DLCI: esa \emph{multiplexación estadística} da a Frame Relay su ventaja económica \cite{buckwalter1999, cisco}.
+
+El protocolo \emph{Local Management Interface} (LMI), extensión ajena al núcleo Q.922, intercambia estado entre DTE y DCE: notifica qué PVC están activos, detecta los inactivos y verifica las direcciones configuradas. Su normalización en 1990 convirtió un conjunto de recetas propietarias en un servicio interoperable \cite{frf1, cisco} y anticipa la separación de planos de datos y de control que hoy caracteriza a MPLS y a SDN.
+
+\subsection{Gestión del tráfico y control de congestión}
+
+Como la red multiplexa tráfico de muchos clientes, debe resolver la sobre-suscripción: el ancho de banda agregado ofrecido suele superar la capacidad real del enlace. Frame Relay lo hace con un contrato de tráfico de tres parámetros (tabla~\ref{tab:cir}): la \emph{Committed Information Rate} (CIR), tasa garantizada; la \emph{Committed Burst Size} (Bc), ráfaga comprometida por intervalo $T_c$ ($CIR = Bc/T_c$); y el \emph{Excess Burst Size} (Be), volumen adicional sin garantía \cite{cisco, stallings2014}. Las tramas dentro del contrato se aceptan; las que exceden la CIR se marcan con $DE=1$ y se vuelven descartables en caso de congestión.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{l l X}
+        \toprule
+        \textbf{Parámetro} & \textbf{Unidad} & \textbf{Significado y efecto} \\
+        \midrule
+        CIR & bit/s & Tasa garantizada por contrato. Define el ancho de banda ``comprometido'' y, en parte, la tarifa. \\
+        Bc  & bits & Ráfaga comprometida por intervalo $T_c$; $CIR = Bc / T_c$. \\
+        Be  & bits & Ráfaga en exceso; su tráfico se marca como descartable (DE) si hay congestión. \\
+        \bottomrule
+    \end{tabularx}
+    \caption{Parámetros del contrato de tráfico en Frame Relay. El exceso sobre la CIR no se rechaza, se degrada mediante el bit DE.}
+    \label{tab:cir}
+\end{table}
+
+Ante la congestión, el protocolo no reserva recursos ni renegocia: \emph{avisa}. Cuando los buffers de un conmutador se saturan, este activa FECN en las tramas que viajan hacia el receptor y BECN en las que viajan hacia el emisor, de modo que los extremos reduzcan su ritmo; si la acumulación persiste, descarta primero las tramas con $DE=1$ \cite{cisco, stallings2014}. El esquema se apoya en la cooperación de los extremos: la red informa, pero no impone el control de flujo, coherente con la filosofía de extremo a extremo. La figura~\ref{fig:congestion} representa esta señalización.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[font=\scriptsize]
+        \node[draw, rounded corners, fill=blue!10, minimum width=2.5cm, minimum height=1cm, align=center] (a) at (0,0) {DTE A\\(emisor)};
+        \node[draw, cloud, cloud puffs=10, cloud puff arc=110, aspect=2.0, fill=gray!12, minimum width=3.2cm, minimum height=1.5cm, align=center] (n) at (4.5,0) {Red FR\\colas};
+        \node[draw, rounded corners, fill=blue!10, minimum width=2.5cm, minimum height=1cm, align=center] (b) at (9,0) {DTE B\\(receptor)};
+        \draw[-{Latex[length=2.5mm]}, thick, orange!85!black] (a.east) to[out=35, in=145] node[above, pos=0.5]{FECN$=1$ (hacia el receptor)} (b.west);
+        \draw[-{Latex[length=2.5mm]}, thick, red!70!black] (b.west) to[out=215, in=325] node[below, pos=0.5]{BECN$=1$ (hacia el emisor)} (a.east);
+        \node at (4.5,-1.7) {\scriptsize DE$=1$: tramas que exceden la CIR se descartan primero};
+    \end{tikzpicture}
+    \caption{Notificación explícita de congestión. La red informa de la congestión mediante bits en la propia trama; son los extremos quienes reducen la tasa de envío.}
+    \label{fig:congestion}
+\end{figure}
+
+% ==========================================
+% ANÁLISIS CRÍTICO
+% ==========================================
+\section{Análisis crítico: eficiencia, compromisos y comparación}
+
+La ventaja de rendimiento frente a X.25 es resultado directo de eliminar el control salto a salto. Al no retener tramas para confirmarlas ni mantener ventanas de enlace, el conmutador reenvía con solo consultar la tabla de DLCI, y el rendimiento deja de estar acotado por el producto ventana--tamaño de paquete que penalizaba a X.25 \cite{tanenbaum2012}. La contrapartida es que Frame Relay \emph{no garantiza} la entrega: es un servicio de mejor esfuerzo que confía la recuperación a los extremos. Para tráfico sobre TCP es transparente y eficiente; para tráfico sin control de transporte ---UDP, voz o datos heredados--- una trama descartada se pierde, lo que obliga a reintroducir fuera de la red la fiabilidad que X.25 ofrecía dentro.
+
+El segundo compromiso es la escalabilidad. Los PVC forman una topología administrativa: para conectividad total (\emph{full mesh}) entre $N$ sitios se requieren $N(N-1)/2$ circuitos configurados uno a uno, esfuerzo que crece cuadráticamente y se vuelve inmanejable en redes de centenares de sucursales \cite{buckwalter1999, cisco}. Frame Relay no dotó a la red de un plano de control dinámico; esa carencia, más que cualquier límite de velocidad, precipitó su reemplazo.
+
+El tercero es la priorización. A diferencia de ATM, que reserva recursos y ofrece garantías de calidad de servicio a costa de una cabecera de 5 octetos sobre 48 (\emph{cell tax} cercano al 10\,\%), Frame Relay no reserva ancho de banda por flujo: solo marca y descarta \cite{stallings2014}. La tabla~\ref{tab:comparacion} contrasta ambas filosofías con X.25 como referencia. Frame Relay ganó en la WAN corporativa por razones económicas ---corría sobre puertos seriales de routers existentes, sin renovar infraestructura--- mientras que ATM quedó relegado a los núcleos de los operadores, donde las garantías en tiempo real justificaban su costo \cite{mcdysan1995}.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{l X X}
+        \toprule
+        & \textbf{X.25} & \textbf{Frame Relay} \\
+        \midrule
+        Niveles & 3 (físico, enlace, paquetes) & 2 (enlace y físico) \\
+        Unidad de datos & Paquete (PLP) dentro de trama LAPB & Trama de longitud variable \\
+        Control de errores & Salto a salto (retransmisión) & Extremo a extremo (descarte) \\
+        Orientación & Circuitos virtuales con señalización & PVC y SVC (Q.933) \\
+        Control de congestión & Ventanas de flujo por nodo & Bits FECN, BECN, DE y CIR \\
+        Máximo rendimiento & Limitado por ventana y latencia por salto & Cercano a la capacidad del enlace \\
+        Diseñado para & Cobre analógico ruidoso & Enlaces digitales de fibra \\
+        \bottomrule
+    \end{tabularx}
+    \caption{Comparación de los supuestos y mecanismos de X.25 y Frame Relay. Cada mecanismo eliminado en Frame Relay corresponde a un supuesto tecnológico que ya no se cumplía.}
+    \label{tab:comparacion}
+\end{table}
+
+% ==========================================
+% IMPACTOS Y ALTERNATIVAS
+% ==========================================
+\section{Impactos técnicos, sociales y éticos, y alternativas}
+
+\textbf{Impacto técnico.} Frame Relay demostró que la complejidad de la red debe justificarse por el contexto: trasladar la fiabilidad a los extremos produjo una mejora de un orden de magnitud en eficiencia y costo \cite{stallings2014, saltzer1984}. En el plano negativo, su modelo asume un sustrato fiable y un transporte que se recupere de las pérdidas; si esas condiciones fallan, el usuario paga las consecuencias. Además, como la red no cifra ni autentica, la confidencialidad queda fuera de su alcance: las tramas circulan en claro y la separación entre PVC es lógica, no criptográfica, de modo que la privacidad depende del operador y de mecanismos externos como IPsec. La simplificación extrema también elimina capacidades de protección, no solo sobrecarga.
+
+\textbf{Impacto social y económico.} La multiplexación estadística redujo drásticamente el costo de la conectividad corporativa: por primera vez una mediana empresa podía interconectar decenas de sucursales con un único acceso, habilitando banca de sucursal, puntos de venta, reservas y comercio electrónico incipiente \cite{buckwalter1999}. En términos de equidad, sin embargo, el beneficio dependió de la infraestructura digital previa: las regiones con fibra y centrales digitalizadas aprovecharon el salto y las demás quedaron rezagadas, de modo que la tecnología amplificó una brecha de inversión más que de capacidad.
+
+\textbf{Impacto ético.} El bit DE introduce un dilema de justicia distributiva que anticipa los debates sobre neutralidad de la red: el operador decide qué tráfico descartar y la CIR determina cuánto se protege, de modo que la calidad efectiva de un mismo servicio depende de lo que cada cliente pague y de criterios de marcado no siempre transparentes \cite{cisco, kurose2017}. Un diseño éticamente sólido exigiría informar con claridad de las políticas de descarte y de los parámetros contratados, medir el cumplimiento de la CIR y ofrecer reclamo verificable. La tecnología no garantiza esa transparencia: la imponen el contrato y la regulación.
+
+\textbf{Alternativas viables.} ATM ofreció garantías de calidad mediante celdas de tamaño fijo, idóneas para voz y video, pero con un costo de cabecera y equipamiento prohibitivo fuera del núcleo \cite{mcdysan1995}. MPLS ---conmutación por etiquetas entre las capas 2 y 3--- conservó el reenvío rápido y la separación de flujos y añadió un plano de control dinámico, resolviendo la escalabilidad de la malla y la ingeniería de tráfico \cite{rfc3031, davie2000}. Las redes Ethernet metropolitanas y las WAN definidas por software (SD-WAN) trasladaron después la conectividad a enlaces IP de propósito general. Estas alternativas no niegan a Frame Relay: lo absorben y le dan continuidad.
+
+% ==========================================
+% LEGADO
+% ==========================================
+\section{Legado: la etiqueta, la notificación y el extremo confiable}
+
+El legado de Frame Relay se despliega en tres planos. \textbf{La conmutación por etiqueta:} reenviar una unidad de datos consultando un identificador corto y local ---el DLCI--- en lugar de una dirección jerárquica es exactamente el principio de MPLS, que puede leerse como un Frame Relay con plano de control; su mecanismo AToM permite incluso encapsular tramas Frame Relay sobre núcleos IP \cite{rfc3031, davie2000}. \textbf{La notificación explícita de congestión:} los bits FECN y BECN introdujeron en 1990 la idea de comunicar la congestión sin descartar paquetes; el principio fue adoptado por Internet en el ECN del RFC~3168, hoy parte de TCP/IP \cite{rfc3168}. \textbf{La fiabilidad en los extremos:} Frame Relay validó industrialmente el argumento de extremo a extremo, al demostrar que, con un sustrato fiable, concentrar la inteligencia en los extremos y simplificar la red no degrada el servicio, sino que lo abarata y acelera \cite{saltzer1984}.
+
+% ==========================================
+% CONCLUSIONES
+% ==========================================
+\section{Conclusiones}
+
+El análisis confirma la tesis: Frame Relay no fue una tecnología menor, sino el eslabón que consumó el tránsito de la red inteligente y fiable ---X.25--- hacia la red neutra que confía la fiabilidad a los extremos. Su arquitectura de dos capas, su DLCI, su multiplexación estadística y su señalización de congestión mediante FECN, BECN y DE son decisiones coherentes con un sustrato digital fiable y con terminales capaces de gestionar sus propios errores. Bajo esos supuestos el diseño fue ejemplar, y su éxito comercial, masivo.
+
+Ese mismo éxito explica su declive: la topología administrativa de PVC escala cuadráticamente, la ausencia de un plano de control dinámico limita la flexibilidad y la falta de seguridad integrada deja la privacidad en manos del operador. La evaluación ética muestra que la simplificación no es neutral: traslada responsabilidades al usuario y concentra en el operador decisiones de priorización que deberían ser transparentes. Las alternativas ---ATM, MPLS, Ethernet metropolitana y SD-WAN--- no reemplazaron a Frame Relay tanto como lo reabsorbieron: heredaron su etiqueta, su señalización de congestión y su principio de extremo a extremo. Comprender Frame Relay es comprender una lección central de las redes de alta velocidad: cada función que la red deja de hacer es una función que alguien, en algún extremo, debe asumir; y decidir quién la asume es, a la vez, una elección de ingeniería y una elección ética.
+
+% ==========================================
+% REFERENCIAS
+% ==========================================
+\begin{thebibliography}{10}
+    \bibitem{ituq922}
+    UIT-T, \textit{Recomendación Q.922: Especificación de la capa de enlace de datos para servicios portadores en modo trama}, Ginebra, 1992.
+
+    \bibitem{ituq933}
+    UIT-T, \textit{Recomendación Q.933: Sistemas de señalización digital de abonado N.º~1 (DSS1) -- Especificación de señalización para el control de conexiones virtuales conmutadas y permanentes en modo trama}, Ginebra, 1995.
+
+    \bibitem{itui233}
+    UIT-T, \textit{Recomendación I.233: Servicios portadores en modo trama}, Ginebra, 1992.
+
+    \bibitem{itux25}
+    UIT-T, \textit{Recomendación X.25: Interfaz entre el equipo terminal de datos (DTE) y el equipo de terminación del circuito de datos (DCE) para terminales que operan en el modo paquete y conectados a una red pública de datos por circuito especial}, Ginebra, 1996.
+
+    \bibitem{ansi1617}
+    ANSI, \textit{T1.617: DSS1 -- Signalling Specification for Frame Relay Bearer Service}, Nueva York, 1991.
+
+    \bibitem{frf1}
+    Frame Relay Forum, \textit{FRF.1.1: User-to-Network Interface (UNI) Implementation Agreement}, 2000.
+
+    \bibitem{frf10}
+    Frame Relay Forum, \textit{FRF.10: Frame Relay Network-to-Network SVC Implementation Agreement}, 1996.
+
+    \bibitem{rybczynski1980}
+    A. Rybczynski, ``X.25 interface and end-to-end virtual circuit service characteristics'', \textit{IEEE Transactions on Communications}, vol.~28, n.º~7, pp.~1153--1161, 1980.
+
+    \bibitem{stallings2014}
+    W. Stallings, \textit{Data and Computer Communications}, 10.ª~ed. Boston: Pearson, 2014.
+
+    \bibitem{tanenbaum2012}
+    A. S. Tanenbaum y D. J. Wetherall, \textit{Redes de Computadoras}, 5.ª~ed. México D.F.: Pearson Educación, 2012.
+
+    \bibitem{kurose2017}
+    J. F. Kurose y K. W. Ross, \textit{Redes de Computadoras: Un enfoque descendente}, 7.ª~ed. México D.F.: Pearson Educación, 2017.
+
+    \bibitem{buckwalter1999}
+    J. T. Buckwalter, \textit{Frame Relay: Technology and Practice}. Reading, MA: Addison-Wesley, 1999.
+
+    \bibitem{mcdysan1995}
+    D. E. McDysan y D. L. Spohn, \textit{ATM: Theory and Application}. Nueva York: McGraw-Hill, 1995.
+
+    \bibitem{davie2000}
+    B. S. Davie y Y. Rekhter, \textit{MPLS: Technology and Applications}. San Francisco: Morgan Kaufmann, 2000.
+
+    \bibitem{rfc3031}
+    E. Rosen, A. Viswanathan y R. Callon, ``Multiprotocol Label Switching Architecture'', RFC 3031, IETF, 2001.
+
+    \bibitem{rfc3168}
+    K. Ramakrishnan, S. Floyd y D. Black, ``The Addition of Explicit Congestion Notification (ECN) to IP'', RFC 3168, IETF, 2001.
+
+    \bibitem{saltzer1984}
+    J. H. Saltzer, D. P. Reed y D. D. Clark, ``End-to-end arguments in system design'', \textit{ACM Transactions on Computer Systems}, vol.~2, n.º~4, pp.~277--288, 1984.
+
+    \bibitem{cisco}
+    Cisco Systems, ``Frame Relay'', en \textit{Internetworking Technology Handbook}, Cisco Press, 2005.
+\end{thebibliography}
+
+\end{document}

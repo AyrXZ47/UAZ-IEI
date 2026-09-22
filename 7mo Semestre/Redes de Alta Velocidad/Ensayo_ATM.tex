@@ -1,0 +1,273 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.symbols,decorations.pathreplacing}
+\usepackage[spanish]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=3cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.12}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{amssymb}
+
+\setlength{\headheight}{14.5pt}
+\setlength{\emergencystretch}{1.5em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textit{Redes de Alta Velocidad}}
+\rhead{\textit{Ensayo -- Protocolo ATM}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\makeatletter
+\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname.\quad}
+\makeatother
+
+\setlist[itemize]{label=\footnotesize$\blacksquare$, itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+\setlist[enumerate]{label=\alph*), itemsep=0.15\baselineskip, topsep=0.5\baselineskip}
+
+\begin{document}
+
+% ==========================================
+% PORTADA
+% ==========================================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\Large\bfseries Universidad Autónoma de Zacatecas\par}
+    \vspace{0.4cm}
+    {\large\bfseries Unidad Académica de Ingeniería Eléctrica\par}
+    {\large\bfseries Ing. Electrónica Industrial con Esp. en Telecomunicaciones\par}
+    \vspace{1.5cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1cm}
+    {\huge\bfseries Ensayo\par}
+    \vspace{0.7cm}
+    {\Large ``ATM: el intento de construir una sola red \\ para voz, datos y video''\par}
+    \vspace{0.6cm}
+    {\normalsize Análisis de la celda de 53 bytes, la calidad de servicio garantizada, \\ su auge en los años noventa y las lecciones de su declive.\par}
+    \vspace{1cm}
+    \noindent\rule{\textwidth}{0.8pt}
+    \vspace{1.8cm}
+
+    \begin{tabular}{r l}
+        \textbf{Materia:}    & Redes de Alta Velocidad \\[0.35cm]
+        \textbf{Actividad:}  & Actividad 06 -- Ensayo analítico de ATM \\[0.35cm]
+        \textbf{Alumno(a):}  & Arnold Yovick Rios Zaldivar \\[0.35cm]
+        \textbf{Matrícula:}  & 35167151 \\[0.35cm]
+        \textbf{Docente:}    & Jose Ricardo Gomez Rodriguez \\[0.35cm]
+        \textbf{Fecha:}      & 22 de septiembre de 2026
+    \end{tabular}
+
+    \vfill
+    Ciclo escolar: Ago--Dic 2026
+    \vspace*{0.5cm}
+\end{titlepage}
+\setcounter{page}{1}
+
+% ==========================================
+% RESUMEN
+% ==========================================
+\section{Resumen}
+
+El presente ensayo analiza el Modo de Transferencia Asíncrona (ATM), elegido por el CCITT en 1988 como base de la Red Digital de Servicios Integrados de Banda Ancha (B-ISDN). Se explica, en lenguaje accesible, por qué ATM usó celdas fijas de 53 octetos, cómo funcionan sus identificadores VPI y VCI, qué son las capas de adaptación (AAL) y cómo sus clases de servicio garantizaban calidad a cada tipo de tráfico. Se sostiene que ATM fue una ingeniería sobresaliente para dar garantías de retardo y ancho de banda, pero que la complejidad de su pila de protocolos y el desperdicio de su celda (el \emph{cell tax}) provocaron su declive; sus ideas, sin embargo, sobreviven en MPLS, DiffServ y las redes móviles 4G y 5G.
+
+\noindent\textbf{Palabras clave:} ATM, B-ISDN, celda de 53 bytes, VPI/VCI, AAL, calidad de servicio, \emph{cell tax}, MPLS.
+
+% ==========================================
+% INTRODUCCIÓN
+% ==========================================
+\section{Introducción}
+
+A mediados de los años ochenta, las comunicaciones estaban divididas en dos formas de enviar información que no se entendían entre sí. Las redes de \emph{conmutación de circuitos}, pensadas para la voz, reservan un camino durante toda la llamada: el retardo es constante y la calidad predecible, pero el canal se desperdicia cuando nadie habla. Las redes de \emph{conmutación de paquetes}, pensadas para los datos, aprovechan mejor el canal, pero el retardo cambia de un paquete a otro y no se puede prometer calidad \cite{tanenbaum2012, stallings2004}.
+
+Con la fibra óptica y los sistemas SONET/SDH el ancho de banda creció muchísimo, pero apareció un cuello de botella: los conmutadores basados en \emph{software} no podían procesar paquetes de tamaño variable a velocidades de gigabit. Se necesitaba una sola red que llevara voz, datos y video con calidad garantizada. Para responder a ello, el CCITT (hoy UIT-T) creó el concepto de B-ISDN y eligió a ATM en 1988 como su tecnología de transporte \cite{itui150, deprycker1995}.
+
+La tesis de este ensayo es que ATM fue una ingeniería brillante para su época, pero cometió el error de querer resolver \emph{todos} los problemas de \emph{todas} las redes; esa ambición, junto con el costo de sus celdas y de su complejidad, provocó su declive, aunque sus ideas sobrevivieron en tecnologías posteriores más simples y económicas.
+
+% ==========================================
+% CONTEXTO HISTÓRICO
+% ==========================================
+\section{Contexto histórico: la apuesta por la banda ancha}
+
+En los años ochenta, la red telefónica ya tenía su núcleo digitalizado con la modulación por impulsos codificados (PCM), que convierte cada voz en un caudal fijo de 64~kbps \cite{schwartz1987}. Sin embargo, los datos viajaban en redes aparte: X.25 para paquetes, líneas dedicadas para enlaces fijos, Frame Relay para conectar sucursales. Cada servicio tenía su red, su interfaz y su inversión; el sueño era una única red que lo integrara todo: la B-ISDN. La fibra óptica hizo posible ese sueño, pero exigía conmutadores capaces de trabajar a velocidades gigabit. ATM nació de esa exigencia, con unidades de datos pequeñas y de tamaño fijo llamadas \emph{celdas}, que permitían construir hardware muy rápido e intercalar voz, datos y video sin que un flujo grande arruinara el retardo de los demás \cite{deprycker1995, mcdysan1995}.
+
+Un episodio de la normalización refleja la tensión entre intereses. En 1989, al definir el tamaño de la celda, los estadounidenses ---Bell Labs y ANSI--- preferían 64 octetos de carga útil, porque así los paquetes de datos llevaban poco encabezado; los europeos ---CNET y las operadoras--- preferían 32, porque a 64~kbps llenar 64 octetos tarda 8~ms y obligaba a canceladores de eco, mientras que 32 octetos tardan 4~ms y el retardo de la voz es imperceptible. La UIT-T resolvió el conflicto con un promedio aritmético: $(32+64)/2 = 48$ octetos de datos, más 5 de encabezado, para un total de \textbf{53 octetos por celda} \cite{deprycker1995, chao2001}. Una decisión que hoy parece técnica fue, en realidad, un compromiso entre la voz europea y los datos estadounidenses.
+
+% ==========================================
+% FUNDAMENTOS TÉCNICOS
+% ==========================================
+\section{Fundamentos técnicos}
+
+\subsection{La celda de 53 bytes: pequeña, fija y rápida}
+
+La pieza básica de ATM es la celda: 5 octetos de encabezado y 48 de carga útil, siempre del mismo tamaño. Que sea fija tiene tres consecuencias. Primero, permite conmutar por hardware: un circuito integrado dedicado (ASIC) sabe exactamente dónde termina una celda y empieza la siguiente. Segundo, reduce el \emph{jitter} (variación del retardo): como ninguna celda ocupa el canal por mucho tiempo, una ráfaga pesada no bloquea a la voz ni al video. Tercero, permite dividir cualquier tráfico en pedazos iguales e intercalarlos ordenadamente \cite{itui361, deprycker1995}. El encabezado, con formatos UNI (usuario--red) y NNI (nodo--nodo), contiene el control de flujo local (GFC), los identificadores de trayecto y canal virtual (VPI y VCI), el tipo de carga útil (PT), la prioridad de pérdida (CLP) y el código HEC, que corrige un bit del encabezado y sincroniza el inicio de la celda. La figura~\ref{fig:celda} muestra la celda completa.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[every node/.style={font=\footnotesize, inner sep=1pt}]
+        \def\h{0.9}
+        \draw[thick] (0,0) rectangle (8.6,\h);
+        \draw[thick] (1.6,0) -- (1.6,\h);
+        \node at (0.8,0.6*\h) [align=center] {\textbf{Encabezado}\\5 octetos};
+        \node at (5.1,0.6*\h) [align=center] {\textbf{Carga útil}\\48 octetos};
+        \foreach \x/\lab in {0.25/GFC, 0.55/VPI, 1.0/VCI, 1.35/PT, 1.50/CLP, 1.70/HEC} {
+            \node[font=\tiny] at (\x,1.12) {\lab};
+        }
+        \draw[decorate, decoration={brace, amplitude=3pt, mirror}] (-0.05,-0.08) -- (1.65,-0.08);
+        \draw[decorate, decoration={brace, amplitude=3pt}] (1.65,-0.08) -- (8.65,-0.08);
+        \node[below=6pt] at (0.8,-0.08) {\scriptsize 5 octetos};
+        \node[below=6pt] at (5.1,-0.08) {\scriptsize 48 octetos};
+        \node at (10.2,0.5*\h) [align=left, font=\small] {53 octetos\\fijos};
+    \end{tikzpicture}
+    \caption{La celda ATM: 5 octetos de encabezado (GFC, VPI, VCI, PT, CLP, HEC) más 48 de carga útil. El tamaño fijo es la clave de la conmutación por hardware.}
+    \label{fig:celda}
+\end{figure}
+
+\subsection{Circuitos virtuales y conmutación por VPI/VCI}
+
+ATM está \emph{orientada a conexión}: antes de enviar datos hay que establecer un camino llamado circuito virtual. Los \emph{circuitos virtuales permanentes} (PVC) los configura a mano el operador y quedan siempre activos; los \emph{conmutados} (SVC) se crean en milisegundos con el protocolo Q.2931, solo cuando se necesitan \cite{ituq2931, deprycker1995}. Lo ingenioso es cómo reenvía las celdas: el conmutador no examina direcciones largas ---como un router IP---, sino que usa una tabla en hardware que combina el puerto de entrada con el VPI y el VCI. Al entrar una celda, lee esos números, consulta la tabla y escribe en ella los valores de salida; como todo se hace en silicio, la conmutación ocurre en nanosegundos y la etiqueta cambia en cada salto \cite{chao2001}.
+
+\subsection{El modelo de capas y las capas de adaptación (AAL)}
+
+ATM define tres planos independientes: el \emph{de usuario}, que transporta la información; el \emph{de control}, que establece y libera las conexiones; y el \emph{de gestión}, que supervisa fallas y rendimiento \cite{itui321}. Sobre la capa ATM se colocan las \emph{capas de adaptación} (AAL), que traducen los protocolos de arriba a celdas de 48 octetos. Las más importantes son AAL1 (emula circuitos T1/E1 y voz PCM de tasa constante), AAL2 (voz comprimida de tasa variable) y AAL5, una capa muy simplificada para tráfico IP y Ethernet que se volvió la más usada \cite{itui363, heinanen1999}.
+
+\subsection{Calidad de servicio: contratos de tráfico}
+
+La mayor fortaleza de ATM fue garantizar calidad de servicio (QoS). Cada conexión firmaba un contrato con la red, que se comprometía a cumplirlo mientras el usuario respetara ciertos límites. Para vigilarlo se usaba el algoritmo GCRA (o \emph{cubo con fuga}), que medía el tráfico en tiempo real y descartaba lo que excedía el contrato \cite{itui371, mcdysan1995}. La tabla~\ref{tab:qos} resume las clases de servicio.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{l X X}
+        \toprule
+        \textbf{Clase} & \textbf{Garantía} & \textbf{Aplicaciones típicas} \\
+        \midrule
+        CBR & Tasa fija; retardo y variación mínimos. & Telefonía, audio sin comprimir, TDM. \\
+        rt-VBR & Tasa media y pico; límites estrictos de retardo. & Videoconferencia, video en vivo. \\
+        nrt-VBR & Ancho de banda promedio; sin límites críticos de retardo. & Transacciones bancarias, bases de datos. \\
+        ABR & Tasa mínima más ajuste por realimentación. & Datos TCP/IP entre redes locales. \\
+        UBR & Sin reserva: ``mejor esfuerzo''. & Navegación web, descarga de archivos. \\
+        \bottomrule
+    \end{tabularx}
+    \caption{Clases de servicio de ATM. La red se comprometía a un retardo y una tasa según la clase contratada.}
+    \label{tab:qos}
+\end{table}
+
+% ==========================================
+% ANÁLISIS CRÍTICO
+% ==========================================
+\section{Análisis crítico: la promesa y el precio}
+
+ATM resolvió un problema real. En 1990, los routers IP basados en CPU colapsaban al pasar de 100~Mbps; ATM demostró que una red podía conmutar por hardware a velocidad de línea, daba retardos predecibles y aprovechaba el canal mejor que la multiplexación por división de tiempo, porque asignaba las ranuras solo cuando había tráfico. Durante unos quince años fue el núcleo de las redes de los operadores: los primeros módems ADSL encapsulaban el tráfico IP en celdas ATM hasta la central (PPPoA, RFC~2364); las estaciones base 2G y 3G se conectaban por enlaces ATM; y las grandes operadoras usaban ATM sobre SONET/SDH como troncal multiservicio \cite{heinanen1999, deprycker1995}.
+
+El problema estaba en el mismo diseño que le daba sus ventajas. Como las celdas son pequeñas y fijas, un paquete grande se llena bien, pero uno pequeño se desperdicia. El caso extremo es el \emph{cell tax}: un acuse de recibo TCP de unos 40 octetos viaja en dos celdas de 53, es decir, 106 octetos para 40 de información útil, más del 60\,\% desperdiciado \cite{chao2001}. Multiplicado por millones de paquetes, ese sobrecosto es inaceptable. A ello se sumó una complejidad enorme: para usar ATM en redes locales hubo que inventar capas como LANE y MPOA, con costos de equipo y operación muy altos \cite{deprycker1995}. La tabla~\ref{tab:comparacion} contrasta las tres tecnologías que compitieron en los noventa.
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{l X X X}
+        \toprule
+        & \textbf{ATM} & \textbf{IP + MPLS} & \textbf{Gigabit Ethernet} \\
+        \midrule
+        Unidad de datos & Celda fija de 53 octetos & Paquete con etiqueta de 4 octetos & Trama variable de 64 a 1518 octetos \\
+        Conmutación & Hardware por VPI/VCI & Hardware de etiquetas & Hardware por dirección MAC \\
+        Costo y complejidad & Muy alto & Moderado & Muy bajo \\
+        QoS nativa & Garantizada por celda & DiffServ + ingeniería de tráfico & Prioridades 802.1p \\
+        Resultado & Relegada a legados & Dominante en el núcleo & Dominante en redes locales \\
+        \bottomrule
+    \end{tabularx}
+    \caption{Batalla tecnológica de los años noventa: ATM frente a IP+MPLS y Gigabit Ethernet. La elegancia teórica de ATM perdió ante la simplicidad y el bajo costo.}
+    \label{tab:comparacion}
+\end{table}
+
+El juicio es equilibrado: ATM \emph{ganó} el debate técnico, pues ninguna rival daba garantías tan finas de retardo, variación y pérdida, pero \emph{perdió} el debate económico y práctico. En ingeniería casi siempre pesa más lo que se puede desplegar barato y rápido que lo que es teóricamente perfecto.
+
+% ==========================================
+% IMPACTOS Y ALTERNATIVAS
+% ==========================================
+\section{Impactos técnicos, sociales y éticos, y alternativas}
+
+\textbf{Impacto técnico.} ATM demostró dos ideas que hoy son sentido común: que la conmutación por etiquetas es mucho más rápida que el enrutamiento tradicional, y que una red puede comprometerse formalmente a un nivel de servicio y vigilar su cumplimiento con algoritmos concretos \cite{chao2001}. Su lección negativa es igual de clara: una tecnología que exige hardware caro y protocolos complejos difícilmente triunfa frente a otra que aprovecha lo que ya existe.
+
+\textbf{Impacto social y económico.} Aunque el usuario final casi nunca vio una tarjeta ATM, esta sostuvo la infraestructura digital de los años noventa y dos mil: la banda ancha por ADSL, la telefonía móvil 2G y 3G y las troncales que conectaban bancos y gobiernos. Facilitó que Internet llegara a más hogares y empresas, aunque su costo benefició sobre todo a las zonas con fibra ya desplegada.
+
+\textbf{Impacto ético.} El bit CLP marca qué celdas pueden descartarse primero, y esa marca la pone la red. Como ocurría con el bit DE de Frame Relay, esto anticipa el debate sobre la neutralidad de la red: si la calidad depende de lo que cada cliente paga, la red debe ser transparente sobre sus reglas de descarte y permitir que se midan. Un diseño ético exige informar con claridad las políticas y ofrecer al usuario una forma de reclamar verificable \cite{kurose2017}.
+
+\textbf{Alternativas viables.} MPLS tomó lo mejor de ATM ---conmutación por etiquetas e ingeniería de tráfico--- sin la celda de 53 bytes ni su complejidad \cite{rfc3031}. Gigabit Ethernet ofreció lo contrario: simplicidad y costo mínimo, pero sin garantías de retardo. La solución que sobrevivió combinó ambas: Ethernet y MPLS en el núcleo, con DiffServ para priorizar voz y video. Estas alternativas no destruyeron a ATM: recogieron sus ideas y las hicieron más simples.
+
+% ==========================================
+% LEGADO
+% ==========================================
+\section{Legado: las ideas que sobrevivieron}
+
+El legado de ATM se despliega en cuatro planos. \textbf{La conmutación por etiquetas:} Ipsilon Networks propuso hacer ``IP switching'' sobre conmutadores ATM, y la IETF tomó esa idea para crear MPLS, es decir, ATM sin impuesto de celda \cite{chao2001, rfc3031}. \textbf{La calidad de servicio:} el modelado de tráfico, el cubo con fuga y el marcado de descarte que ATM definió hoy gobiernan DiffServ y las redes 4G y 5G \cite{itui371, kurose2017}. \textbf{Los acuerdos de nivel de servicio:} ATM enseñó a la industria a redactar contratos con métricas matemáticas de retardo, variación y pérdida, base de los SLA actuales \cite{mcdysan1995}. \textbf{La infraestructura real:} los primeros accesos ADSL, los enlaces de la telefonía móvil 2G/3G y las troncales de los noventa fueron ATM, y eso permitió que Internet creciera antes de que Ethernet y MPLS estuvieran listos para tomar su lugar \cite{heinanen1999}.
+
+% ==========================================
+% CONCLUSIONES
+% ==========================================
+\section{Conclusiones}
+
+El análisis confirma la tesis: ATM fue una ingeniería brillante, pero su ambición de resolver todos los problemas de todas las redes fue a la vez su gloria y su condena. Su celda fija de 53 octetos permitió conmutar por hardware a velocidad de línea, dar retardos predecibles y unir voz, datos y video en una sola red; su modelo de planos, sus capas de adaptación y sus clases de servicio construyeron el concepto moderno de calidad de servicio. Bajo los supuestos de su tiempo, el diseño fue ejemplar y dominó las redes de los operadores durante unos quince años.
+
+Ese mismo diseño cargaba el precio de su caída: el \emph{cell tax} desperdiciaba el canal en paquetes pequeños, la pila de protocolos era costosa y difícil de operar, y no había una forma sencilla de conectarse con mundos ya existentes como Ethernet e IP. Sus rivales no eran técnicamente mejores, pero sí mucho más simples y económicas, y en el mercado de las redes eso suele decidir la batalla. La evaluación ética muestra, además, que decisiones aparentemente técnicas ---como el bit CLP o el tamaño de la celda--- reparten beneficios y responsabilidades entre operador y usuario, y por eso deben ser transparentes. El legado de ATM es, finalmente, más profundo que su uso comercial: MPLS heredó su conmutación por etiquetas; DiffServ y las redes 4G y 5G, su manejo de la congestión; y los acuerdos de nivel de servicio, su rigor matemático. La lección que deja resume la ingeniería de redes de alta velocidad: la elegancia teórica de una arquitectura puede perder ante la simplicidad práctica y el bajo costo del hardware.
+
+% ==========================================
+% REFERENCIAS
+% ==========================================
+\begin{thebibliography}{13}
+    \footnotesize
+    \setlength{\itemsep}{2pt}
+    \setlength{\parskip}{0pt}
+    \bibitem{itui150}
+    UIT-T, \textit{Recomendación I.150: Características funcionales del modo de transferencia asíncrona de la RDSI de banda ancha}, Ginebra, 1999.
+
+    \bibitem{itui361}
+    UIT-T, \textit{Recomendación I.361: Especificación de la capa ATM de la RDSI de banda ancha}, Ginebra, 1999.
+
+    \bibitem{itui321}
+    UIT-T, \textit{Recomendación I.321: Modelo de referencia de protocolo de la RDSI de banda ancha y su aplicación}, Ginebra, 1991.
+
+    \bibitem{itui363}
+    UIT-T, \textit{Recomendación I.363: Especificación de la capa de adaptación ATM (AAL)}, Ginebra, 1993.
+
+    \bibitem{itui371}
+    UIT-T, \textit{Recomendación I.371: Gestión del tráfico y control de congestión en la RDSI de banda ancha}, Ginebra, 2000.
+
+    \bibitem{ituq2931}
+    UIT-T, \textit{Recomendación Q.2931: Sistema de señalización digital de abonado N.º~2 -- Especificación de la capa 3 para el control básico de llamadas}, Ginebra, 1995.
+
+    \bibitem{deprycker1995}
+    M. de Prycker, \textit{Asynchronous Transfer Mode: Solution for Broadband ISDN}, 3.ª~ed. Londres: Prentice Hall International, 1995.
+
+    \bibitem{chao2001}
+    H. J. Chao, C. H. Lam y E. Oki, \textit{Broadband Packet Switching Technologies: A Practical Approach to ATM Switches and IP/MPLS Routers}. Nueva York: Wiley-Interscience, 2001.
+
+    \bibitem{mcdysan1995}
+    D. E. McDysan y D. L. Spohn, \textit{ATM: Theory and Application}. Nueva York: McGraw-Hill, 1995.
+
+    \bibitem{heinanen1999}
+    J. Heinanen, ``Multiprotocol Encapsulation over ATM Adaptation Layer 5'', RFC 1483 / RFC 2684, IETF, 1993/1999.
+
+    \bibitem{rfc3031}
+    E. Rosen, A. Viswanathan y R. Callon, ``Multiprotocol Label Switching Architecture'', RFC 3031, IETF, 2001.
+
+    \bibitem{stallings2004}
+    W. Stallings, \textit{Comunicaciones y Redes de Computadores}, 8.ª~ed. Madrid: Pearson Educación, 2004.
+
+    \bibitem{schwartz1987}
+    M. Schwartz, \textit{Telecommunication Networks: Protocols, Modeling and Analysis}. Reading, MA: Addison-Wesley, 1987.
+
+    \bibitem{tanenbaum2012}
+    A. S. Tanenbaum y D. J. Wetherall, \textit{Redes de Computadoras}, 5.ª~ed. México D.F.: Pearson Educación, 2012.
+
+    \bibitem{kurose2017}
+    J. F. Kurose y K. W. Ross, \textit{Redes de Computadoras: Un enfoque descendente}, 7.ª~ed. México D.F.: Pearson Educación, 2017.
+\end{thebibliography}
+
+\end{document}

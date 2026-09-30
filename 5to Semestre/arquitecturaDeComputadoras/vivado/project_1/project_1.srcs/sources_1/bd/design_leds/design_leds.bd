@@ -1,0 +1,70 @@
+{
+  "design": {
+    "design_info": {
+      "boundary_crc": "0xECBBA07EECBBA07E",
+      "device": "xc7a35tcpg236-1",
+      "gen_directory": "../../../../project_1.gen/sources_1/bd/design_leds",
+      "name": "design_leds",
+      "rev_ctrl_bd_flag": "RevCtrlBdOff",
+      "synth_flow_mode": "Hierarchical",
+      "tool_version": "2026.1",
+      "validated": "true"
+    },
+    "design_tree": {
+      "leds_0": ""
+    },
+    "ports": {
+      "sw": {
+        "direction": "I",
+        "left": "15",
+        "right": "0"
+      },
+      "led": {
+        "direction": "O",
+        "left": "15",
+        "right": "0"
+      }
+    },
+    "components": {
+      "leds_0": {
+        "vlnv": "xilinx.com:module_ref:leds:1.0",
+        "ip_revision": "1",
+        "xci_name": "design_leds_leds_0_0",
+        "xci_path": "ip/design_leds_leds_0_0/design_leds_leds_0_0.xci",
+        "inst_hier_path": "leds_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "leds",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "sw": {
+            "direction": "I",
+            "left": "15",
+            "right": "0"
+          },
+          "led": {
+            "direction": "O",
+            "left": "15",
+            "right": "0"
+          }
+        }
+      }
+    },
+    "nets": {
+      "leds_0_led": {
+        "ports": [
+          "leds_0/led",
+          "led"
+        ]
+      },
+      "sw_0_1": {
+        "ports": [
+          "sw",
+          "leds_0/sw"
+        ]
+      }
+    }
+  }
+}

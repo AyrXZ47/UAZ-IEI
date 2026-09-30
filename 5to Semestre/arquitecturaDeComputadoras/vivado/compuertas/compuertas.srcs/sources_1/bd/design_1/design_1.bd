@@ -1,0 +1,90 @@
+{
+  "design": {
+    "design_info": {
+      "boundary_crc": "0x8F4D097F8F4D097F",
+      "device": "xc7a35tcpg236-1",
+      "gen_directory": "../../../../compuertas.gen/sources_1/bd/design_1",
+      "name": "design_1",
+      "rev_ctrl_bd_flag": "RevCtrlBdOff",
+      "synth_flow_mode": "Hierarchical",
+      "tool_version": "2026.1",
+      "validated": "true"
+    },
+    "design_tree": {
+      "compuertas1_vhd_0": ""
+    },
+    "ports": {
+      "A": {
+        "direction": "I"
+      },
+      "B": {
+        "direction": "I"
+      },
+      "sel": {
+        "direction": "I",
+        "left": "2",
+        "right": "0"
+      },
+      "sal": {
+        "direction": "O"
+      }
+    },
+    "components": {
+      "compuertas1_vhd_0": {
+        "vlnv": "xilinx.com:module_ref:compuertas1_vhd:1.0",
+        "ip_revision": "1",
+        "xci_name": "design_1_compuertas1_vhd_0_0",
+        "xci_path": "ip/design_1_compuertas1_vhd_0_0/design_1_compuertas1_vhd_0_0.xci",
+        "inst_hier_path": "compuertas1_vhd_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "compuertas1_vhd",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "A": {
+            "direction": "I"
+          },
+          "B": {
+            "direction": "I"
+          },
+          "sel": {
+            "direction": "I",
+            "left": "2",
+            "right": "0"
+          },
+          "sal": {
+            "direction": "O"
+          }
+        }
+      }
+    },
+    "nets": {
+      "A_0_1": {
+        "ports": [
+          "A",
+          "compuertas1_vhd_0/A"
+        ]
+      },
+      "B_0_1": {
+        "ports": [
+          "B",
+          "compuertas1_vhd_0/B"
+        ]
+      },
+      "compuertas1_vhd_0_sal": {
+        "ports": [
+          "compuertas1_vhd_0/sal",
+          "sal"
+        ]
+      },
+      "sel_0_1": {
+        "ports": [
+          "sel",
+          "compuertas1_vhd_0/sel"
+        ]
+      }
+    }
+  }
+}

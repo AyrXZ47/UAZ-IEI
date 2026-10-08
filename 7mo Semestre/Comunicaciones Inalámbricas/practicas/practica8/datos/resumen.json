@@ -1,0 +1,138 @@
+{
+  "practicas": {
+    "2": {
+      "distancias": [
+        1.0,
+        2.0,
+        5.0,
+        10.0,
+        15.0,
+        20.0
+      ],
+      "potencias_dB": [
+        -39.661280756578755,
+        -51.43710564409847,
+        -62.35945159642652,
+        -71.50927079196876,
+        -74.08788208278261,
+        -82.35778823854567
+      ],
+      "n_estimado": 3.0632484502142736,
+      "intercepto": -40.71123861016447,
+      "r2": 0.9890243127734188,
+      "desviacion_residuales_dB": 1.5102982175559931,
+      "modo": "simulacion"
+    },
+    "3": {
+      "n": 50,
+      "distancia": 10.0,
+      "mu": -49.22602117462199,
+      "sigma": 5.522290917624815,
+      "mu_fit": -49.22602117462199,
+      "sigma_fit": 5.466789097752344,
+      "p_valor_normalidad": 0.6165742148491546,
+      "sigma_ic95": [
+        4.428933098074346,
+        6.615648737175285
+      ],
+      "modo": "simulacion"
+    },
+    "4": {
+      "frecuencia": 433900000.0,
+      "n_muestras": 4800000,
+      "media": 0.8757572770118713,
+      "std": 0.48275166749954224,
+      "sigma_rayleigh": 0.7071067690849304,
+      "umbral": 0.5,
+      "porcentaje_profundo": 25.992958333333334,
+      "porcentaje_teorico": 22.119922359289912,
+      "modo": "simulacion"
+    },
+    "5": {
+      "modo": "simulacion",
+      "frecuencia_Hz": 433900000.0,
+      "rate_Hz": 240000.0,
+      "dur_s": 5.0,
+      "escenarios": {
+        "estatico": {
+          "fD_estimado_Hz": 1.0390180136293392,
+          "Tc_s": 0.40711517456992,
+          "ancho_PSD_Hz": 0.8483546556506729,
+          "ancho_3dB_Hz": 0.5013745153703483,
+          "ancho_manual_Hz": 252.90887466117198,
+          "n_muestras": 1200000,
+          "fD_teorico_Hz": 0.2
+        },
+        "lento": {
+          "fD_estimado_Hz": 3.0614073705632925,
+          "Tc_s": 0.13817174547475167,
+          "ancho_PSD_Hz": 2.4996286508918684,
+          "ancho_3dB_Hz": 1.308302075999509,
+          "ancho_manual_Hz": 252.9607797850795,
+          "n_muestras": 1200000,
+          "fD_teorico_Hz": 3.0
+        },
+        "rapido": {
+          "fD_estimado_Hz": 12.696193489500045,
+          "Tc_s": 0.03331707258162281,
+          "ancho_PSD_Hz": 10.366398574973642,
+          "ancho_3dB_Hz": 1.5193116071771875,
+          "ancho_manual_Hz": 252.79712153492,
+          "n_muestras": 1200000,
+          "fD_teorico_Hz": 12.0
+        }
+      }
+    },
+    "6": {
+      "LOS": {
+        "potencia_dB": -2.508481502532959,
+        "variacion_espectral_dB": 1.2765984535217285,
+        "Bc_90_Hz": 1171.875,
+        "Bc_50_Hz": 721875.0
+      },
+      "NLOS": {
+        "potencia_dB": 2.5684759616851807,
+        "variacion_espectral_dB": 5.747033596038818,
+        "Bc_90_Hz": 189843.75,
+        "Bc_50_Hz": 623437.5
+      }
+    },
+    "7": {
+      "frecuencia_Hz": 433900000.0,
+      "offset_ruido_Hz": 1000000.0,
+      "banda_Hz": 200000.0,
+      "modo": "sim",
+      "escenarios": {
+        "LOS": {
+          "Ps_dB": 0.04208174300562044,
+          "Pn_dB": -20.004534125439246,
+          "SNR_dB": 20.046615868444867,
+          "C_bps": 1334708.8859126968,
+          "C_kbps": 1334.7088859126968
+        },
+        "NLOS": {
+          "Ps_dB": 0.2619886814146787,
+          "Pn_dB": -12.01681754841001,
+          "SNR_dB": 12.27880622982469,
+          "C_bps": 832373.7216575148,
+          "C_kbps": 832.3737216575148
+        },
+        "lejano": {
+          "Ps_dB": 1.1908074491082707,
+          "Pn_dB": -5.004644714335862,
+          "SNR_dB": 6.195452163444132,
+          "C_bps": 473716.2804950695,
+          "C_kbps": 473.7162804950695
+        }
+      }
+    }
+  },
+  "actividades": [
+    "Perdidas por trayectoria (n)",
+    "Shadowing log-normal (sigma)",
+    "Fading Rayleigh (% profundo)",
+    "Efecto Doppler (fD, Tc)",
+    "Selectividad en frecuencia (Bc)",
+    "Capacidad de canal (C)"
+  ]
+}

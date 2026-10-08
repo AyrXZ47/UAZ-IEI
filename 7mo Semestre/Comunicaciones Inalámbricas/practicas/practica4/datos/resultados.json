@@ -1,0 +1,11 @@
+{
+  "frecuencia": 433900000.0,
+  "n_muestras": 4800000,
+  "media": 0.8757572770118713,
+  "std": 0.48275166749954224,
+  "sigma_rayleigh": 0.7071067690849304,
+  "umbral": 0.5,
+  "porcentaje_profundo": 25.992958333333334,
+  "porcentaje_teorico": 22.119922359289912,
+  "modo": "simulacion"
+}

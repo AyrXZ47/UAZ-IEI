@@ -1,0 +1,24 @@
+#-----------------------------------------------------------
+# Vivado v2026.1 (64-bit)
+# SW Build 6511674 on Tue Jun 16 11:01:26 MDT 2026
+# IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+# SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+# Start of session at: Sat Oct 10 17:24:16 2026
+# Process ID         : 45445
+# Current directory  : /home/yovick/repos/UAZ-IEI/5to Semestre/arquitecturaDeComputadoras/vivado/Press_Div/Press_Div.runs/impl_1
+# Command line       : vivado -log design_1_wrapper.vdi -applog -product Vivado -messageDb vivado.pb -mode batch -source design_1_wrapper.tcl -notrace
+# Log file           : /home/yovick/repos/UAZ-IEI/5to Semestre/arquitecturaDeComputadoras/vivado/Press_Div/Press_Div.runs/impl_1/design_1_wrapper.vdi
+# Journal file       : /home/yovick/repos/UAZ-IEI/5to Semestre/arquitecturaDeComputadoras/vivado/Press_Div/Press_Div.runs/impl_1/vivado.jou
+# Running On         : nixos-laptop
+# Platform           : unknown
+# Operating System   : unknown
+# Processor Detail   : AMD Ryzen 5 PRO 5650U with Radeon Graphics
+# CPU Frequency      : 1397.314 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 15523 MB
+# Swap memory        : 7761 MB
+# Total Virtual      : 23285 MB
+# Available Virtual  : 16499 MB
+#-----------------------------------------------------------
+source design_1_wrapper.tcl -notrace

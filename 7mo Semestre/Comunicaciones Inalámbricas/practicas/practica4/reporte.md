@@ -42,22 +42,22 @@ Para $r_{\text{umbral}} = 0.5$ y $\sigma = 1/\sqrt{2}$ resulta $P = 1 - e^{-0.25
 |---|---|
 | Frecuencia central | **433.9 MHz** (banda ISM; el manual propone 915 MHz y el dongle cubre ambas, pero el transmisor de referencia previsto es un LoRa de 433 MHz) |
 | Sample rate | 2.4 MHz |
-| Muestras por cuadro (`SamplesPerFrame`) | 262 144 |
-| Duración de captura | 2.0 s → **4 800 000 muestras** |
+| Ventana de análisis (`--dur`) | 2.0 s, móvil y actualizada en vivo |
+| Envolvente analizada | ventana de `--dur` segundos decimada 1:1000 |
 | Filtro IF del tuner | 0.6 MHz |
 | Ganancia | automática calibrada (la mayor sin recorte del ADC) |
 | Umbral de fading profundo | 0.5 (relativo al valor RMS normalizado) |
 
-> Nota técnica: la captura usa lectura asíncrona (`comun.capturar`) para no perder muestras; el análisis estadístico se hace sobre **todas** las muestras y solo la gráfica temporal se decima ($r[::100]$) para no saturar la figura.
+> Nota técnica: la lectura es asíncrona (`vivo.Fuente`) para no perder muestras; el análisis estadístico se hace sobre **toda** la ventana móvil y solo la gráfica temporal se decima para no saturar la figura.
 
 ### 3.2 Procedimiento
 
 1. Colocar el transmisor continuo de referencia en una posición fija.
 2. Mantener el receptor en la mano y **caminar lentamente varios metros durante la captura** (velocidad de caminata, ~0.5–1.5 m/s), en un entorno interior con paredes, puertas y mobiliario que generen reflexiones y bloqueos.
-3. Ejecutar `python3 practica4.py` (por defecto: 433.9 MHz, 2 s, umbral 0.5). El script avisa al usuario antes de capturar. Repetir la medición cambiando la ruta para excitar distintas realizaciones del canal.
-4. Sobre la señal capturada el script calcula la envolvente $r=|x|$, la normaliza ($r/\sqrt{\mathrm{mean}(r^2)}$), construye su histograma normalizado a pdf y ajusta una distribución Rayleigh con `scipy.stats.rayleigh.fit(r, floc=0)`.
+3. Ejecutar `python3 practica4.py` (por defecto: 433.9 MHz, ventana de 2 s, umbral 0.5) y caminar con la ventana en vivo abierta: la envolvente y el histograma se actualizan en vivo. Pulsar `ESPACIO` cuando la ventana capturada sirva como medición (queda congelada); repetir cambiando la ruta para excitar distintas realizaciones del canal.
+4. Sobre la ventana móvil el script calcula la envolvente $r=|x|$, la normaliza ($r/\sqrt{\mathrm{mean}(r^2)}$), construye su histograma normalizado a pdf y ajusta una distribución Rayleigh con `scipy.stats.rayleigh.fit(r, floc=0)`.
 5. Cuenta las muestras con $r < 0.5$ y compara el porcentaje con el valor teórico $1-e^{-r_{\text{umbral}}^2/(2\sigma^2)}$ usando el $\sigma$ ajustado.
-6. Guarda figuras en `figs/` y resultados en `datos/resultados.json`.
+6. La tecla `s` guarda las figuras en `figs/` y los resultados en `datos/resultados.json`.
 
 Para verificar el análisis sin hardware pueden usarse `--sim` (fading Rayleigh sintético con correlación temporal) y `--selftest`.
 
@@ -66,15 +66,13 @@ Para verificar el análisis sin hardware pueden usarse `--sim` (fading Rayleigh 
 El script completo está en [`practica4.py`](practica4.py). Fragmentos esenciales:
 
 ```python
-x = comun.capturar(args.freq, n=n, rate=args.rate, ganancia=args.gain)  # [data,len] = rx()
-r = np.abs(x)                                                          # r = abs(data)
-r = r / np.sqrt(np.mean(r ** 2))                                       # r = r./sqrt(mean(r.^2))
+r = self.ventana()                                                     # ESPACIO: |x| normalizada de la ventana móvil
 sigma = rayleigh.fit(r, floc=0)[1]                                     # pd = fitdist(r,'Rayleigh')
 pct = 100 * np.mean(r < args.umbral)                                   # Porcentaje = 100*Ndeep/length(r)
 pct_teorico = 100 * (1 - np.exp(-args.umbral**2 / (2 * sigma**2)))
 ```
 
-En `--sim` el fading se genera filtrando ruido complejo gaussiano con un pasa-bajos (`firwin(129, fd, fs=fs_f)`, $f_d \approx 10$ Hz) y se interpola a la tasa de muestreo; el pipeline posterior es idéntico al de la captura real.
+En `--sim` el fading se genera con `vivo.rayleigh_sim` (suma de sinusoides con $f_d$ ajustable por `--fd`) y el pipeline posterior es idéntico al de la captura real.
 
 ## 5. Resultados
 
@@ -135,4 +133,4 @@ El histograma normalizado a pdf se aproxima a la curva Rayleigh ajustada ($\sigm
 
 ## 8. Conclusiones
 
-Se implementó y verificó un pipeline completo para caracterizar el desvanecimiento Rayleigh con el RTL-SDR: captura IQ, cálculo y normalización de la envolvente, histograma, ajuste `fitdist` Rayleigh, cuantificación del fading profundo y comparación con el modelo teórico. La corrida de verificación en modo simulación produjo $\sigma = 0.7071$, media 0.876 y 25.99 % de muestras bajo 0.5 frente al 22.12 % teórico; las diferencias son compatibles con la correlación temporal y el limitado número efectivo de desvanecimientos en 2 s. Los resultados confirman que, en ausencia de trayectoria directa, la envolvente de un canal multitrayecto sigue aproximadamente una distribución Rayleigh y que el movimiento del receptor en interiores es un mecanismo eficaz para excitar desvanecimientos profundos. Al realizar la práctica con hardware basta ejecutar `python3 practica4.py` y reemplazar las figuras y la tabla de la sección 5 por los datos reales.
+Se implementó y verificó un pipeline completo para caracterizar el desvanecimiento Rayleigh con el RTL-SDR: captura IQ, cálculo y normalización de la envolvente, histograma, ajuste `fitdist` Rayleigh, cuantificación del fading profundo y comparación con el modelo teórico. La corrida de verificación en modo simulación produjo $\sigma = 0.7071$, media 0.876 y 25.99 % de muestras bajo 0.5 frente al 22.12 % teórico; las diferencias son compatibles con la correlación temporal y el limitado número efectivo de desvanecimientos en 2 s. Los resultados confirman que, en ausencia de trayectoria directa, la envolvente de un canal multitrayecto sigue aproximadamente una distribución Rayleigh y que el movimiento del receptor en interiores es un mecanismo eficaz para excitar desvanecimientos profundos. Al realizar la práctica con hardware basta ejecutar `python3 practica4.py` y guardar con `s` para reemplazar las figuras y la tabla de la sección 5 por los datos reales.

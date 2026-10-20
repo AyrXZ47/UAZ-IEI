@@ -60,11 +60,11 @@ de modo que $T_c$ es inversamente proporcional a la velocidad: a mayor movilidad
 | Chip / tuner | RTL2832U / R820T |
 | Frecuencia central | **433.9 MHz** (banda ISM; el manual propone 915 MHz) |
 | Sample rate | 240 kHz (como el manual) |
-| Muestras por escenario | $n = \lfloor 5\,\mathrm{s}\cdot 240\,\mathrm{kHz}\rfloor = 1\,200\,000$ |
-| Filtro IF del tuner | 600 kHz (`comun.capturar`) |
+| Muestras por escenario (ventana móvil `--dur`) | $n = \lfloor 5\,\mathrm{s}\cdot 240\,\mathrm{kHz}\rfloor = 1\,200\,000$ |
+| Filtro IF del tuner | 600 kHz (`--bw`) |
 | Ganancia | `auto`: la mayor que no recorta el ADC (`--gain` permite fijarla) |
 | Antena | telescópica conectada al RX |
-| Captura | asíncrona, sin pérdida de muestras (`comun.capturar`) |
+| Captura | asíncrona, sin pérdida de muestras (`vivo.Fuente`) |
 
 ### 3.2 Escenarios
 
@@ -74,31 +74,31 @@ de modo que $T_c$ es inversamente proporcional a la velocidad: a mayor movilidad
 | `lento` | 3 Hz | Caminar despacio y sostener el paso durante los 5 s de captura |
 | `rapido` | 12 Hz | Caminar rápido y sostener el paso durante los 5 s de captura |
 
-El transmisor CW permanece fijo; solo se mueve el receptor. El modo real pide confirmación por escenario con `input()` y captura `n = int(dur*rate)` muestras con `comun.capturar`. El modo `--sim` genera los mismos escenarios sin dongle y `--selftest` verifica el estimador.
+El transmisor CW permanece fijo; solo se mueve el receptor. El modo real abre la ventana en vivo: el escenario se elige con `1`, `2` o `3` y la medición se fija con `ESPACIO` sobre la ventana móvil de `--dur` segundos. El modo `--sim` genera los mismos escenarios sin dongle y `--selftest` verifica el estimador.
 
 ### 3.3 Procedimiento
 
 1. `python3 practica5.py` (real) o `python3 practica5.py --sim` (sintético).
-2. Por escenario se obtiene la envolvente $r=|x|$ y su PSD con Welch.
+2. Por escenario se acumula la ventana móvil de `--dur` segundos, se obtiene la envolvente $r=|x|$ y su PSD con Welch.
 3. Se estima $f_D$ y se calcula $T_c = 0.423/f_D$.
-4. Se guardan `figs/envolventes.png`, `figs/doppler.png` y `datos/resultados.json`.
+4. La tecla `s` guarda `figs/envolventes.png`, `figs/doppler.png` y `datos/resultados.json`.
 
-**Simulación (`--sim`).** El desvanecimiento se genera con un modelo simplificado de Jakes: ruido complejo gaussiano filtrado pasa-bajos con un FIR de 257 taps cuyo ancho de banda es $f_D$, multiplicado por una portadora compleja constante (equivalente al IQ de una fuente CW). El FIR se aplica a la tasa de la envolvente (240 Hz) porque a 240 kHz un FIR de 257 taps tiene una banda de transición de ≈1.5 kHz, tres órdenes de magnitud mayor que $f_D$; la envolvente resultante se interpola en banda base a 240 kHz mediante relleno de ceros espectral. Se usa una semilla fija (`SEMILLA = 42`) para que los resultados sean reproducibles.
+**Simulación (`--sim`).** Cada escenario se genera con `vivo.ruido_plano`, un desvanecimiento de espectro Doppler plano con ancho `fd` (0.2, 3 y 12 Hz nominales) sintetizado a `max(20·fd, 1 kHz)` y llevado a la tasa del receptor conservando el estado entre bloques, multiplicado por una portadora compleja constante (equivalente al IQ de una fuente CW). Se usa una semilla fija para que los resultados sean reproducibles.
 
 ## 4. Código
 
 El script completo está en [`practica5.py`](practica5.py). Fragmentos esenciales:
 
 ```python
-# Simulación: ruido complejo gaussiano filtrado con FIR de 257 taps a fs_env = 240 Hz
-h = lfilter(firwin(257, fd, fs=fs/L), 1.0, ruido_complejo)[257:]
-h /= np.sqrt(np.mean(np.abs(h)**2))
-x = _interpolar(h, L)[:n] * np.exp(1j*np.pi/4)          # portadora CW constante
+# Simulación: envolvente de espectro Doppler plano (vivo.ruido_plano)
+gen = vivo.ruido_plano(rate, fd=FD_ESC[NOMBRES[self.sel]][0])
+x = gen(n) * np.exp(1j*np.pi/4)                         # portadora CW constante
 
 # PSD de Welch centrada (método del manual para el IQ)
 f_man, P_man = _psd(x, fs, 4096, 2048, 4096)             # welch(x, fs, 4096, 2048, 4096)
 
 # Espectro Doppler de la envolvente (decimada a 240 Hz para resolver pocos Hz)
+L = max(1, int(round(fs / FS_ENV)))
 xd = resample_poly(x, 1, L)
 r = np.abs(xd)
 f_env, P_env = _psd(r - r.mean(), fs/L, 1024, nfft=8192)
@@ -159,7 +159,7 @@ $$f_D = \sqrt{\tfrac{3}{2}}\,\sigma$$
 
 El estimador es lineal con la velocidad (3.06 y 12.70 Hz frente a 3 y 12 Hz nominales) y el cruce crudo de −3 dB se conserva en `datos/resultados.json` como `ancho_3dB_Hz`.
 
-En el escenario estático el valor medido (1.04 Hz) no es el $f_D$ real (0.2 Hz) sino el **piso de resolución del método**: con 5 s de registro solo se observa 1 ciclo de un proceso de 0.2 Hz, y el FIR de 257 taps tampoco puede tener una banda de transición menor que ≈1 Hz. Para medirlo habría que capturar varias decenas de segundos.
+En el escenario estático el valor medido (1.04 Hz) no es el $f_D$ real (0.2 Hz) sino el **piso de resolución del método**: con 5 s de registro solo se observa 1 ciclo de un proceso de 0.2 Hz, y el generador sintético (sintetizado a `max(20·fd, 1 kHz)`) tampoco resuelve esa frecuencia. Para medirlo habría que capturar varias decenas de segundos.
 
 ## 6. Análisis de resultados
 

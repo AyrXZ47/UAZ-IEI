@@ -44,34 +44,31 @@ R^2 = 1-\frac{\sum r_i^2}{\sum (P_i-\bar P)^2}$$
 |---|---|
 | Frecuencia central | **433.9 MHz** (banda ISM, frecuencia del nodo transmisor) |
 | Sample rate | **2.4 MHz** |
-| Muestras por bloque | **4096** (`--frame`) |
-| Bloques por distancia | **10** (`--nmed`) |
+| Muestras por medición | un bloque IQ de 131 072 muestras (`vivo.Fuente.ultimo`) |
+| Mediciones por distancia | las que se registren con `ESPACIO` (10 en el procedimiento) |
 | Ganancias | **auto calibrada**: mayor ganancia del R820T sin recorte del ADC (`comun.fijar_ganancia`) |
-| Distancias | **1, 2, 5, 10, 15 y 20 m** |
-| Captura | asíncrona (`comun.capturar`), sin pérdida de muestras |
+| Distancias | **1, 2, 5, 10, 15 y 20 m** (`--distancias`) |
+| Captura | asíncrona (`vivo.Fuente`), sin pérdida de muestras |
 
 ### 3.2 Procedimiento
 
 1. Conectar el RTL-SDR a la PC y el transmisor LoRa a una fuente estable; fijar el transmisor en una posición y altura constantes.
-2. Ejecutar `python3 practica2.py -f 433.9e6`. Para cada distancia el script pide confirmar con `input()` que el transmisor está colocado a esa distancia.
-3. En cada punto se capturan **10 bloques de 4096 muestras**; por bloque se calcula $P(k)=\text{mean}(|x|^2)$ y la potencia del punto es $P_{dB}=10\log_{10}\!\left(\text{mean}(P(k))\right)$.
-4. Las mediciones se guardan en `datos/mediciones.csv` y el ajuste en `datos/resultados.json`.
-5. El script ajusta la recta, calcula $n$, $R^2$ y los residuales, y genera `figs/pathloss.png` y `figs/residuales.png`.
+2. Ejecutar `python3 practica2.py -f 433.9e6`, que abre una sola ventana en vivo con espectro, cascada, la curva de potencia y sus residuales.
+3. En cada punto se pulsa la tecla de esa distancia (`1..6`) y `ESPACIO` para registrar una medición; se repite 10 veces por distancia.
+4. Cada medición es la potencia del último bloque IQ: $P=10\log_{10}\!\left(\text{mean}(|x|^2)\right)$; el ajuste de la recta se actualiza en vivo y calcula $n$, $R^2$ y los residuales.
+5. La tecla `s` guarda las mediciones en `datos/mediciones.csv`, el ajuste en `datos/resultados.json` y las figuras `figs/pathloss.png` y `figs/residuales.png`.
 6. Entorno de medición previsto: **pasillo del edificio E17-A** (interior con obstáculos), manteniendo visibilidad directa hacia el transmisor, misma orientación de antenas y sin tránsito de personas durante la captura.
 
-> El dongle físico puede estar ocupado; la verificación del script se realizó con `--sim` y `--selftest`, que corren el mismo pipeline de ajuste sin hardware.
+> El dongle físico puede estar ocupado; la verificación del script se realizó con `--sim` (demo automática que recorre distancias y registra mediciones) y `--selftest`, que corren el mismo pipeline de ajuste sin hardware.
 
 ## 4. Código
 
 El script completo está en [`practica2.py`](practica2.py). Fragmentos esenciales:
 
 ```python
-# Adquisición real: P(k) = mean(|data|^2) por bloque
-for i, d in enumerate(distancias):                 # d = [1 2 5 10 15 20]
-    input(f"Transmisor a {d:g} m — Enter para capturar...")
-    for k in range(nmed):                          # Nmed = 10
-        x = comun.capturar(freq, n=frame, ganancia=gain)   # [data,len] = rx()
-        P[i, k] = np.mean(np.abs(x) ** 2)
+# Cada ESPACIO registra P = mean(|data|^2) del último bloque IQ
+P[i].append(comun.potencia_dbfs(self.app.fuente.ultimo))   # P = 10*log10(mean(|x|^2))
+self._actualizar_ajuste()                                   # recta, n y R2 en vivo
 
 # Simulación log-normal: Pr(d) = P0 - 10*n*log10(d) + X_sigma
 return p0 - 10.0 * n_real * np.log10(d)[:, None] + rng.normal(0, sigma, (d.size, nmed))
@@ -84,7 +81,7 @@ n = -p[0] / 10.0                                   # n = -p(1)/10
 
 ## 5. Resultados
 
-> **Los valores de esta sección provienen de la corrida de verificación por simulación (`python3 practica2.py --sim --no-show`), con $P_0=-40$ dB a 1 m, $n_{real}=3.2$ y $\sigma=4$ dB. Son datos sintéticos de verificación y se reemplazarán por los de la corrida real cuando llegue el transmisor LoRa.**
+> **Los valores de esta sección provienen de la corrida de verificación por simulación (`python3 practica2.py --sim`), con $P_0=-40$ dB a 1 m, $n_{real}=3.2$ y $\sigma=4$ dB. Son datos sintéticos de verificación y se reemplazarán por los de la corrida real cuando llegue el transmisor LoRa.**
 
 | Distancia (m) | Potencia (dB) | Observaciones ($\sigma$ de los 10 bloques) |
 |---|---|---|
@@ -134,4 +131,4 @@ n = -p[0] / 10.0                                   # n = -p(1)/10
 
 ## 8. Conclusiones
 
-Se implementó el pipeline completo de medición de pérdidas por trayectoria: captura de 10 bloques de 4096 muestras por distancia, cálculo de potencia, ajuste por mínimos cuadrados de $P_{dB}$ contra $\log_{10}(d)$, estimación de $n$, $R^2$ y residuales, guardado de CSV/JSON y generación de figuras. La corrida de verificación `--sim` (sin hardware) recuperó $n=3.063$ frente al valor nominal $n_{real}=3.2$ ($R^2=0.9890$, residuales de 1.51 dB, consistente con el shadowing promediado), lo que valida el procedimiento. La corrida real queda preparada para ejecutarse con `python3 practica2.py` cuando llegue el transmisor LoRa, y sus datos reemplazarán a los de la tabla anterior.
+Se implementó el pipeline completo de medición de pérdidas por trayectoria: registro de 10 mediciones por distancia con la tecla `ESPACIO`, cálculo de potencia, ajuste por mínimos cuadrados de $P_{dB}$ contra $\log_{10}(d)$, estimación de $n$, $R^2$ y residuales, guardado de CSV/JSON y generación de figuras con `s`. La corrida de verificación `--sim` (sin hardware) recuperó $n=3.063$ frente al valor nominal $n_{real}=3.2$ ($R^2=0.9890$, residuales de 1.51 dB, consistente con el shadowing promediado), lo que valida el procedimiento. La corrida real queda preparada para ejecutarse con `python3 practica2.py` cuando llegue el transmisor LoRa, y sus datos reemplazarán a los de la tabla anterior.

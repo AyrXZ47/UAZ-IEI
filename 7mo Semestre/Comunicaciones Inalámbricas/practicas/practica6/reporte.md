@@ -76,14 +76,16 @@ Se selecciona un entorno interior con abundantes reflectores (pasillo/laboratori
 - **LOS (línea de vista):** transmisor y receptor enfrentados sin obstáculos entre ambos; domina la trayectoria directa y la dispersión temporal es pequeña.
 - **NLOS (sin línea de vista):** se interpone un obstáculo (muro, mobiliario, cambio de pasillo) de modo que la señal llega solo por reflexiones y difracciones; la dispersión temporal aumenta.
 
-En el script, el modo real pide al usuario colocar el receptor en cada escenario y captura con `comun.capturar`:
+En el script, el escenario se elige con `1` (LOS) o `2` (NLOS) y `ESPACIO` captura los últimos `--n` IQ de la fuente en vivo:
 
 ```python
-for esc, desc in (("LOS", "en línea de vista directa"),
-                  ("NLOS", "con obstáculos (sin línea de vista)")):
-    input(f"[{esc}] Coloca el receptor {desc} y pulsa ENTER para capturar... ")
-    capturas[esc] = comun.capturar(args.freq, n=args.n, rate=args.rate,
-                                   ganancia=args.gain)
+def tecla(self, ev):
+    if ev.key == "1":                       # selecciona el escenario
+        self.escenario = "LOS"
+    elif ev.key == "2":
+        self.escenario = "NLOS"
+    elif ev.key == " ":                     # ESPACIO: captura el escenario activo
+        self._medir(self.escenario, self.captura())
 ```
 
 ### 3.3 Procedimiento de análisis (por escenario)
@@ -138,8 +140,8 @@ Ejecución:
 
 ```bash
 python3 practica6.py --selftest        # verificación sin hardware
-python3 practica6.py --sim --no-show   # resultados de verificación por simulación
-python3 practica6.py                   # corrida real: pide LOS y NLOS por consola
+python3 practica6.py --sim             # demo automática de verificación por simulación
+python3 practica6.py                   # corrida real: 1 LOS, 2 NLOS, ESPACIO captura
 ```
 
 ## 5. Resultados

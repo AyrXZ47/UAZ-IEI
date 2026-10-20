@@ -2,12 +2,12 @@
 
 **Materia:** Comunicaciones Inalámbricas
 **Equipo:** RTL-SDR (`RTL2832U` + `R820T`), antena, transmisor de referencia (LoRa 433 MHz / generador RF)
-**Script:** [`practica8.py`](practica8.py) — orquesta las prácticas 2 a 7 y agrega el modelo integral.
+**Script:** [`practica8.py`](practica8.py) — lee los resultados de las prácticas 2 a 7 y agrega el modelo integral.
 
 > **Nota:** los resultados numéricos de este reporte provienen de la corrida de verificación
-> `python3 practica8.py --sim` (datos sintéticos). La campaña real se ejecuta con
-> `python3 practica8.py --real` y regenera automáticamente `datos/resumen.json`; al terminar,
-> se actualizan las tablas de las secciones 6–11 con los valores medidos.
+> `python3 practica8.py --sim` (datos sintéticos). La campaña real requiere haber guardado
+> `practicaN/datos/resultados.json` con la tecla `s` en cada práctica 2–7; `python3 practica8.py`
+> lee esos archivos, escribe `datos/resumen.json` y con él se actualizan las tablas de las secciones 6–11.
 
 ---
 
@@ -39,7 +39,7 @@ El desempeño de un sistema inalámbrico depende de las características del can
 
 ## 4. Metodología
 
-`practica8.py` ejecuta las prácticas 2 a 7 en orden (modo `--sim` o `--real`), cada una guarda sus mediciones y métricas en `practicaN/datos/`, y después agrega todo en `datos/resumen.json`. Cada actividad conserva su propio script y figuras; el proyecto no duplica el procesamiento.
+`practica8.py` no ejecuta las prácticas: lee el `datos/resultados.json` que cada práctica 2–7 guardó al pulsar `s`, verifica que exista y los agrega en `datos/resumen.json`. Con `--sim` construye el mismo resumen a partir de los simuladores de cada práctica, sin leer mediciones. Cada actividad conserva su propio script y figuras; el proyecto no duplica el procesamiento.
 
 Configuración común del receptor: RTL-SDR a la frecuencia del transmisor (433.9 MHz en la campaña prevista), `SampleRate = 2.4 MHz`, ganancia fija calibrada, captura asíncrona sin pérdida de muestras.
 
@@ -120,7 +120,7 @@ La capacidad cae al degradarse el enlace: la SNR pasa de 20 a 6 dB y la capacida
 
 ## 13. Conclusiones
 
-Se integró el modelo completo del canal: pérdidas por trayectoria con n = 3.06, shadowing log-normal con σ = 5.52 dB, desvanecimiento Rayleigh, ensanchamiento Doppler de 1.04 a 12.70 Hz con tiempos de coherencia de 0.41 a 0.03 s, ancho de banda de coherencia del orden de cientos de kHz y capacidad de 0.47 a 1.33 Mbps en 200 kHz. Los scripts de las prácticas 2–7 quedan listos para repetir la campaña con el transmisor real (`practica8.py --real`), momento en el cual este reporte se regenera con los valores medidos.
+Se integró el modelo completo del canal: pérdidas por trayectoria con n = 3.06, shadowing log-normal con σ = 5.52 dB, desvanecimiento Rayleigh, ensanchamiento Doppler de 1.04 a 12.70 Hz con tiempos de coherencia de 0.41 a 0.03 s, ancho de banda de coherencia del orden de cientos de kHz y capacidad de 0.47 a 1.33 Mbps en 200 kHz. Los scripts de las prácticas 2–7 quedan listos para repetir la campaña con el transmisor real; tras guardar cada una con `s`, `python3 practica8.py` regenera `datos/resumen.json` y con él se actualizan las tablas de este reporte.
 
 ## 14. Referencias
 

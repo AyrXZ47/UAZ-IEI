@@ -56,21 +56,23 @@ Para una señal FM, el ancho de banda teórico (Carson) es $B \approx 2(\Delta f
 
 ### 3.3 Procedimiento
 
-1. `python3 practica1.py` captura las muestras IQ y las guarda en `datos/iq.npy`.
-2. Se calculan potencia, FFT y espectrograma.
-3. Se estiman la frecuencia central (centroide del 99 % de la potencia en exceso sobre el piso de ruido) y el ancho de banda ocupado.
-4. Se generan las figuras en `figs/`.
+1. `python3 practica1.py -f 96.5e6` abre una sola ventana en vivo: la fuente recibe IQ de forma asíncrona y la ventana muestra espectro, cascada e I/Q actualizados unas 10 veces por segundo.
+2. La tecla `s` guarda los entregables: las últimas `--muestras` muestras continuas en `datos/iq.npy`, los resultados en `datos/resultados.json` y las figuras en `figs/`; `q` cierra la ventana.
+3. Sobre las muestras guardadas se calculan potencia, FFT y espectrograma.
+4. Se estiman la frecuencia central (centroide del 99 % de la potencia en exceso sobre el piso de ruido) y el ancho de banda ocupado.
 
 ## 4. Código
 
 El script completo está en [`practica1.py`](practica1.py). Fragmentos esenciales:
 
 ```python
-x = comun.capturar(96.5e6, n=131072, rate=2.4e6, ganancia="auto", bw=2.4e6)  # [data,len] = rx()
+def actualizar(self, x, fs, t):               # la ventana la llama ~10 veces/s con el último bloque IQ
+    ...
+x = self.captura()                            # al pulsar s: últimas `--muestras` muestras continuas
 P_dbfs = 10*np.log10(np.mean(np.abs(x)**2))                                   # P = mean(abs(data).^2)
 X = np.fft.fftshift(np.fft.fft(x))                                            # X = fftshift(fft(data))
-f = np.linspace(-Fs/2, Fs/2, x.size)                                          # f = linspace(-Fs/2,Fs/2,N)
-f, t, S = sig.spectrogram(x, fs=Fs, window="hamming", nperseg=1024,
+f = np.linspace(-fs/2, fs/2, x.size)                                          # f = linspace(-Fs/2,Fs/2,N)
+f, t, S = sig.spectrogram(x, fs=fs, window="hamming", nperseg=1024,
                           noverlap=512, nfft=1024, return_onesided=False)     # spectrogram(...,'centered')
 ```
 
@@ -126,4 +128,4 @@ La emisión se mantiene estable durante toda la captura (54.6 ms): no hay saltos
 
 ## 8. Conclusiones
 
-Se configuró el RTL-SDR y se caracterizó una estación FM real en 96.5 MHz. La captura de 131 072 muestras IQ permitió obtener las componentes I/Q, un espectro con la emisora claramente identificable y su espectrograma. La potencia promedio fue −10.18 dBFS, la frecuencia central observada 96.4934 MHz (error de −6.6 kHz por el oscilador del dongle) y el ancho de banda ocupado 147.7 kHz al 99 % de potencia, consistente con una emisión FM comercial de 200 kHz de canal. El procedimiento queda reproducible con `python3 practica1.py` (y verificable sin hardware con `--sim`).
+Se configuró el RTL-SDR y se caracterizó una estación FM real en 96.5 MHz. La captura de 131 072 muestras IQ permitió obtener las componentes I/Q, un espectro con la emisora claramente identificable y su espectrograma. La potencia promedio fue −10.18 dBFS, la frecuencia central observada 96.4934 MHz (error de −6.6 kHz por el oscilador del dongle) y el ancho de banda ocupado 147.7 kHz al 99 % de potencia, consistente con una emisión FM comercial de 200 kHz de canal. El procedimiento queda reproducible con `python3 practica1.py -f 96.5e6` (y verificable sin hardware con `--sim`).

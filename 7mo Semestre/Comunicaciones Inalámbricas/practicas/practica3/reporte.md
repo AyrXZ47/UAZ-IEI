@@ -43,11 +43,11 @@ El ajuste gaussiano se obtiene por máxima verosimilitud con `scipy.stats.norm.f
 |---|---|
 | Frecuencia central | 433.9 MHz (banda ISM de 433 MHz) |
 | Sample rate | 2.4 MSPS |
-| Muestras por medición (`--frame`) | 4096 |
-| Mediciones independientes (`--nmed`) | 50 |
+| Muestras por medición | un bloque IQ de la fuente en vivo |
+| Mediciones independientes | 50 (con `--nmed` solo cambia el tamaño de la demo `--sim`) |
 | Distancia transmisor–receptor (`--distancia`) | 10.0 m |
 | Ganancia (`--gain`) | auto (la mayor que no recorta el ADC) |
-| Pausa entre mediciones (`--pausa`) | 1.0 s |
+| Ritmo entre mediciones | manual: `ESPACIO` en cada posición |
 | Antena | telescópica del RTL-SDR |
 
 ### 3.2 Escenario
@@ -56,18 +56,19 @@ Fuente transmisora fija y distancia constante de 10 m entre transmisor y recepto
 
 ### 3.3 Procedimiento
 
-1. `python3 practica3.py` avisa al usuario que mueva la antena/receptor entre mediciones.
-2. En cada una de las 50 posiciones se captura un frame de 4096 muestras IQ y se calcula $P_r(k) = 10\log_{10}(\text{mean}(|data|^2))$; se imprime el progreso cada 10 mediciones y se espera `--pausa` segundos.
-3. Las 50 mediciones se guardan en `datos/mediciones.csv` (índice y potencia en dB).
-4. Se calculan $\mu$, $\sigma$, el ajuste gaussiano, el intervalo de confianza aproximado de $\sigma$ y la prueba de normalidad; todo se guarda en `datos/resultados.json`.
-5. Se generan `figs/variacion.png` y `figs/histograma.png`.
+1. `python3 practica3.py` abre una sola ventana en vivo con el espectro, la serie de potencias y el histograma con el ajuste gaussiano.
+2. En cada una de las 50 posiciones se pulsa `ESPACIO` para registrar $P_r(k) = 10\log_{10}(\text{mean}(|x|^2))$ del último bloque IQ; `r` reinicia las mediciones.
+3. La tecla `s` guarda las mediciones en `datos/mediciones.csv` (índice y potencia en dB).
+4. Al guardar se calculan $\mu$, $\sigma$, el ajuste gaussiano, el intervalo de confianza aproximado de $\sigma$ y la prueba de normalidad; todo se guarda en `datos/resultados.json`.
+5. La misma tecla `s` genera `figs/variacion.png` y `figs/histograma.png`.
 
 ## 4. Código
 
 El script completo está en [`practica3.py`](practica3.py). Fragmentos esenciales:
 
 ```python
-Pr[k] = comun.potencia_dbfs(comun.capturar(freq, n=frame, ganancia=ganancia))  # [data,len]=rx(); Pr(k)=10*log10(P)
+def tecla(self, ev):                                        # al pulsar ESPACIO
+    self.registrar(comun.potencia_dbfs(self.app.fuente.ultimo))  # Pr(k)=10*log10(P)
 mu, sigma = float(np.mean(Pr)), float(np.std(Pr, ddof=1))                      # mu=mean(Pr); sigma=std(Pr)
 mu_fit, sigma_fit = stats.norm.fit(Pr)                                         # pd=fitdist(Pr,'Normal')
 p = stats.shapiro(Pr).pvalue                                                   # prueba de normalidad
@@ -131,4 +132,4 @@ El histograma normalizado a pdf presenta una forma acampanada, simétrica alrede
 
 ## 8. Conclusiones
 
-Se implementó y verificó el pipeline completo de caracterización del shadowing: adquisición de $N_{med}$ frames IQ a distancia fija, cálculo de $P_r(k) = 10\log_{10}(\text{mean}(|data|^2))$, estimación de $\mu$ y $\sigma$, ajuste gaussiano, prueba de normalidad y visualización. En la verificación por simulación ($\mathcal{N}(-50, 6)$ dB) se obtuvo $\mu = -49.23$ dB, $\sigma = 5.52$ dB, $p = 0.6166$, de modo que las mediciones pasan la prueba de normalidad y el valor de $\sigma$ es consistente con el parámetro simulado y con los rangos típicos de interiores (4–12 dB). El script queda listo para la corrida real (`python3 practica3.py`), donde los archivos `datos/mediciones.csv` y `datos/resultados.json` y las figuras se regenerarán con las 50 posiciones medidas; la validación sin hardware con `python3 practica3.py --selftest` confirma que la lógica estadística es correcta.
+Se implementó y verificó el pipeline completo de caracterización del shadowing: adquisición de $N_{med}$ mediciones IQ a distancia fija con la tecla `ESPACIO`, cálculo de $P_r(k) = 10\log_{10}(\text{mean}(|x|^2))$, estimación de $\mu$ y $\sigma$, ajuste gaussiano, prueba de normalidad y visualización. En la verificación por simulación ($\mathcal{N}(-50, 6)$ dB) se obtuvo $\mu = -49.23$ dB, $\sigma = 5.52$ dB, $p = 0.6166$, de modo que las mediciones pasan la prueba de normalidad y el valor de $\sigma$ es consistente con el parámetro simulado y con los rangos típicos de interiores (4–12 dB). El script queda listo para la corrida real (`python3 practica3.py`), donde los archivos `datos/mediciones.csv` y `datos/resultados.json` y las figuras se regenerarán con las 50 posiciones medidas; la validación sin hardware con `python3 practica3.py --selftest` confirma que la lógica estadística es correcta.

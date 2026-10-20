@@ -37,7 +37,7 @@ Nota: como la captura de señal ya contiene ruido, $\mathrm{SNR} = (S+N)/N$; la 
 | Frecuencia central | 433.9 MHz (banda ISM de la fuente transmisora) |
 | Canal de ruido | 434.9 MHz ($f + 1$ MHz, sin transmisión) |
 | Sample rate | 2.4 MHz |
-| Muestras por captura | 262 144 (≈109 ms) |
+| Muestras por medición | un bloque IQ de la fuente en vivo |
 | Ancho de banda de referencia | $B = 200$ kHz |
 | Filtro IF del tuner | 2.4 MHz (span completo) |
 | Ganancia | fija calibrada ("auto": la mayor sin recorte del ADC) |
@@ -54,20 +54,22 @@ Para cada escenario se realizan dos capturas con la misma configuración del rec
 
 ### 3.4 Procedimiento
 
-1. `python3 practica7.py` solicita confirmación (`input()`) antes de cada escenario y captura señal y ruido con `comun.capturar` (lectura asíncrona, sin perder muestras).
+1. `python3 practica7.py` abre la ventana en vivo: el escenario se elige con `1`, `2` o `3` y `ESPACIO` mide la señal en la frecuencia y el ruido en el canal vecino. La medición retuna la fuente al canal de ruido, toma un bloque y vuelve a la frecuencia de la señal, sin perder muestras.
 2. Se calculan $P_s$, $P_n$, la SNR y $C = B\log_2(1+\mathrm{SNR})$.
 3. Se grafican la curva de Shannon con los puntos experimentales (`figs/shannon.png`) y las potencias por escenario (`figs/potencias.png`).
-4. Se guardan los resultados en `datos/resultados.json`.
-5. `python3 practica7.py --sim --no-show` ejecuta el mismo pipeline sin dongle para verificación; `--selftest` comprueba el estimador de SNR.
+4. La tecla `s` guarda los resultados en `datos/resultados.json`.
+5. `python3 practica7.py --sim` ejecuta el mismo pipeline sin dongle en modo demo automático; `--selftest` comprueba el estimador de SNR.
 
 ## 4. Código
 
 El script completo está en [`practica7.py`](practica7.py). Fragmentos esenciales:
 
 ```python
-# captura real: senal y ruido en canal cercano vacio
-x  = comun.capturar(args.freq, n=args.n, rate=args.rate, ganancia=args.gain)
-xr = comun.capturar(args.freq + args.fnoise, n=args.n, rate=args.rate, ganancia=args.gain)
+# medición real (ESPACIO): señal en la frecuencia y ruido en el canal vecino
+x  = fuente.ultimo
+fuente.sintonizar(self.freq + self.args.fnoise)   # canal vacío
+xr = self.nuevo_bloque()
+fuente.sintonizar(self.freq)                      # vuelve a la señal
 
 Ps  = np.mean(np.abs(x) ** 2)                 # Ps = mean(abs(data).^2)
 Pn  = np.mean(np.abs(xr) ** 2)                # Pn = mean(abs(dataNoise).^2)
@@ -126,4 +128,4 @@ $P_n$ es prácticamente constante entre escenarios (el ruido del receptor no dep
 
 ## 8. Conclusiones
 
-Se implementó un estimador experimental de capacidad de canal basado en $P_s = \mathrm{mean}(|x|^2)$ y $P_n$ medido en un canal vacío cercano. El procedimiento se validó por simulación con SNR conocidas (LOS 20 dB → 1.335 Mbps, NLOS 12 dB → 0.832 Mbps, lejano 5 dB → 0.474 Mbps) y con `--selftest` (estimación de una SNR de 15 dB con error < 1.5 dB). Los resultados confirman la dependencia logarítmica de la capacidad con la SNR y muestran que la distancia y los obstáculos reducen la SNR y, con ella, la capacidad del enlace; la curva de Shannon permite cuantificar ese efecto y sirve de cota para el diseño del sistema. **Los valores presentados son de verificación por simulación y deben reemplazarse con la corrida real**, que es reproducible con `python3 practica7.py` y verificable sin hardware con `python3 practica7.py --sim --no-show`.
+Se implementó un estimador experimental de capacidad de canal basado en $P_s = \mathrm{mean}(|x|^2)$ y $P_n$ medido en un canal vacío cercano. El procedimiento se validó por simulación con SNR conocidas (LOS 20 dB → 1.335 Mbps, NLOS 12 dB → 0.832 Mbps, lejano 5 dB → 0.474 Mbps) y con `--selftest` (estimación de una SNR de 15 dB con error < 1.5 dB). Los resultados confirman la dependencia logarítmica de la capacidad con la SNR y muestran que la distancia y los obstáculos reducen la SNR y, con ella, la capacidad del enlace; la curva de Shannon permite cuantificar ese efecto y sirve de cota para el diseño del sistema. **Los valores presentados son de verificación por simulación y deben reemplazarse con la corrida real**, que es reproducible con `python3 practica7.py` y verificable sin hardware con `python3 practica7.py --sim`.

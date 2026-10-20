@@ -1,47 +1,35 @@
 #!/usr/bin/env python3
 """Practica 4. Caracterizacion experimental del desvanecimiento Rayleigh.
 
-Captura muestras IQ y analiza la envolvente normalizada de la senal recibida:
-  - envolvente en el tiempo (decimada) y desvanecimientos profundos
-  - histograma de amplitudes y ajuste de una distribucion Rayleigh
-  - porcentaje de muestras bajo un umbral (fading profundo)
+Una sola ventana en vivo: espectro y cascada del canal, la envolvente
+normalizada de los ultimos segundos y su histograma con el ajuste Rayleigh.
+Mientras caminas ves el desvanecimiento en tiempo real; ESPACIO lo congela.
+
+Procedimiento:
+    1. Deja el transmisor fijo y camina con el receptor (paredes, puertas, muebles).
+    2. Observa las caidas de la envolvente y el porcentaje de fading profundo.
+    3. Pulsa ESPACIO cuando la ventana capturada te sirva como medicion.
+    4. Pulsa s para guardar figuras y JSON del reporte.
 
 Uso:
-    python3 practica4.py                       # captura real en 433.9 MHz (caminar con el receptor)
-    python3 practica4.py -f 915e6 --dur 5      # otra frecuencia / duracion
-    python3 practica4.py --sim                 # datos sinteticos (sin dongle)
+    python3 practica4.py                       # 433.9 MHz, ventana de 2 s
+    python3 practica4.py -f 915e6 --dur 5 --umbral 0.5
+    python3 practica4.py --sim                 # Rayleigh sintetico con fd=10 Hz
     python3 practica4.py --selftest            # verifica el analisis sin dongle
-    python3 practica4.py --no-show             # solo guarda figuras
+Teclas:  ESPACIO fijar/descongelar   r reiniciar   s guardar   q salir
 """
-import argparse
 import sys
 from pathlib import Path
 
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import comun  # noqa: E402
+import vivo  # noqa: E402
 
 DIR = Path(__file__).resolve().parent
 FIGS, DATOS = DIR / "figs", DIR / "datos"
-MOSTRAR = True
-
-
-def rayleigh_sim(fs, n, fd=10.0, los=0.0, seed=0):
-    """Desvanecimiento Rayleigh con correlacion temporal (fd = Doppler maximo)."""
-    from scipy.signal import firwin, lfilter
-
-    rng = np.random.default_rng(seed)
-    fs_f = 100.0 * fd   # ponytail: 129 taps a fs no resuelven 10 Hz; sintetizar a 100*fd
-    m = int(np.ceil(n * fs_f / fs))
-    h = firwin(129, fd, fs=fs_f)
-    a = lfilter(h, 1.0, (rng.standard_normal(m) + 1j * rng.standard_normal(m)) / np.sqrt(2))
-    a /= np.sqrt(np.mean(np.abs(a) ** 2))
-    if los:
-        a = a + los
-    t = np.linspace(0, m - 1, n)
-    return (np.interp(t, np.arange(m), a.real)
-            + 1j * np.interp(t, np.arange(m), a.imag)).astype(np.complex64)
 
 
 def analizar(r, umbral):
@@ -58,7 +46,7 @@ def analizar(r, umbral):
 def fig_envolvente(r, umbral, ruta):
     import matplotlib.pyplot as plt
 
-    paso = 100
+    paso = max(1, r.size // 4000)
     rd, x = r[::paso], np.arange(0, r.size, paso)
     fig, ax = plt.subplots(figsize=(9, 5))
     ax.plot(x, rd, lw=0.6)
@@ -68,7 +56,7 @@ def fig_envolvente(r, umbral, ruta):
     ax.set_title("Envolvente de la señal recibida")
     ax.grid(alpha=0.3)
     ax.legend()
-    return comun.guardar_fig(fig, ruta, MOSTRAR)
+    return comun.guardar_fig(fig, ruta, False)
 
 
 def fig_histograma(r, sigma, ruta):
@@ -84,7 +72,139 @@ def fig_histograma(r, sigma, ruta):
     ax.set_title("Ajuste Rayleigh")
     ax.grid(alpha=0.3)
     ax.legend()
-    return comun.guardar_fig(fig, ruta, MOSTRAR)
+    return comun.guardar_fig(fig, ruta, False)
+
+
+class P4(vivo.Practica):
+    titulo = "Practica 4 - desvanecimiento Rayleigh"
+    filas = 2
+    alto = [2.0, 1.2, 1.9, 1.9]
+
+    def __init__(self, args):
+        super().__init__(args)
+        self.dur = float(args.dur)
+        self.umbral = float(args.umbral)
+        self.dec = max(1, int(round(args.rate / 2400.0)))
+        self.bloques = []
+        self.total = 0
+        self.fijado = False
+        self.res = None
+        self.ax_env = self.ax_hist = None
+        self.l_env = self.l_hist = self.l_pdf = None
+
+    # -- fuente sintetica ------------------------------------------------
+    def generador_sim(self, rate):
+        return vivo.rayleigh_sim(rate, fd=self.args.fd, los=self.args.los)
+
+    # -- paneles ---------------------------------------------------------
+    def ejes(self, fig, gs, inicio):
+        self.ax_env = fig.add_subplot(gs[inicio])
+        self.ax_env.set_title("Envolvente normalizada (ventana movil)",
+                             fontsize=9, loc="left")
+        self.ax_env.set_xlabel("Tiempo (s)")
+        self.ax_env.set_ylabel("|x| / rms")
+        self.ax_env.grid(alpha=0.25)
+        self.ax_env.set_ylim(0, 3)
+        self.umbral_linea = self.ax_env.axhline(self.umbral, color="#ff2975",
+                                                ls="--", lw=1.0)
+        self.l_env, = self.ax_env.plot([], [], lw=0.7, color="#00e5ff")
+
+        self.ax_hist = fig.add_subplot(gs[inicio + 1])
+        self.ax_hist.set_title("Histograma y ajuste Rayleigh", fontsize=9, loc="left")
+        self.ax_hist.set_xlabel("Amplitud")
+        self.ax_hist.set_ylabel("Densidad")
+        self.ax_hist.grid(alpha=0.25)
+        self.ax_hist.set_xlim(0, 3)
+        self.l_hist, = self.ax_hist.plot([], [], drawstyle="steps-mid", lw=1.1,
+                                         label="Experimental")
+        self.l_pdf, = self.ax_hist.plot([], [], lw=1.8, label="Rayleigh")
+        self.ax_hist.legend(fontsize=7, loc="upper right")
+        return [self.ax_env, self.ax_hist]
+
+    @property
+    def fs(self):
+        return self.app.fs if self.app is not None else self.args.rate
+
+    # -- acumulacion -----------------------------------------------------
+    def _acumular(self, x):
+        r = np.abs(x)[::self.dec]
+        self.bloques.append(r)
+        self.total += r.size
+        tope = int(self.dur * self.fs / self.dec)
+        while self.bloques and self.total - self.bloques[0].size >= tope:
+            self.total -= self.bloques.pop(0).size
+
+    def ventana(self):
+        if not self.bloques:
+            return np.zeros(1)
+        r = np.concatenate(self.bloques)
+        return r / np.sqrt(np.mean(r ** 2) + 1e-20)
+
+    def _refrescar(self):
+        from scipy.stats import rayleigh
+
+        r = self.ventana()
+        self.res = analizar(r, self.umbral)
+        paso = max(1, r.size // 3000)
+        t = np.arange(0, r.size, paso) * self.dec / self.fs
+        self.l_env.set_data(t, r[::paso])
+        self.ax_env.set_xlim(0, max(t[-1] if t.size else 1.0, 0.1))
+        lo, hi = 0.0, min(max(3.0, float(r.max()) * 1.1), 6.0)
+        dens, bordes = np.histogram(np.clip(r, 0, hi), bins=40, range=(lo, hi),
+                                    density=True)
+        self.l_hist.set_data((bordes[:-1] + bordes[1:]) / 2, dens)
+        x = np.linspace(0, hi, 200)
+        self.l_pdf.set_data(x, rayleigh.pdf(x, scale=self.res["sigma"]))
+        self.ax_hist.set_xlim(lo, hi)
+        self.ax_hist.set_ylim(0, max(dens.max(), 1e-3) * 1.35)
+        self.estado = (f"| {'FIJADO ' if self.fijado else ''}N {r.size:6d}   "
+                       f"sigma {self.res['sigma']:.3f}   "
+                       f"profundo {self.res['porcentaje_profundo']:5.2f} %   "
+                       f"teorico {self.res['porcentaje_teorico']:5.2f} %")
+        if self.app is not None:
+            self.app.reencuadrar()
+
+    # -- lazo ------------------------------------------------------------
+    def actualizar(self, x, fs, t):
+        if not self.fijado:
+            self._acumular(x)
+            if self.cada(0.35):
+                self._refrescar()
+
+    def tecla(self, ev):
+        if ev.key == " ":
+            self.fijado = not self.fijado
+            self._refrescar()
+        elif ev.key in ("r", "R"):
+            self.bloques, self.total, self.fijado = [], 0, False
+            for l in (self.l_env, self.l_hist, self.l_pdf):
+                l.set_data([], [])
+
+    def ayuda(self):
+        return "ESPACIO fijar/descongelar   r reiniciar"
+
+    # -- entregables -----------------------------------------------------
+    def guardar(self):
+        r = self.ventana()
+        if r.size < 1000:
+            print("ventana demasiado corta: espera unos segundos")
+            return []
+        res = analizar(r, self.umbral)
+        rutas = [fig_envolvente(r, self.umbral, FIGS / "envolvente.png"),
+                 fig_histograma(r, res["sigma"], FIGS / "histograma_rayleigh.png")]
+        rutas.append(comun.guardar_json(
+            DATOS / "resultados.json", frecuencia=self.freq, n_muestras=int(r.size),
+            media=res["media"], std=res["std"], sigma_rayleigh=res["sigma"],
+            umbral=self.umbral, porcentaje_profundo=res["porcentaje_profundo"],
+            porcentaje_teorico=res["porcentaje_teorico"],
+            modo="simulacion" if self.args.sim else "real"))
+        print(comun.tabla_markdown(
+            ["Frecuencia", "Muestras", "Media", "Desviación", "Fading profundo"],
+            [[f"{self.freq/1e6:.3f} MHz", r.size, f"{res['media']:.4f}",
+              f"{res['std']:.4f}", f"{res['porcentaje_profundo']:.2f} %"]]))
+        print(f"sigma Rayleigh ajustado : {res['sigma']:.4f}")
+        print(f"fading profundo teorico : {res['porcentaje_teorico']:.2f} %")
+        return rutas
 
 
 def selftest():
@@ -99,59 +219,22 @@ def selftest():
     print("practica4 selftest OK")
 
 
-def main():
-    p = argparse.ArgumentParser(description=__doc__,
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("-f", "--freq", type=float, default=433.9e6)
-    p.add_argument("--dur", type=float, default=2.0, help="segundos de captura")
-    p.add_argument("-r", "--rate", type=float, default=comun.RATE_DEF)
-    p.add_argument("--umbral", type=float, default=0.5)
-    p.add_argument("-g", "--gain", default="auto")
-    p.add_argument("--fd", type=float, default=10.0, help="Doppler maximo simulado (Hz)")
-    p.add_argument("--los", type=float, default=0.0, help="componente LOS simulada")
-    p.add_argument("--sim", action="store_true")
-    p.add_argument("--no-show", action="store_true")
-    p.add_argument("--selftest", action="store_true")
-    args = p.parse_args()
-    global MOSTRAR
-    MOSTRAR = not args.no_show
-
+def main(argv=None):
+    args = vivo.parser(
+        __doc__, freq=433.9e6,
+        mas=[("--dur", dict(type=float, default=2.0,
+                            help="ventana movil de analisis (s)")),
+             ("--umbral", dict(type=float, default=0.5,
+                               help="umbral de desvanecimiento profundo")),
+             ("--fd", dict(type=float, default=10.0,
+                           help="Doppler maximo de la simulacion (Hz)")),
+             ("--los", dict(type=float, default=0.0,
+                            help="componente LOS de la simulacion")),
+             ("--selftest", dict(action="store_true"))]).parse_args(argv)
     if args.selftest:
         selftest()
         return 0
-
-    n = int(args.dur * args.rate)
-    if args.sim:
-        x = rayleigh_sim(args.rate, n, fd=args.fd, los=args.los)
-        modo = "simulacion"
-        print(f"modo simulacion: Rayleigh con fd={args.fd:g} Hz, LOS={args.los:g}, {n} muestras")
-    else:
-        print("mueva el receptor (camine) durante la captura para excitar el desvanecimiento")
-        x = comun.capturar(args.freq, n=n, rate=args.rate, ganancia=args.gain)
-        modo = "real"
-        print(f"capturadas {x.size} muestras a {args.freq/1e6:.3f} MHz")
-
-    r = np.abs(x)
-    r = r / np.sqrt(np.mean(r ** 2))
-    res = analizar(r, args.umbral)
-
-    print(comun.tabla_markdown(
-        ["Frecuencia de operación", "Cantidad de muestras", "Media de amplitud",
-         "Desviación estándar", "Porcentaje de fading profundo"],
-        [[f"{args.freq/1e6:.3f} MHz", r.size, f"{res['media']:.4f}",
-          f"{res['std']:.4f}", f"{res['porcentaje_profundo']:.2f} %"]]))
-    print(f"sigma Rayleigh ajustado : {res['sigma']:.4f}")
-    print(f"fading profundo teorico : {res['porcentaje_teorico']:.2f} %")
-
-    fig_envolvente(r, args.umbral, FIGS / "envolvente.png")
-    fig_histograma(r, res["sigma"], FIGS / "histograma_rayleigh.png")
-    comun.guardar_json(DATOS / "resultados.json", frecuencia=args.freq,
-                       n_muestras=int(r.size), media=res["media"], std=res["std"],
-                       sigma_rayleigh=res["sigma"], umbral=args.umbral,
-                       porcentaje_profundo=res["porcentaje_profundo"],
-                       porcentaje_teorico=res["porcentaje_teorico"], modo=modo)
-    print(f"figuras en {FIGS}")
-    return 0
+    return vivo.correr(P4(args), args)
 
 
 if __name__ == "__main__":

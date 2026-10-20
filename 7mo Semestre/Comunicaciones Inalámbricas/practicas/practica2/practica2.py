@@ -1,25 +1,33 @@
 #!/usr/bin/env python3
 """Practica 2. Medicion experimental de perdidas por trayectoria (path loss).
 
-Captura la potencia recibida a varias distancias con el RTL-SDR y ajusta el
-modelo logaritmico  P(d) = P0 - 10*n*log10(d/d0) + X_sigma  por minimos
-cuadrados para estimar el exponente de perdidas n del entorno.
+Una sola ventana en vivo: espectro y cascada del canal, mas la curva de
+potencia contra distancia y sus residuales actualizandose con cada medicion.
+El modelo  P(d) = P0 - 10*n*log10(d/d0) + X_sigma  se ajusta por minimos
+cuadrados en cuanto hay dos distancias medidas.
+
+Procedimiento:
+    1. Deja el transmisor fijo y lleva el receptor a la distancia 1.
+    2. Pulsa la tecla de esa distancia (1..6) para seleccionarla.
+    3. Pulsa ESPACIO para registrar una medicion; repite 10 veces por distancia.
+    4. Pulsa s para guardar figuras, CSV y JSON del reporte.
 
 Uso:
-    python3 practica2.py                          # medicion real a 433.9 MHz
+    python3 practica2.py                          # transmisor en 433.9 MHz
     python3 practica2.py -f 915e6 --distancias 1,2,5,10
-    python3 practica2.py --sim                    # datos sinteticos (sin dongle)
-    python3 practica2.py --selftest               # verifica ajuste sin dongle
-    python3 practica2.py --no-show                # solo guarda figuras
+    python3 practica2.py --sim                    # demo automatica, sin dongle
+    python3 practica2.py --selftest               # verifica el ajuste sin dongle
+Teclas:  1..6 distancia   ESPACIO medir   r reiniciar   s guardar   q salir
 """
-import argparse
 import sys
 from pathlib import Path
 
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import comun  # noqa: E402
+import vivo  # noqa: E402
 
 DIR = Path(__file__).resolve().parent
 FIGS, DATOS = DIR / "figs", DIR / "datos"
@@ -34,18 +42,6 @@ def simular(distancias, nmed, p0=P0_SIM, n_real=N_REAL_SIM, sigma=SIGMA_SIM, see
     rng = np.random.default_rng(seed)
     d = np.asarray(distancias, float)
     return p0 - 10.0 * n_real * np.log10(d)[:, None] + rng.normal(0.0, sigma, (d.size, nmed))
-
-
-def medir_real(distancias, freq, frame, nmed, gain):
-    """Captura nmed bloques de `frame` muestras a cada distancia; potencia lineal P(k)."""
-    P = np.empty((len(distancias), nmed))
-    for i, d in enumerate(distancias):
-        input(f"Transmisor a {d:g} m — Enter para capturar {nmed} bloques de {frame} muestras...")
-        for k in range(nmed):
-            x = comun.capturar(freq, n=frame, ganancia=gain)
-            P[i, k] = np.mean(np.abs(x) ** 2)
-        print(f"  {d:g} m: {10 * np.log10(P[i].mean()):.2f} dB")
-    return P
 
 
 def ajustar(distancias, Pr_dB):
@@ -82,7 +78,7 @@ def fig_pathloss(distancias, Pr_dB, aj, ruta):
     ax.set_title("Pérdidas por trayectoria")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend()
-    return comun.guardar_fig(fig, ruta, MOSTRAR)
+    return comun.guardar_fig(fig, ruta, False)
 
 
 def fig_residuales(distancias, res, sigma, ruta):
@@ -98,18 +94,142 @@ def fig_residuales(distancias, res, sigma, ruta):
     ax.set_title("Residuales del ajuste (Pr − ajuste)")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend()
-    return comun.guardar_fig(fig, ruta, MOSTRAR)
+    return comun.guardar_fig(fig, ruta, False)
 
 
-def reporte(distancias, Pr_dB, M_dB, aj, modo):
-    filas = [(f"{d:g}", f"{pr:.2f}", f"σ = {s:.2f} dB")
-             for d, pr, s in zip(distancias, Pr_dB, M_dB.std(axis=1))]
-    print(comun.tabla_markdown(["Distancia (m)", "Potencia (dB)", "Observaciones"], filas))
-    print(f"\nModo                    : {modo}")
-    print(f"Exponente de pérdidas   : n = {aj['n']:.3f}")
-    print(f"Intercepto (d0 = 1 m)   : {aj['intercepto']:.2f} dB")
-    print(f"Coeficiente R²          : {aj['r2']:.4f}")
-    print(f"Desv. de residuales     : {aj['sigma_res']:.2f} dB")
+class P2(vivo.Practica):
+    titulo = "Practica 2 - perdidas por trayectoria"
+    filas = 2
+    alto = [2.2, 1.3, 2.0, 1.5]
+
+    def __init__(self, args):
+        super().__init__(args)
+        self.d = np.array([float(v) for v in args.distancias.split(",") if v.strip()])
+        if self.d.size == 0:
+            raise SystemExit("--distancias vacio")
+        self.M = {float(dd): [] for dd in self.d}
+        self.sel = 0
+        self.aj = None
+        self.ax_pl = self.ax_res = None
+        self.l_pts = self.l_aj = self.l_res = None
+        self._demo = 0
+
+    # -- paneles ---------------------------------------------------------
+    def ejes(self, fig, gs, inicio):
+        self.ax_pl = fig.add_subplot(gs[inicio])
+        self.ax_pl.set_xlabel("Distancia (m)")
+        self.ax_pl.set_ylabel("P (dBFS)")
+        self.ax_pl.set_title("Perdidas por trayectoria", fontsize=9, loc="left")
+        self.ax_pl.grid(True, which="both", alpha=0.25)
+        self.l_pts, = self.ax_pl.semilogx([], [], "o", ms=8, label="Mediciones")
+        self.l_aj, = self.ax_pl.semilogx([], [], "-", lw=1.6, label="Ajuste LS")
+        self.ax_pl.legend(fontsize=7, loc="upper right")
+
+        self.ax_res = fig.add_subplot(gs[inicio + 1], sharex=self.ax_pl)
+        self.ax_res.set_xlabel("Distancia (m)")
+        self.ax_res.set_ylabel("Residual (dB)")
+        self.ax_res.grid(True, which="both", alpha=0.25)
+        self.l_res, = self.ax_res.semilogx([], [], "o-", ms=5, lw=0.8)
+        self._acomodar()
+        return [self.ax_pl, self.ax_res]
+
+    # -- mediciones ------------------------------------------------------
+    def medias(self):
+        """Distancias medidas, media en dB y cantidad de mediciones."""
+        ds = [dd for dd in self.d if self.M[float(dd)]]
+        if not ds:
+            return np.array([]), np.array([]), 0
+        pr = np.array([np.mean(self.M[float(dd)]) for dd in ds])
+        return np.array(ds), pr, sum(len(self.M[float(dd)]) for dd in ds)
+
+    def registrar(self, pot_db):
+        self.M[float(self.d[self.sel])].append(float(pot_db))
+        self._actualizar_ajuste()
+
+    def _acomodar(self):
+        ds, pr, _ = self.medias()
+        if ds.size >= 2:
+            self.ax_pl.set_xlim(ds.min() * 0.8, ds.max() * 1.25)
+            lo, hi = min(pr.min(), pr.min() - 6), pr.max() + 6
+            self.ax_pl.set_ylim(lo, hi)
+            self.ax_res.set_ylim(-(hi - lo) / 3, (hi - lo) / 3)
+        elif ds.size == 1:
+            self.ax_pl.set_xlim(ds[0] * 0.8, ds[0] * 1.25)
+            self.ax_pl.set_ylim(pr[0] - 10, pr[0] + 10)
+            self.ax_res.set_ylim(-4, 4)
+
+    def _actualizar_ajuste(self):
+        ds, pr, ntot = self.medias()
+        self.l_pts.set_data(ds, pr)
+        if ds.size >= 2:
+            self.aj = ajustar(ds, pr)
+            dd = np.logspace(np.log10(ds.min()), np.log10(ds.max()), 50)
+            self.l_aj.set_data(dd, self.aj["intercepto"] + self.aj["pendiente"] * np.log10(dd))
+            self.l_res.set_data(ds, self.aj["residuales"])
+        self._acomodar()
+        self.estado = (f"| d = {self.d[self.sel]:g} m   medidas {ntot:3d}   "
+                       + (f"n = {self.aj['n']:.2f}  R2 = {self.aj['r2']:.3f}"
+                          if self.aj else "n = -- (mide 2 distancias)"))
+        if self.app is not None:
+            self.app.reencuadrar()
+
+    # -- lazo ------------------------------------------------------------
+    def actualizar(self, x, fs, t):
+        if self.args.sim and self.cada(0.6):      # demo: recorre las distancias
+            pot = float(simular(self.d, 1, seed=self._demo)[self.sel, 0])
+            self._demo += 1
+            self.registrar(pot)
+            self.sel = (self.sel + 1) % self.d.size
+        elif not self.args.sim:
+            self.estado = (f"| d = {self.d[self.sel]:g} m   "
+                           f"P {comun.potencia_dbfs(x):6.2f} dBFS   "
+                           + (f"n = {self.aj['n']:.2f}  R2 = {self.aj['r2']:.3f}"
+                              if self.aj else "n = --"))
+
+    def tecla(self, ev):
+        if ev.key == " ":
+            if self.args.sim:
+                self.registrar(float(simular(self.d, 1, seed=self._demo)[self.sel, 0]))
+                self._demo += 1
+            else:
+                self.registrar(comun.potencia_dbfs(self.app.fuente.ultimo))
+        elif ev.key.isdigit() and 1 <= int(ev.key) <= self.d.size:
+            self.sel = int(ev.key) - 1
+            self._actualizar_ajuste()
+        elif ev.key in ("r", "R"):
+            self.M = {float(dd): [] for dd in self.d}
+            self.aj = None
+            for l in (self.l_pts, self.l_aj, self.l_res):
+                l.set_data([], [])
+            self._actualizar_ajuste()
+
+    def ayuda(self):
+        return "1..6 distancia   ESPACIO medir   r reiniciar"
+
+    # -- entregables -----------------------------------------------------
+    def guardar(self):
+        ds, pr, _ = self.medias()
+        if ds.size < 2:
+            print("faltan mediciones: mide al menos 2 distancias")
+            return []
+        M_lin = [10 ** (np.array(self.M[float(dd)]) / 10) for dd in ds]
+        aj = ajustar(ds, pr)
+        guardar_csv(ds, M_lin)
+        rutas = [fig_pathloss(ds, pr, aj, FIGS / "pathloss.png"),
+                 fig_residuales(ds, aj["residuales"], aj["sigma_res"], FIGS / "residuales.png")]
+        rutas.append(comun.guardar_json(
+            DATOS / "resultados.json", distancias=[float(v) for v in ds],
+            potencias_dB=[float(v) for v in pr], n_estimado=aj["n"],
+            intercepto=aj["intercepto"], r2=aj["r2"],
+            desviacion_residuales_dB=aj["sigma_res"],
+            modo="simulacion" if self.args.sim else "real"))
+        filas = [(f"{dd:g}", f"{p:.2f}", f"σ = {np.std(self.M[float(dd)]):.2f} dB")
+                 for dd, p in zip(ds, pr)]
+        print(comun.tabla_markdown(["Distancia (m)", "Potencia (dB)", "Observaciones"], filas))
+        print(f"Exponente de perdidas : n = {aj['n']:.3f}")
+        print(f"Intercepto (d0 = 1 m) : {aj['intercepto']:.2f} dB")
+        print(f"Coeficiente R2        : {aj['r2']:.4f}")
+        return rutas
 
 
 def selftest():
@@ -120,53 +240,15 @@ def selftest():
     print("practica2 selftest OK")
 
 
-def main():
-    p = argparse.ArgumentParser(description=__doc__,
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("-f", "--freq", type=float, default=433.9e6)
-    p.add_argument("--distancias", default="1,2,5,10,15,20")
-    p.add_argument("--nmed", type=int, default=10, help="bloques por distancia")
-    p.add_argument("--frame", type=int, default=4096, help="muestras por bloque")
-    p.add_argument("--gain", default="auto")
-    p.add_argument("--sim", action="store_true")
-    p.add_argument("--selftest", action="store_true")
-    p.add_argument("--no-show", action="store_true")
-    args = p.parse_args()
-    global MOSTRAR
-    MOSTRAR = not args.no_show
-
+def main(argv=None):
+    args = vivo.parser(
+        __doc__, freq=433.9e6,
+        mas=[("--distancias", dict(default="1,2,5,10,15,20")),
+             ("--selftest", dict(action="store_true"))]).parse_args(argv)
     if args.selftest:
         selftest()
         return 0
-
-    d = np.array([float(v) for v in args.distancias.split(",") if v.strip()])
-    if args.sim:
-        modo = "simulacion"
-        M_dB = simular(d, args.nmed)
-        M_lin = 10.0 ** (M_dB / 10.0)
-        Pr_dB = M_dB.mean(axis=1)
-        print(f"Modo simulación: P0 = {P0_SIM:g} dB a 1 m, "
-              f"n_real = {N_REAL_SIM}, σ = {SIGMA_SIM:g} dB "
-              f"({args.nmed} bloques por distancia)")
-    else:
-        modo = "real"
-        print(f"Frecuencia del transmisor: {args.freq / 1e6:.3f} MHz")
-        M_lin = medir_real(d, args.freq, args.frame, args.nmed, args.gain)
-        M_dB = 10.0 * np.log10(M_lin)
-        Pr_dB = 10.0 * np.log10(M_lin.mean(axis=1))
-
-    aj = ajustar(d, Pr_dB)
-    guardar_csv(d, M_lin)
-    fig_pathloss(d, Pr_dB, aj, FIGS / "pathloss.png")
-    fig_residuales(d, aj["residuales"], aj["sigma_res"], FIGS / "residuales.png")
-    comun.guardar_json(DATOS / "resultados.json",
-                       distancias=[float(v) for v in d],
-                       potencias_dB=[float(v) for v in Pr_dB],
-                       n_estimado=aj["n"], intercepto=aj["intercepto"], r2=aj["r2"],
-                       desviacion_residuales_dB=aj["sigma_res"], modo=modo)
-    reporte(d, Pr_dB, M_dB, aj, modo)
-    print(f"\nfiguras en {FIGS}")
-    return 0
+    return vivo.correr(P2(args), args)
 
 
 if __name__ == "__main__":

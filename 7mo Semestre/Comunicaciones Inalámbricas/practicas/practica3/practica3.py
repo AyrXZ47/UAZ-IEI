@@ -1,42 +1,34 @@
 #!/usr/bin/env python3
 """Practica 3. Caracterizacion experimental del shadowing log-normal.
 
-Mide la potencia recibida Pr(k) = 10*log10(mean(|data|^2)) en Nmed posiciones
-independientes a distancia fija (10 m recomendados), estima la media mu y la
-desviacion sigma del shadowing, ajusta una normal y verifica su normalidad.
+Una sola ventana en vivo: espectro y cascada del canal, la serie de potencias
+medidas y su histograma con el ajuste gaussiano, todo actualizandose con cada
+medicion.  Se estima mu, sigma sigma del shadowing y la normalidad (Shapiro-Wilk).
+
+Procedimiento:
+    1. Deja el transmisor fijo a ~10 m y conserva esa distancia.
+    2. Pulsa ESPACIO en cada posicion nueva (pasillo, pared, puerta, con gente).
+    3. Pulsa s para guardar figuras, CSV y JSON del reporte.
 
 Uso:
-    python3 practica3.py                       # 50 mediciones reales a 433.9 MHz
-    python3 practica3.py -f 433.9e6 -d 10 -n 50 --frame 4096 --pausa 1
-    python3 practica3.py --sim                 # datos sinteticos (sin dongle)
+    python3 practica3.py                       # 433.9 MHz, distancia 10 m
+    python3 practica3.py -d 15 -f 915e6        # otra distancia / frecuencia
+    python3 practica3.py --sim                 # demo automatica, sin dongle
     python3 practica3.py --selftest            # verifica el analisis sin dongle
-    python3 practica3.py --no-show             # solo guarda figuras
+Teclas:  ESPACIO medir   r reiniciar   s guardar   q salir
 """
-import argparse
 import sys
-import time
 from pathlib import Path
 
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import comun  # noqa: E402
+import vivo  # noqa: E402
 
 DIR = Path(__file__).resolve().parent
 FIGS, DATOS = DIR / "figs", DIR / "datos"
-
-
-def medir_real(nmed, frame, freq, ganancia, pausa):
-    print("Mueva la antena/receptor entre mediciones (pasillo, interior de oficina,")
-    print("paredes, puertas, con y sin personas), conservando ~10 m al transmisor.")
-    Pr = np.empty(nmed)
-    for k in range(nmed):
-        Pr[k] = comun.potencia_dbfs(comun.capturar(freq, n=frame, ganancia=ganancia))
-        if (k + 1) % 10 == 0 or k == nmed - 1:
-            print(f"  medicion {k + 1:3d}/{nmed}: {Pr[k]:7.2f} dB")
-        if k < nmed - 1:
-            time.sleep(pausa)
-    return Pr
 
 
 def medir_sim(nmed, mu=-50.0, sigma=6.0, seed=0):
@@ -73,7 +65,7 @@ def fig_variacion(Pr, ruta):
     ax.set_ylabel("Potencia (dB)")
     ax.set_title("Variación de potencia recibida")
     ax.grid(alpha=0.3)
-    return comun.guardar_fig(fig, ruta, MOSTRAR)
+    return comun.guardar_fig(fig, ruta, False)
 
 
 def fig_histograma(Pr, mu_fit, sigma_fit, ruta):
@@ -89,7 +81,130 @@ def fig_histograma(Pr, mu_fit, sigma_fit, ruta):
     ax.set_title("Modelo gaussiano del shadowing")
     ax.grid(alpha=0.3)
     ax.legend()
-    return comun.guardar_fig(fig, ruta, MOSTRAR)
+    return comun.guardar_fig(fig, ruta, False)
+
+
+class P3(vivo.Practica):
+    titulo = "Practica 3 - shadowing log-normal"
+    filas = 2
+    alto = [2.2, 1.3, 1.8, 1.9]
+
+    def __init__(self, args):
+        super().__init__(args)
+        self.distancia = float(args.distancia)
+        self.nmax = int(args.nmed)
+        self.Pr = []
+        self.res = None
+        self.ax_serie = self.ax_hist = None
+        self.l_serie = self.l_hist = self.l_pdf = None
+        self._demo = 0
+
+    def ejes(self, fig, gs, inicio):
+        self.ax_serie = fig.add_subplot(gs[inicio])
+        self.ax_serie.set_xlabel("Medicion")
+        self.ax_serie.set_ylabel("P (dBFS)")
+        self.ax_serie.set_title(f"Potencia recibida a {self.distancia:g} m",
+                                fontsize=9, loc="left")
+        self.ax_serie.grid(alpha=0.25)
+        self.ax_serie.set_xlim(1, max(10, self.nmax))
+        self.l_serie, = self.ax_serie.plot([], [], "o-", ms=4, lw=0.9)
+
+        self.ax_hist = fig.add_subplot(gs[inicio + 1])
+        self.ax_hist.set_xlabel("Potencia (dBFS)")
+        self.ax_hist.set_ylabel("Densidad")
+        self.ax_hist.set_title("Histograma y ajuste gaussiano (shadowing)",
+                               fontsize=9, loc="left")
+        self.ax_hist.grid(alpha=0.25)
+        self.l_hist, = self.ax_hist.plot([], [], drawstyle="steps-mid", lw=1.2,
+                                         label="Mediciones")
+        self.l_pdf, = self.ax_hist.plot([], [], lw=1.8, label="N(mu, sigma)")
+        self.ax_hist.legend(fontsize=7, loc="upper right")
+        return [self.ax_serie, self.ax_hist]
+
+    def registrar(self, pot_db):
+        if len(self.Pr) < 2000:
+            self.Pr.append(float(pot_db))
+        self._refrescar()
+
+    def _refrescar(self):
+        from scipy import stats
+
+        Pr = np.array(self.Pr)
+        self.l_serie.set_data(np.arange(1, Pr.size + 1), Pr)
+        if Pr.size >= 3:
+            self.res = analizar(Pr)
+            lo, hi = Pr.min() - 1, Pr.max() + 1
+            dens, bordes = np.histogram(Pr, bins=10, range=(lo, hi), density=True)
+            self.l_hist.set_data((bordes[:-1] + bordes[1:]) / 2, dens)
+            x = np.linspace(lo, hi, 200)
+            self.l_pdf.set_data(x, stats.norm.pdf(x, self.res["mu_fit"],
+                                                  self.res["sigma_fit"]))
+            self.ax_hist.set_xlim(lo, hi)
+            self.ax_hist.set_ylim(0, max(dens.max(), 1e-3) * 1.35)
+            self.ax_serie.set_xlim(1, max(10, Pr.size + 1))
+            self.ax_serie.set_ylim(Pr.min() - 4, Pr.max() + 4)
+            self.estado = (f"| N {Pr.size:3d}   mu {self.res['mu']:6.2f} dB   "
+                           f"sigma {self.res['sigma']:5.2f} dB   "
+                           f"p {self.res['p_valor_normalidad']:.2f}")
+        else:
+            self.estado = f"| N {Pr.size:3d}   (necesita 3 mediciones)"
+        if self.app is not None:
+            self.app.reencuadrar()
+
+    def actualizar(self, x, fs, t):
+        if self.args.sim and self.cada(0.5) and len(self.Pr) < self.nmax:
+            self.registrar(medir_sim(1, seed=self._demo)[0])
+            self._demo += 1
+        elif not self.args.sim:
+            extra = (f"   mu {self.res['mu']:.1f} dB" if self.res else "")
+            self.estado = (f"| N {len(self.Pr):3d}   "
+                           f"P {comun.potencia_dbfs(x):6.2f} dBFS{extra}")
+
+    def tecla(self, ev):
+        if ev.key == " ":
+            if self.args.sim:
+                self.registrar(medir_sim(1, seed=self._demo)[0])
+                self._demo += 1
+            else:
+                self.registrar(comun.potencia_dbfs(self.app.fuente.ultimo))
+        elif ev.key in ("r", "R"):
+            self.Pr, self.res = [], None
+            for l in (self.l_serie, self.l_hist, self.l_pdf):
+                l.set_data([], [])
+            self._refrescar()
+
+    def ayuda(self):
+        return "ESPACIO medir   r reiniciar"
+
+    def guardar(self):
+        Pr = np.array(self.Pr)
+        if Pr.size < 3:
+            print("faltan mediciones: usa ESPACIO al menos 3 veces")
+            return []
+        res = analizar(Pr)
+        DATOS.mkdir(parents=True, exist_ok=True)
+        np.savetxt(DATOS / "mediciones.csv", np.c_[np.arange(1, Pr.size + 1), Pr],
+                   delimiter=",", header="indice,potencia_dB", comments="",
+                   fmt=["%d", "%.4f"])
+        rutas = [fig_variacion(Pr, FIGS / "variacion.png"),
+                 fig_histograma(Pr, res["mu_fit"], res["sigma_fit"],
+                                FIGS / "histograma.png")]
+        rutas.append(comun.guardar_json(
+            DATOS / "resultados.json", n=int(Pr.size), distancia=self.distancia,
+            mu=res["mu"], sigma=res["sigma"], mu_fit=res["mu_fit"],
+            sigma_fit=res["sigma_fit"], p_valor_normalidad=res["p_valor_normalidad"],
+            sigma_ic95=res["sigma_ic95"],
+            modo="simulacion" if self.args.sim else "real"))
+        print(f"Prueba de normalidad (Shapiro-Wilk): p = "
+              f"{res['p_valor_normalidad']:.4f}")
+        print(f"IC 95 % aprox. para sigma: [{res['sigma_ic95'][0]:.2f}, "
+              f"{res['sigma_ic95'][1]:.2f}] dB")
+        print(comun.tabla_markdown(["Parámetro", "Valor"], [
+            ["Media µ (dB)", f"{res['mu']:.2f}"],
+            ["Desviación σ (dB)", f"{res['sigma']:.2f}"],
+            ["N mediciones", int(Pr.size)],
+            ["Entorno", entorno_de(res["sigma"])]]))
+        return rutas
 
 
 def selftest():
@@ -100,57 +215,17 @@ def selftest():
     print("practica3 selftest OK")
 
 
-def main():
-    p = argparse.ArgumentParser(description=__doc__,
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("-f", "--freq", type=float, default=433.9e6)
-    p.add_argument("-d", "--distancia", type=float, default=10.0)
-    p.add_argument("-n", "--nmed", type=int, default=50)
-    p.add_argument("--frame", type=int, default=4096, help="muestras por medicion")
-    p.add_argument("--pausa", type=float, default=1.0, help="segundos entre mediciones")
-    p.add_argument("-g", "--gain", default="auto")
-    p.add_argument("--sim", action="store_true")
-    p.add_argument("--no-show", action="store_true")
-    p.add_argument("--selftest", action="store_true")
-    args = p.parse_args()
-    global MOSTRAR
-    MOSTRAR = not args.no_show
-
+def main(argv=None):
+    args = vivo.parser(
+        __doc__, freq=433.9e6,
+        mas=[(("-d", "--distancia"), dict(type=float, default=10.0)),
+             (("-n", "--nmed"), dict(type=int, default=50,
+                                     help="mediciones de la demo --sim")),
+             ("--selftest", dict(action="store_true"))]).parse_args(argv)
     if args.selftest:
         selftest()
         return 0
-
-    DATOS.mkdir(parents=True, exist_ok=True)
-    if args.sim:
-        Pr = medir_sim(args.nmed)
-        modo = "simulacion"
-        print(f"modo simulacion: {args.nmed} muestras N(-50, 6) dB")
-    else:
-        Pr = medir_real(args.nmed, args.frame, args.freq, args.gain, args.pausa)
-        modo = "real"
-    np.savetxt(DATOS / "mediciones.csv", np.c_[np.arange(1, Pr.size + 1), Pr],
-               delimiter=",", header="indice,potencia_dB", comments="",
-               fmt=["%d", "%.4f"])
-
-    res = analizar(Pr)
-    comun.guardar_json(DATOS / "resultados.json", n=int(Pr.size),
-                       distancia=args.distancia, mu=res["mu"], sigma=res["sigma"],
-                       mu_fit=res["mu_fit"], sigma_fit=res["sigma_fit"],
-                       p_valor_normalidad=res["p_valor_normalidad"],
-                       sigma_ic95=res["sigma_ic95"], modo=modo)
-    fig_variacion(Pr, FIGS / "variacion.png")
-    fig_histograma(Pr, res["mu_fit"], res["sigma_fit"], FIGS / "histograma.png")
-
-    print(f"\nPrueba de normalidad (Shapiro-Wilk): p = {res['p_valor_normalidad']:.4f}")
-    print(f"IC 95 % aprox. para sigma: [{res['sigma_ic95'][0]:.2f}, "
-          f"{res['sigma_ic95'][1]:.2f}] dB")
-    print(comun.tabla_markdown(["Parámetro", "Valor"], [
-        ["Media µ (dB)", f"{res['mu']:.2f}"],
-        ["Desviación σ (dB)", f"{res['sigma']:.2f}"],
-        ["N mediciones", int(Pr.size)],
-        ["Entorno", entorno_de(res["sigma"])]]))
-    print(f"\nfiguras en {FIGS}")
-    return 0
+    return vivo.correr(P3(args), args)
 
 
 if __name__ == "__main__":

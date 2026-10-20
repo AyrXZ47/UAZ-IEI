@@ -1,14 +1,15 @@
 {
   "LOS": {
-    "potencia_dB": -2.508481502532959,
-    "variacion_espectral_dB": 1.2765984535217285,
+    "potencia_dB": -2.501258611679077,
+    "variacion_espectral_dB": 1.2588831186294556,
     "Bc_90_Hz": 1171.875,
-    "Bc_50_Hz": 721875.0
+    "Bc_50_Hz": 711328.125
   },
   "NLOS": {
-    "potencia_dB": 2.5684759616851807,
-    "variacion_espectral_dB": 5.747033596038818,
-    "Bc_90_Hz": 189843.75,
-    "Bc_50_Hz": 623437.5
-  }
+    "potencia_dB": 1.968780517578125,
+    "variacion_espectral_dB": 6.743863582611084,
+    "Bc_90_Hz": 198046.875,
+    "Bc_50_Hz": 618750.0
+  },
+  "modo": "simulacion"
 }

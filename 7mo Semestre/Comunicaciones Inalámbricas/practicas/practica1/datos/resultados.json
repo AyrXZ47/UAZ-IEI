@@ -1,7 +1,7 @@
 {
-  "frecuencia_Hz": 96500000.0,
+  "frecuencia_Hz": 106500000.0,
   "n_muestras": 131072,
-  "potencia_dbfs": -10.184951782226562,
-  "offset_centro_Hz": -6559.51603988026,
-  "ancho_banda_Hz": 147656.25
+  "potencia_dbfs": 0.013675229623913765,
+  "offset_centro_Hz": 29692.80191696559,
+  "ancho_banda_Hz": 168164.0625
 }

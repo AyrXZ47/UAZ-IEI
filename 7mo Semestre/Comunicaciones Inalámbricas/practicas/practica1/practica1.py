@@ -1,48 +1,34 @@
 #!/usr/bin/env python3
 """Practica 1. Introduccion al RTL-SDR y analisis espectral de senales inalambricas.
 
-Captura muestras IQ de una estacion FM comercial y obtiene:
+Una sola ventana en vivo (espectro, cascada e I/Q), audio FM sonando al mismo
+tiempo y los entregables del reporte guardados con la tecla `s`:
   - componentes I y Q en el tiempo
   - potencia promedio recibida
-  - espectro (FFT)
+  - espectro (FFT) y frecuencia central / ancho de banda observados
   - espectrograma
-  - frecuencia central y ancho de banda observados
 
 Uso:
-    python3 practica1.py                       # captura real en 96.5 MHz
-    python3 practica1.py -f 93.3e6 -n 65536    # otra estacion / otra longitud
-    python3 practica1.py --sim                 # datos sinteticos (sin dongle)
+    python3 practica1.py                       # estacion FM en 106.5 MHz
+    python3 practica1.py -f 93.3e6             # otra estacion
+    python3 practica1.py --sin-audio           # solo analisis en vivo
+    python3 practica1.py --sim                 # sin dongle (FM sintetica)
     python3 practica1.py --selftest            # verifica el analisis sin dongle
-    python3 practica1.py --no-show             # solo guarda figuras
+Teclas:  s guardar entregables   q cerrar
 """
-import argparse
 import sys
 from pathlib import Path
 
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import comun  # noqa: E402
+import vivo  # noqa: E402
 
 DIR = Path(__file__).resolve().parent
 FIGS, DATOS = DIR / "figs", DIR / "datos"
-
-
-def fm_sintetica(fs, n, f0=30e3, dev=75e3, snr_db=25.0, seed=0):
-    """Estacion FM sintetica (audio de banda limitada) para pruebas sin antena."""
-    from scipy.signal import firwin, lfilter
-
-    rng = np.random.default_rng(seed)
-    audio = lfilter(firwin(129, 15e3, fs=fs), 1.0, rng.standard_normal(n))
-    audio /= np.sqrt(np.mean(audio ** 2))
-    audio = np.tanh(audio)                    # audio tipo radiodifusion (RMS/pico ~0.6)
-    audio /= np.max(np.abs(audio))            # desviacion pico = dev
-    t = np.arange(n) / fs
-    fase = 2 * np.pi * f0 * t + 2 * np.pi * dev * np.cumsum(audio) / fs
-    x = np.exp(1j * fase)
-    ruido = (rng.standard_normal(n) + 1j * rng.standard_normal(n)) / np.sqrt(2)
-    x = x + ruido * 10 ** (-snr_db / 20)
-    return x.astype(np.complex64)
+N_LIVE = 1024          # muestras de I/Q dibujadas en vivo
 
 
 def centro_y_ancho(f, P, umbral_db=3.0, fraccion=0.99):
@@ -103,7 +89,7 @@ def fig_iq(x, fs, ruta):
     a2.set_xlabel("Tiempo (ms)")
     fig.suptitle("Muestras IQ de la estacion FM")
     fig.tight_layout()
-    return comun.guardar_fig(fig, ruta, MOSTRAR)
+    return comun.guardar_fig(fig, ruta, False)
 
 
 def fig_espectro(f, psd_db, freq, ruta):
@@ -115,7 +101,7 @@ def fig_espectro(f, psd_db, freq, ruta):
     ax.set_ylabel("Magnitud (dB)")
     ax.set_title("Espectro de la senal (FFT)")
     ax.grid(alpha=0.3)
-    return comun.guardar_fig(fig, ruta, MOSTRAR)
+    return comun.guardar_fig(fig, ruta, False)
 
 
 def fig_espectrograma(x, fs, freq, ruta):
@@ -134,72 +120,122 @@ def fig_espectrograma(x, fs, freq, ruta):
     ax.set_ylabel("Frecuencia (MHz)")
     ax.set_title("Espectrograma")
     fig.colorbar(m, ax=ax, label="PSD (dB)")
-    return comun.guardar_fig(fig, ruta, MOSTRAR)
+    return comun.guardar_fig(fig, ruta, False)
 
 
-def reporte_consola(res, freq):
-    print(f"Frecuencia sintonizada : {freq/1e6:.3f} MHz")
-    print(f"Muestras               : {res['n_muestras']}")
-    print(f"Potencia promedio      : {res['potencia_dbfs']:.2f} dBFS")
-    print(f"Frecuencia central obs.: {(freq + res['offset_centro_Hz'])/1e6:.4f} MHz "
-          f"(offset {res['offset_centro_Hz']/1e3:+.1f} kHz)")
-    print(f"Ancho de banda (99%)   : {res['ancho_banda_Hz']/1e3:.1f} kHz")
+class P1(vivo.Practica):
+    titulo = "Practica 1 - analisis espectral"
+    filas = 1
+    alto = [2.2, 1.6, 1.7]
+    audio = True                 # es una estacion FM: aqui si se escucha
+
+    def __init__(self, args):
+        super().__init__(args)
+        self.n = int(args.muestras)
+        self.bloques = []
+        self.total = 0
+        self.ax_t = None
+        self.lineas = []
+
+    def ejes(self, fig, gs, inicio):
+        self.ax_t = fig.add_subplot(gs[inicio])
+        self.ax_t.set_xlim(0, N_LIVE)
+        self.ax_t.set_ylim(-1.1, 1.1)
+        self.ax_t.set_ylabel("IQ")
+        self.ax_t.set_xlabel("Muestra (ventana en vivo)")
+        self.ax_t.grid(alpha=0.25)
+        self.lineas = [self.ax_t.plot(np.zeros(N_LIVE), lw=0.8, color="#00e5ff")[0],
+                       self.ax_t.plot(np.zeros(N_LIVE), lw=0.8, color="#ff2975")[0]]
+        self.ax_t.legend(["I", "Q"], loc="upper right", fontsize=8)
+        return [self.ax_t]
+
+    def _acumular(self, x):
+        self.bloques.append(x)
+        self.total += x.size
+        while self.bloques and self.total - self.bloques[0].size >= self.n:
+            self.total -= self.bloques.pop(0).size
+
+    def captura(self):
+        """Ultimas `n` muestras continuas (lo que va al reporte)."""
+        if not self.bloques:
+            return np.zeros(self.n, np.complex64)
+        return np.concatenate(self.bloques)[-self.n:]
+
+    def actualizar(self, x, fs, t):
+        self._acumular(x)
+        i, q = x.real[:N_LIVE], x.imag[:N_LIVE]
+        if i.size < N_LIVE:                     # ultimo bloque incompleto
+            i, q = np.resize(i, N_LIVE), np.resize(q, N_LIVE)
+        self.lineas[0].set_ydata(i)
+        self.lineas[1].set_ydata(q)
+        app = self.app
+        pdb = app.pdb if app is not None else None
+        if pdb is not None:
+            centro, ancho = centro_y_ancho(app.f_mhz * 1e6, 10 ** (pdb / 10))
+            pot = float(np.mean(np.abs(x) ** 2))
+            self.estado = (f"| P {10*np.log10(pot + 1e-20):5.1f} dBFS  "
+                           f"fc {(self.freq + centro)/1e6:8.4f} MHz  "
+                           f"B99 {ancho/1e3:5.1f} kHz")
+
+    def ayuda(self):
+        return ""
+
+    def guardar(self):
+        x = self.captura()
+        res = analizar(x, self.app.fs)
+        rutas = [
+            fig_iq(x, self.app.fs, FIGS / "iq_temporal.png"),
+            fig_espectro(res["f"], res["PSD_dB"], self.freq, FIGS / "espectro.png"),
+            fig_espectrograma(x, self.app.fs, self.freq, FIGS / "espectrograma.png"),
+        ]
+        np.save(DATOS / "iq.npy", x)
+        rutas.append(comun.guardar_json(
+            DATOS / "resultados.json", frecuencia_Hz=self.freq,
+            n_muestras=res["n_muestras"], potencia_dbfs=res["potencia_dbfs"],
+            offset_centro_Hz=res["offset_centro_Hz"],
+            ancho_banda_Hz=res["ancho_banda_Hz"]))
+        print(f"Frecuencia sintonizada : {self.freq/1e6:.3f} MHz")
+        print(f"Muestras               : {res['n_muestras']}")
+        print(f"Potencia promedio      : {res['potencia_dbfs']:.2f} dBFS")
+        print(f"Frecuencia central obs.: "
+              f"{(self.freq + res['offset_centro_Hz'])/1e6:.4f} MHz "
+              f"(offset {res['offset_centro_Hz']/1e3:+.1f} kHz)")
+        print(f"Ancho de banda (99%)   : {res['ancho_banda_Hz']/1e3:.1f} kHz")
+        return rutas
 
 
 def selftest():
     fs, n = 2.4e6, 1 << 18
-    x = fm_sintetica(fs, n, f0=30e3)
+    x = vivo.fm_sintetica(fs, n, f0=30e3)
     res = analizar(x, fs)
     assert abs(res["offset_centro_Hz"] - 30e3) < 8e3, res["offset_centro_Hz"]
     assert 100e3 < res["ancho_banda_Hz"] < 350e3, res["ancho_banda_Hz"]
     p = comun.potencia_dbfs(x)
     assert -30 < p < 5, p
+    # la cadena de audio del motor debe seguir demodulando el tono de prueba
+    fs_a, fm, dev = 2.4e6, 1000.0, 75e3
+    t = np.arange(int(fs_a)) / fs_a
+    y = np.exp(2j * np.pi * (100e3 * t + dev / fm * np.sin(2 * np.pi * fm * t)))
+    proc, out = vivo.make_audio(240e3, 5)
+    ch = vivo.make_channelizer(fs_a, 10)(y.astype(np.complex64))
+    a = proc(vivo.fm_demod(ch)).astype(np.float32) / 32767
+    F = np.abs(np.fft.rfft(a * np.hanning(a.size)))
+    fr = np.fft.rfftfreq(a.size, 1 / out)
+    assert abs(fr[np.argmax(F)] - fm) < 20, fr[np.argmax(F)]
+    assert 0.05 < np.sqrt(np.mean(a ** 2)) < 1.0
     print("practica1 selftest OK")
 
 
-def main():
-    p = argparse.ArgumentParser(description=__doc__,
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("-f", "--freq", type=float, default=96.5e6)
-    p.add_argument("-n", type=int, default=1 << 17, help="muestras a capturar")
-    p.add_argument("-r", "--rate", type=float, default=comun.RATE_DEF)
-    p.add_argument("-g", "--gain", default="auto")
-    p.add_argument("-b", "--bw", type=float, default=2.4e6, help="filtro IF del tuner")
-    p.add_argument("--sim", action="store_true")
-    p.add_argument("--no-show", action="store_true")
-    p.add_argument("--selftest", action="store_true")
-    args = p.parse_args()
-    global MOSTRAR
-    MOSTRAR = not args.no_show
-
+def main(argv=None):
+    args = vivo.parser(
+        __doc__, freq=106.5e6,
+        mas=[(("-n", "--muestras"), dict(type=int, default=1 << 17,
+                                        help="muestras del reporte guardado")),
+             ("--selftest", dict(action="store_true"))]).parse_args(argv)
     if args.selftest:
         selftest()
         return 0
-
-    if args.sim:
-        x = fm_sintetica(args.rate, args.n, f0=30e3)
-        print("modo simulacion: estacion FM sintetica a +30 kHz")
-    else:
-        info = comun.info_dispositivo()
-        print(f"Dispositivo: RTL2832U / {info['tuner']}  "
-              f"({info['frecuencia_min_Hz']/1e6:.0f}-{info['frecuencia_max_Hz']/1e6:.0f} MHz)")
-        x = comun.capturar(args.freq, n=args.n, rate=args.rate,
-                           ganancia=args.gain, bw=args.bw)
-        np.save(DATOS / "iq.npy", x)
-        print(f"capturadas {x.size} muestras a {args.freq/1e6:.3f} MHz")
-
-    res = analizar(x, args.rate)
-    reporte_consola(res, args.freq)
-    fig_iq(x, args.rate, FIGS / "iq_temporal.png")
-    fig_espectro(res["f"], res["PSD_dB"], args.freq, FIGS / "espectro.png")
-    fig_espectrograma(x, args.rate, args.freq, FIGS / "espectrograma.png")
-    comun.guardar_json(DATOS / "resultados.json", frecuencia_Hz=args.freq,
-                       n_muestras=res["n_muestras"],
-                       potencia_dbfs=res["potencia_dbfs"],
-                       offset_centro_Hz=res["offset_centro_Hz"],
-                       ancho_banda_Hz=res["ancho_banda_Hz"])
-    print(f"figuras en {FIGS}")
-    return 0
+    return vivo.correr(P1(args), args)
 
 
 if __name__ == "__main__":

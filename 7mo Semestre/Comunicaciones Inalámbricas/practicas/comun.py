@@ -1,12 +1,11 @@
 """Utilidades compartidas de las practicas de Comunicaciones Inalambricas.
 
-Captura IQ del RTL-SDR (lectura asincrona, sin perder muestras) y graficas con
-el estilo obligatorio del repo (mplcyberpunk).
+Conversion IQ de bytes, ganancia del tuner, PSD de Welch, graficas con el estilo
+obligatorio del repo (mplcyberpunk) y salida de resultados (JSON, tablas).
+La captura en vivo la hace `vivo.Fuente` (lectura asincrona, sin perder muestras).
 """
 import json
 import sys
-import threading
-import time
 from pathlib import Path
 
 import numpy as np
@@ -59,52 +58,6 @@ def info_dispositivo():
         info["tuner"] = "desconocido"
     sdr.close()
     return info
-
-
-def capturar(freq, n=262144, rate=RATE_DEF, ganancia="auto", bw=BW_IF_DEF, ppm=0.0):
-    """Captura n muestras IQ a la frecuencia dada (lectura asincrona).
-
-    Devuelve un arreglo complex64.  Lanza RuntimeError si no hay dongle.
-    """
-    from rtlsdr import RtlSdr
-
-    sdr = RtlSdr()
-    sdr.sample_rate = rate
-    sdr.center_freq = freq
-    if ppm:
-        sdr.freq_correction = int(ppm)
-    if bw:
-        try:
-            sdr.set_bandwidth(bw)
-        except Exception:
-            pass
-    fijar_ganancia(sdr, ganancia)
-
-    partes, listo = [], threading.Event()
-    total = [0]
-
-    def cb(raw, ctx):
-        x = bytes_a_iq(raw)
-        partes.append(x)
-        total[0] += x.size
-        if total[0] >= n:
-            listo.set()
-
-    def leer():
-        try:
-            sdr.read_bytes_async(cb, 2 * min(n, 65536))
-        except Exception:
-            pass
-
-    hilo = threading.Thread(target=leer, daemon=True)
-    hilo.start()
-    listo.wait(timeout=n / rate * 3 + 5)
-    sdr.cancel_read_async()
-    hilo.join(timeout=2)
-    sdr.close()
-    if total[0] < n:
-        raise RuntimeError(f"solo se capturaron {total[0]} de {n} muestras")
-    return np.concatenate(partes)[:n].astype(np.complex64)
 
 
 def potencia_dbfs(x):

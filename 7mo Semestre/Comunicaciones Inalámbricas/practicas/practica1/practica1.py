@@ -9,7 +9,7 @@ tiempo y los entregables del reporte guardados con la tecla `s`:
   - espectrograma
 
 Uso:
-    python3 practica1.py                       # estacion FM en 106.5 MHz
+    python3 practica1.py                       # estacion FM en 91.5 MHz
     python3 practica1.py -f 93.3e6             # otra estacion
     python3 practica1.py --sin-audio           # solo analisis en vivo
     python3 practica1.py --sim                 # sin dongle (FM sintetica)
@@ -228,7 +228,7 @@ def selftest():
 
 def main(argv=None):
     args = vivo.parser(
-        __doc__, freq=106.5e6,
+        __doc__, freq=91.5e6,
         mas=[(("-n", "--muestras"), dict(type=int, default=1 << 17,
                                         help="muestras del reporte guardado")),
              ("--selftest", dict(action="store_true"))]).parse_args(argv)

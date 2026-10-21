@@ -46,7 +46,7 @@ Para una señal FM, el ancho de banda teórico (Carson) es $B \approx 2(\Delta f
 
 | Parámetro | Valor |
 |---|---|
-| Frecuencia central | **96.5 MHz** (estación FM más fuerte del sitio; 100.5 MHz del manual no tiene emisora en esta ubicación) |
+| Frecuencia central | **91.5 MHz** (estación FM más fuerte del sitio según el barrido de la banda con `escaner.py`; 100.5 MHz del manual no tiene emisora en esta ubicación) |
 | Sample rate | 2.4 MHz |
 | Muestras capturadas | 131 072 (≈ 54.6 ms) |
 | Filtro IF del tuner | 2.4 MHz (span completo) |
@@ -56,7 +56,7 @@ Para una señal FM, el ancho de banda teórico (Carson) es $B \approx 2(\Delta f
 
 ### 3.3 Procedimiento
 
-1. `python3 practica1.py -f 96.5e6` abre una sola ventana en vivo: la fuente recibe IQ de forma asíncrona y la ventana muestra espectro, cascada e I/Q actualizados unas 10 veces por segundo.
+1. `python3 practica1.py` abre una sola ventana en vivo: la fuente recibe IQ de forma asíncrona y la ventana muestra espectro, cascada e I/Q actualizados unas 10 veces por segundo.
 2. La tecla `s` guarda los entregables: las últimas `--muestras` muestras continuas en `datos/iq.npy`, los resultados en `datos/resultados.json` y las figuras en `figs/`; `q` cierra la ventana.
 3. Sobre las muestras guardadas se calculan potencia, FFT y espectrograma.
 4. Se estiman la frecuencia central (centroide del 99 % de la potencia en exceso sobre el piso de ruido) y el ancho de banda ocupado.
@@ -82,11 +82,11 @@ f, t, S = sig.spectrogram(x, fs=fs, window="hamming", nperseg=1024,
 
 | Parámetro | Valor |
 |---|---|
-| Frecuencia sintonizada | 96.500 MHz |
+| Frecuencia sintonizada | 91.500 MHz |
 | Muestras | 131 072 |
-| Potencia promedio recibida | **−10.18 dBFS** |
-| Frecuencia central observada | **96.4934 MHz** (offset −6.6 kHz) |
-| Ancho de banda ocupado (99 % de potencia) | **147.7 kHz** |
+| Potencia promedio recibida | **−1.62 dBFS** |
+| Frecuencia central observada | **91.5012 MHz** (offset +1.2 kHz) |
+| Ancho de banda ocupado (99 % de potencia) | **171.1 kHz** |
 
 ### 5.2 Componentes I y Q
 
@@ -98,7 +98,7 @@ Las componentes I y Q oscilan alrededor de cero con amplitud similar; su evoluci
 
 ![Espectro](figs/espectro.png)
 
-Se observa el "hump" de la señal FM centrado en 96.5 MHz, con un ancho de aproximadamente 150–200 kHz, sobre un piso de ruido aproximadamente 15–20 dB más abajo.
+Se observa el "hump" de la señal FM centrado en 91.5 MHz, con un ancho de aproximadamente 170 kHz, sobre un piso de ruido claramente más abajo.
 
 ### 5.4 Espectrograma
 
@@ -109,8 +109,8 @@ La emisión se mantiene estable durante toda la captura (54.6 ms): no hay saltos
 ## 6. Análisis de resultados
 
 - La potencia medida (−10.2 dBFS) es alta porque la escala del RTL-SDR es relativa a fondo de escala del ADC; no es una potencia absoluta en dBm. Para comparar con un modelo de propagación habría que calibrar el receptor.
-- La frecuencia central observada difiere en −6.6 kHz de la sintonizada. Es un error relativo de ≈ 68 ppm, atribuible al oscilador de cristal del dongle (los RTL-SDR sin TCXO tienen errores típicos de decenas de ppm). Se corrige con `--ppm`.
-- El ancho de banda estimado (147.7 kHz, 99 % de potencia) es menor que el valor teórico de Carson (≈ 180 kHz) porque las "colas" del espectro FM quedan por debajo del piso de ruido con la antena disponible (relación portadora/ruido ≈ 15–20 dB). El canal comercial completo (200 kHz) es el valor de diseño.
+- La frecuencia central observada difiere en +1.2 kHz de la sintonizada. Es un error relativo de ≈ 14 ppm, atribuible al oscilador de cristal del dongle (los RTL-SDR sin TCXO tienen errores típicos de decenas de ppm). Se corrige con `--ppm`.
+- El ancho de banda estimado (171.1 kHz, 99 % de potencia) es algo menor que el valor teórico de Carson (≈ 180 kHz) porque las "colas" del espectro FM quedan cerca del piso de ruido; es consistente con una emisión FM comercial cuyo canal completo es de 200 kHz.
 - El espectrograma confirma que la señal es estacionaria en la ventana analizada y que el receptor no presenta saltos de sintonía.
 
 ## 7. Cuestionario
@@ -128,4 +128,4 @@ La emisión se mantiene estable durante toda la captura (54.6 ms): no hay saltos
 
 ## 8. Conclusiones
 
-Se configuró el RTL-SDR y se caracterizó una estación FM real en 96.5 MHz. La captura de 131 072 muestras IQ permitió obtener las componentes I/Q, un espectro con la emisora claramente identificable y su espectrograma. La potencia promedio fue −10.18 dBFS, la frecuencia central observada 96.4934 MHz (error de −6.6 kHz por el oscilador del dongle) y el ancho de banda ocupado 147.7 kHz al 99 % de potencia, consistente con una emisión FM comercial de 200 kHz de canal. El procedimiento queda reproducible con `python3 practica1.py -f 96.5e6` (y verificable sin hardware con `--sim`).
+Se configuró el RTL-SDR y se caracterizó una estación FM real en 91.5 MHz. La captura de 131 072 muestras IQ permitió obtener las componentes I/Q, un espectro con la emisora claramente identificable y su espectrograma. La potencia promedio fue −1.62 dBFS, la frecuencia central observada 91.5012 MHz (error de +1.2 kHz, ≈14 ppm por el oscilador del dongle) y el ancho de banda ocupado 171.1 kHz al 99 % de potencia, consistente con una emisión FM comercial de 200 kHz de canal. La misma ventana demodula y reproduce el audio FM en vivo. El procedimiento queda reproducible con `python3 practica1.py` (y verificable sin hardware con `--sim`).

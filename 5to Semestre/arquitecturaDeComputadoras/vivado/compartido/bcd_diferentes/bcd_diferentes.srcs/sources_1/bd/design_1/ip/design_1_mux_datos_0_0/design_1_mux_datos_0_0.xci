@@ -1,0 +1,46 @@
+{
+  "schema": "xilinx.com:schema:json_instance:1.0",
+  "ip_inst": {
+    "xci_name": "design_1_mux_datos_0_0",
+    "cell_name": "mux_datos_0",
+    "component_reference": "xilinx.com:module_ref:mux_datos:1.0",
+    "ip_revision": "1",
+    "gen_directory": "../../../../../../bcd_diferentes.gen/sources_1/bd/design_1/ip/design_1_mux_datos_0_0",
+    "parameters": {
+      "component_parameters": {
+        "Component_Name": [ { "value": "design_1_mux_datos_0_0", "resolve_type": "user", "usage": "all" } ]
+      },
+      "project_parameters": {
+        "ARCHITECTURE": [ { "value": "artix7", "resolve_type": "generated", "usage": "all" } ],
+        "BASE_BOARD_PART": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "BOARD_CONNECTIONS": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "DEVICE": [ { "value": "xc7a100t", "resolve_type": "generated", "usage": "all" } ],
+        "PACKAGE": [ { "value": "csg324", "resolve_type": "generated", "usage": "all" } ],
+        "PREFHDL": [ { "value": "VHDL", "resolve_type": "generated", "usage": "all" } ],
+        "SILICON_REVISION": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "SIMULATOR_LANGUAGE": [ { "value": "MIXED", "resolve_type": "generated", "usage": "all" } ],
+        "SPEEDGRADE": [ { "value": "-1", "resolve_type": "generated", "usage": "all" } ],
+        "STATIC_POWER": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "TEMPERATURE_GRADE": [ { "value": "", "resolve_type": "generated", "usage": "all" } ]
+      },
+      "runtime_parameters": {
+        "IPCONTEXT": [ { "value": "IP_Integrator" } ],
+        "IPREVISION": [ { "value": "1" } ],
+        "MANAGED": [ { "value": "TRUE" } ],
+        "OUTPUTDIR": [ { "value": "../../../../../../bcd_diferentes.gen/sources_1/bd/design_1/ip/design_1_mux_datos_0_0" } ],
+        "SELECTEDSIMMODEL": [ { "value": "" } ],
+        "SHAREDDIR": [ { "value": "../../ipshared" } ],
+        "SWVERSION": [ { "value": "2026.1" } ],
+        "SYNTHESISFLOW": [ { "value": "OOC_HIERARCHICAL" } ]
+      }
+    },
+    "boundary": {
+      "ports": {
+        "sw": [ { "direction": "in", "size_left": "15", "size_right": "0" } ],
+        "sel": [ { "direction": "in", "size_left": "2", "size_right": "0" } ],
+        "sal": [ { "direction": "out", "size_left": "3", "size_right": "0" } ]
+      }
+    }
+  },
+  "checksum": "cda35a2a"
+}

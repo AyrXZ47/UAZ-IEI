@@ -1,0 +1,62 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (lin64) Build 6511674 Tue Jun 16 11:01:26 MDT 2026
+| Date         : Sat Oct 24 18:20:44 2026
+| Host         : nixos-laptop running 64-bit unknown
+| Command      : report_methodology -file design_1_wrapper_methodology_drc_routed.rpt -pb design_1_wrapper_methodology_drc_routed.pb -rpx design_1_wrapper_methodology_drc_routed.rpx
+| Design       : design_1_wrapper
+| Device       : xc7a100tcsg324-1
+| Speed File   : -1
+| Design State : Fully Routed
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Report Methodology
+
+Table of Contents
+-----------------
+1. REPORT SUMMARY
+2. REPORT DETAILS
+
+1. REPORT SUMMARY
+-----------------
+            Netlist: netlist
+          Floorplan: design_1
+      Design limits: <entire design considered>
+             Max checks: <unlimited>
+             Checks found: 5
++-----------+------------------+------------------------------------------------------------------+--------+
+| Rule      | Severity         | Description                                                      | Checks |
++-----------+------------------+------------------------------------------------------------------+--------+
+| TIMING-17 | Critical Warning | Non-clocked sequential cell                                      | 3      |
+| CKLD-2    | Warning          | Clock Net has IO Driver, not a Clock Buf, and/or non-Clock loads | 1      |
+| TIMING-18 | Warning          | Missing input or output delay                                    | 1      |
++-----------+------------------+------------------------------------------------------------------+--------+
+
+2. REPORT DETAILS
+-----------------
+TIMING-17#1 Critical Warning
+Non-clocked sequential cell  
+The clock pin design_1_i/contador_0/U0/auxN_reg[0]/C is not reached by a timing clock
+Related violations: <none>
+
+TIMING-17#2 Critical Warning
+Non-clocked sequential cell  
+The clock pin design_1_i/contador_0/U0/auxN_reg[1]/C is not reached by a timing clock
+Related violations: <none>
+
+TIMING-17#3 Critical Warning
+Non-clocked sequential cell  
+The clock pin design_1_i/contador_0/U0/auxN_reg[2]/C is not reached by a timing clock
+Related violations: <none>
+
+CKLD-2#1 Warning
+Clock Net has IO Driver, not a Clock Buf, and/or non-Clock loads  
+Clock net CLK100MHZ_IBUF is directly driven by an IO rather than a Clock Buffer or may be an IO driving a mix of Clock Buffer and non-Clock loads. This connectivity should be reviewed and corrected as appropriate. Driver(s): CLK100MHZ_IBUF_inst/O, design_1_i/CLK100MHZ
+Related violations: <none>
+
+TIMING-18#1 Warning
+Missing input or output delay  
+An input delay is missing on rst relative to the rising and/or falling clock edge(s) of sys_clk_pin.
+Related violations: <none>
+
+

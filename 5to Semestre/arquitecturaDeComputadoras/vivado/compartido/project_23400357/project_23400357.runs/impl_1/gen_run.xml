@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenRun Id="impl_1" LaunchPart="xc7a100tcsg324-1" LaunchTime="1790460297">
+  <File Type="ROUTE-PWR" Name="PRUEBA_DESING_wrapper_power_routed.rpt"/>
+  <File Type="PA-TCL" Name="PRUEBA_DESING_wrapper.tcl"/>
+  <File Type="PWROPT-DCP" Name="PRUEBA_DESING_wrapper_pwropt.dcp"/>
+  <File Type="ROUTE-PWR-SUM" Name="PRUEBA_DESING_wrapper_power_summary_routed.pb"/>
+  <File Type="REPORTS-TCL" Name="PRUEBA_DESING_wrapper_reports.tcl"/>
+  <File Type="BG-DRC" Name="PRUEBA_DESING_wrapper.drc"/>
+  <File Type="OPT-HWDEF" Name="PRUEBA_DESING_wrapper.hwdef"/>
+  <File Type="OPT-DCP" Name="PRUEBA_DESING_wrapper_opt.dcp"/>
+  <File Type="OPT-DRC" Name="PRUEBA_DESING_wrapper_drc_opted.rpt"/>
+  <File Type="PLACE-DCP" Name="PRUEBA_DESING_wrapper_placed.dcp"/>
+  <File Type="PLACE-IO" Name="PRUEBA_DESING_wrapper_io_placed.rpt"/>
+  <File Type="PLACE-UTIL" Name="PRUEBA_DESING_wrapper_utilization_placed.rpt"/>
+  <File Type="PLACE-UTIL-PB" Name="PRUEBA_DESING_wrapper_utilization_placed.pb"/>
+  <File Type="PLACE-CTRL" Name="PRUEBA_DESING_wrapper_control_sets_placed.rpt"/>
+  <File Type="PLACE-PRE-SIMILARITY" Name="PRUEBA_DESING_wrapper_incremental_reuse_pre_placed.rpt"/>
+  <File Type="POSTPLACE-PWROPT-DCP" Name="PRUEBA_DESING_wrapper_postplace_pwropt.dcp"/>
+  <File Type="PHYSOPT-DCP" Name="PRUEBA_DESING_wrapper_physopt.dcp"/>
+  <File Type="BG-BIT" Name="PRUEBA_DESING_wrapper.bit"/>
+  <File Type="ROUTE-ERROR-DCP" Name="PRUEBA_DESING_wrapper_routed_error.dcp"/>
+  <File Type="ROUTE-DCP" Name="PRUEBA_DESING_wrapper_routed.dcp"/>
+  <File Type="ROUTE-BLACKBOX-DCP" Name="PRUEBA_DESING_wrapper_routed_bb.dcp"/>
+  <File Type="ROUTE-DRC" Name="PRUEBA_DESING_wrapper_drc_routed.rpt"/>
+  <File Type="ROUTE-DRC-PB" Name="PRUEBA_DESING_wrapper_drc_routed.pb"/>
+  <File Type="ROUTE-DRC-RPX" Name="PRUEBA_DESING_wrapper_drc_routed.rpx"/>
+  <File Type="BITSTR-MSK" Name="PRUEBA_DESING_wrapper.msk"/>
+  <File Type="ROUTE-METHODOLOGY-DRC" Name="PRUEBA_DESING_wrapper_methodology_drc_routed.rpt"/>
+  <File Type="BG-BGN" Name="PRUEBA_DESING_wrapper.bgn"/>
+  <File Type="ROUTE-METHODOLOGY-DRC-RPX" Name="PRUEBA_DESING_wrapper_methodology_drc_routed.rpx"/>
+  <File Type="BITSTR-RBT" Name="PRUEBA_DESING_wrapper.rbt"/>
+  <File Type="ROUTE-METHODOLOGY-DRC-PB" Name="PRUEBA_DESING_wrapper_methodology_drc_routed.pb"/>
+  <File Type="BG-BIN" Name="PRUEBA_DESING_wrapper.bin"/>
+  <File Type="ROUTE-PWR-RPX" Name="PRUEBA_DESING_wrapper_power_routed.rpx"/>
+  <File Type="ROUTE-STATUS" Name="PRUEBA_DESING_wrapper_route_status.rpt"/>
+  <File Type="ROUTE-STATUS-PB" Name="PRUEBA_DESING_wrapper_route_status.pb"/>
+  <File Type="ROUTE-TIMINGSUMMARY" Name="PRUEBA_DESING_wrapper_timing_summary_routed.rpt"/>
+  <File Type="ROUTE-TIMING-PB" Name="PRUEBA_DESING_wrapper_timing_summary_routed.pb"/>
+  <File Type="ROUTE-TIMING-RPX" Name="PRUEBA_DESING_wrapper_timing_summary_routed.rpx"/>
+  <File Type="ROUTE-CLK" Name="PRUEBA_DESING_wrapper_clock_utilization_routed.rpt"/>
+  <File Type="RDI-RDI" Name="PRUEBA_DESING_wrapper.vdi"/>
+  <File Type="POSTROUTE-PHYSOPT-DCP" Name="PRUEBA_DESING_wrapper_postroute_physopt.dcp"/>
+  <File Type="POSTROUTE-PHYSOPT-BLACKBOX-DCP" Name="PRUEBA_DESING_wrapper_postroute_physopt_bb.dcp"/>
+  <File Type="BITSTR-NKY" Name="PRUEBA_DESING_wrapper.nky"/>
+  <File Type="BITSTR-BMM" Name="PRUEBA_DESING_wrapper_bd.bmm"/>
+  <File Type="BITSTR-MMI" Name="PRUEBA_DESING_wrapper.mmi"/>
+  <File Type="BITSTR-LTX" Name="PRUEBA_DESING_wrapper.ltx"/>
+  <File Type="BITSTR-SYSDEF" Name="PRUEBA_DESING_wrapper.sysdef"/>
+  <File Type="WBT-USG" Name="usage_statistics_webtalk.html"/>
+  <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
+    <Filter Type="Srcs"/>
+    <File Path="$PSRCDIR/sources_1/new/FUENTE_prueba.vhd">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/bd/PRUEBA_DESING/PRUEBA_DESING.bd">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/bd/PRUEBA_DESING/hdl/PRUEBA_DESING_wrapper.vhd">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <Config>
+      <Option Name="DesignMode" Val="RTL"/>
+      <Option Name="TopModule" Val="PRUEBA_DESING_wrapper"/>
+      <Option Name="TopAutoSet" Val="TRUE"/>
+    </Config>
+  </FileSet>
+  <FileSet Name="constrs_in" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">
+    <Filter Type="Constrs"/>
+    <File Path="$PSRCDIR/constrs_1/imports/Downloads/Nexys4-DDR-Master.xdc">
+      <FileInfo>
+        <Attr Name="ImportPath" Val="$PPRDIR/../../../../../Downloads/Nexys4-DDR-Master.xdc"/>
+        <Attr Name="ImportTime" Val="1790454317"/>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+      </FileInfo>
+    </File>
+    <Config>
+      <Option Name="ConstrsType" Val="XDC"/>
+    </Config>
+  </FileSet>
+  <Strategy Version="1" Minor="2">
+    <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2017"/>
+    <Step Id="init_design"/>
+    <Step Id="opt_design"/>
+    <Step Id="power_opt_design"/>
+    <Step Id="place_design"/>
+    <Step Id="post_place_power_opt_design"/>
+    <Step Id="phys_opt_design"/>
+    <Step Id="route_design"/>
+    <Step Id="post_route_phys_opt_design"/>
+    <Step Id="write_bitstream"/>
+  </Strategy>
+  <BlockFileSet Type="BlockSrcs" Name="PRUEBA_DESING_FUENTE_PRUEBA_0_0"/>
+</GenRun>

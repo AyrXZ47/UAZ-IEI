@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Sat Oct 24 17:44:15 2026" VIVADOVERSION="2026.1">
+
+  <SYSTEMINFO ARCH="artix7" DEVICE="7a100t" NAME="design_1" PACKAGE="csg324" SPEEDGRADE="-1"/>
+
+  <EXTERNALPORTS>
+    <PORT DIR="O" LEFT="7" NAME="AN" RIGHT="0" SIGIS="undef" SIGNAME="dec_an_0_sal">
+      <CONNECTIONS>
+        <CONNECTION INSTANCE="dec_an_0" PORT="sal"/>
+      </CONNECTIONS>
+    </PORT>
+    <PORT CLKFREQUENCY="100000000" DIR="I" NAME="CLK100MHZ" SIGIS="clk" SIGNAME="External_Ports_CLK100MHZ">
+      <CONNECTIONS>
+        <CONNECTION INSTANCE="pres_500hz_0" PORT="clk"/>
+      </CONNECTIONS>
+    </PORT>
+    <PORT DIR="I" LEFT="15" NAME="SW" RIGHT="0" SIGIS="undef" SIGNAME="External_Ports_SW">
+      <CONNECTIONS>
+        <CONNECTION INSTANCE="mux_datos_0" PORT="sw"/>
+      </CONNECTIONS>
+    </PORT>
+    <PORT DIR="I" NAME="rst" POLARITY="ACTIVE_LOW" SIGIS="rst" SIGNAME="External_Ports_rst">
+      <CONNECTIONS>
+        <CONNECTION INSTANCE="pres_500hz_0" PORT="rst"/>
+        <CONNECTION INSTANCE="contador_0" PORT="rst"/>
+      </CONNECTIONS>
+    </PORT>
+    <PORT DIR="O" LEFT="7" NAME="seg" RIGHT="0" SIGIS="undef" SIGNAME="Dec_bcd_seg_0_seg">
+      <CONNECTIONS>
+        <CONNECTION INSTANCE="Dec_bcd_seg_0" PORT="seg"/>
+      </CONNECTIONS>
+    </PORT>
+  </EXTERNALPORTS>
+
+  <EXTERNALINTERFACES/>
+
+  <MODULES>
+    <MODULE COREREVISION="1" FULLNAME="/Dec_bcd_seg_0" HWVERSION="1.0" INSTANCE="Dec_bcd_seg_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="Dec_bcd_seg" VLNV="xilinx.com:module_ref:Dec_bcd_seg:1.0">
+      <DOCUMENTS>
+        <DOCUMENT SOURCE="https://support.amd.com/documentation/ipcores/Dec_bcd_seg/1_0"/>
+      </DOCUMENTS>
+      <PARAMETERS>
+        <PARAMETER NAME="Component_Name" VALUE="design_1_Dec_bcd_seg_0_0"/>
+        <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
+      </PARAMETERS>
+      <PORTS>
+        <PORT DIR="I" LEFT="3" NAME="num" RIGHT="0" SIGIS="undef" SIGNAME="mux_datos_0_sal">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="mux_datos_0" PORT="sal"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="O" LEFT="7" NAME="seg" RIGHT="0" SIGIS="undef" SIGNAME="Dec_bcd_seg_0_seg">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="External_Ports" PORT="seg"/>
+          </CONNECTIONS>
+        </PORT>
+      </PORTS>
+      <BUSINTERFACES/>
+    </MODULE>
+    <MODULE COREREVISION="1" FULLNAME="/contador_0" HWVERSION="1.0" INSTANCE="contador_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="contador" VLNV="xilinx.com:module_ref:contador:1.0">
+      <DOCUMENTS>
+        <DOCUMENT SOURCE="https://support.amd.com/documentation/ipcores/contador/1_0"/>
+      </DOCUMENTS>
+      <PARAMETERS>
+        <PARAMETER NAME="Component_Name" VALUE="design_1_contador_0_0"/>
+        <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
+      </PARAMETERS>
+      <PORTS>
+        <PORT CLKFREQUENCY="100000000" DIR="I" NAME="clk" SIGIS="clk" SIGNAME="pres_500hz_0_clk_pres">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="pres_500hz_0" PORT="clk_pres"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="O" LEFT="2" NAME="display" RIGHT="0" SIGIS="undef" SIGNAME="contador_0_display">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="mux_datos_0" PORT="sel"/>
+            <CONNECTION INSTANCE="dec_an_0" PORT="ent"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="I" NAME="rst" POLARITY="ACTIVE_LOW" SIGIS="rst" SIGNAME="External_Ports_rst">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="External_Ports" PORT="rst"/>
+          </CONNECTIONS>
+        </PORT>
+      </PORTS>
+      <BUSINTERFACES/>
+    </MODULE>
+    <MODULE COREREVISION="1" FULLNAME="/dec_an_0" HWVERSION="1.0" INSTANCE="dec_an_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="dec_an" VLNV="xilinx.com:module_ref:dec_an:1.0">
+      <DOCUMENTS>
+        <DOCUMENT SOURCE="https://support.amd.com/documentation/ipcores/dec_an/1_0"/>
+      </DOCUMENTS>
+      <PARAMETERS>
+        <PARAMETER NAME="Component_Name" VALUE="design_1_dec_an_0_2"/>
+        <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
+      </PARAMETERS>
+      <PORTS>
+        <PORT DIR="I" LEFT="2" NAME="ent" RIGHT="0" SIGIS="undef" SIGNAME="contador_0_display">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="contador_0" PORT="display"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="O" LEFT="7" NAME="sal" RIGHT="0" SIGIS="undef" SIGNAME="dec_an_0_sal">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="External_Ports" PORT="AN"/>
+          </CONNECTIONS>
+        </PORT>
+      </PORTS>
+      <BUSINTERFACES/>
+    </MODULE>
+    <MODULE COREREVISION="1" FULLNAME="/mux_datos_0" HWVERSION="1.0" INSTANCE="mux_datos_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="mux_datos" VLNV="xilinx.com:module_ref:mux_datos:1.0">
+      <DOCUMENTS>
+        <DOCUMENT SOURCE="https://support.amd.com/documentation/ipcores/mux_datos/1_0"/>
+      </DOCUMENTS>
+      <PARAMETERS>
+        <PARAMETER NAME="Component_Name" VALUE="design_1_mux_datos_0_0"/>
+        <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
+      </PARAMETERS>
+      <PORTS>
+        <PORT DIR="O" LEFT="3" NAME="sal" RIGHT="0" SIGIS="undef" SIGNAME="mux_datos_0_sal">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="Dec_bcd_seg_0" PORT="num"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="I" LEFT="2" NAME="sel" RIGHT="0" SIGIS="undef" SIGNAME="contador_0_display">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="contador_0" PORT="display"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="I" LEFT="15" NAME="sw" RIGHT="0" SIGIS="undef" SIGNAME="External_Ports_SW">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="External_Ports" PORT="SW"/>
+          </CONNECTIONS>
+        </PORT>
+      </PORTS>
+      <BUSINTERFACES/>
+    </MODULE>
+    <MODULE COREREVISION="1" FULLNAME="/pres_500hz_0" HWVERSION="1.0" INSTANCE="pres_500hz_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="pres_500hz" VLNV="xilinx.com:module_ref:pres_500hz:1.0">
+      <DOCUMENTS>
+        <DOCUMENT SOURCE="https://support.amd.com/documentation/ipcores/pres_500hz/1_0"/>
+      </DOCUMENTS>
+      <PARAMETERS>
+        <PARAMETER NAME="frec_in" VALUE="100000000"/>
+        <PARAMETER NAME="frec_out" VALUE="500"/>
+        <PARAMETER NAME="num_display" VALUE="8"/>
+        <PARAMETER NAME="Component_Name" VALUE="design_1_pres_500hz_0_0"/>
+        <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
+      </PARAMETERS>
+      <PORTS>
+        <PORT CLKFREQUENCY="100000000" DIR="I" NAME="clk" SIGIS="clk" SIGNAME="External_Ports_CLK100MHZ">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="External_Ports" PORT="CLK100MHZ"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="O" NAME="clk_pres" SIGIS="undef" SIGNAME="pres_500hz_0_clk_pres">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="contador_0" PORT="clk"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="I" NAME="rst" POLARITY="ACTIVE_LOW" SIGIS="rst" SIGNAME="External_Ports_rst">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="External_Ports" PORT="rst"/>
+          </CONNECTIONS>
+        </PORT>
+      </PORTS>
+      <BUSINTERFACES/>
+    </MODULE>
+  </MODULES>
+
+</EDKSYSTEM>

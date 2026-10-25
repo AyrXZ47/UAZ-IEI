@@ -1,0 +1,218 @@
+#-----------------------------------------------------------
+# Vivado v2017.4.1 (64-bit)
+# SW Build 2117270 on Tue Jan 30 15:32:00 MST 2018
+# IP Build 2095745 on Tue Jan 30 17:13:15 MST 2018
+# Start of session at: Sat Sep 26 16:04:58 2026
+# Process ID: 8860
+# Current directory: C:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.runs/PRUEBA_DESING_FUENTE_PRUEBA_0_0_synth_1
+# Command line: vivado.exe -log PRUEBA_DESING_FUENTE_PRUEBA_0_0.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source PRUEBA_DESING_FUENTE_PRUEBA_0_0.tcl
+# Log file: C:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.runs/PRUEBA_DESING_FUENTE_PRUEBA_0_0_synth_1/PRUEBA_DESING_FUENTE_PRUEBA_0_0.vds
+# Journal file: C:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.runs/PRUEBA_DESING_FUENTE_PRUEBA_0_0_synth_1\vivado.jou
+#-----------------------------------------------------------
+source PRUEBA_DESING_FUENTE_PRUEBA_0_0.tcl -notrace
+Command: synth_design -top PRUEBA_DESING_FUENTE_PRUEBA_0_0 -part xc7a100tcsg324-1 -mode out_of_context
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7a100t'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7a100t'
+INFO: Launching helper process for spawning children vivado processes
+INFO: Helper process launched with PID 3636 
+---------------------------------------------------------------------------------
+Starting Synthesize : Time (s): cpu = 00:00:06 ; elapsed = 00:00:07 . Memory (MB): peak = 353.281 ; gain = 101.242
+---------------------------------------------------------------------------------
+INFO: [Synth 8-638] synthesizing module 'PRUEBA_DESING_FUENTE_PRUEBA_0_0' [c:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.srcs/sources_1/bd/PRUEBA_DESING/ip/PRUEBA_DESING_FUENTE_PRUEBA_0_0/synth/PRUEBA_DESING_FUENTE_PRUEBA_0_0.vhd:63]
+INFO: [Synth 8-3491] module 'FUENTE_PRUEBA' declared at 'C:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.srcs/sources_1/new/FUENTE_prueba.vhd:34' bound to instance 'U0' of component 'FUENTE_PRUEBA' [c:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.srcs/sources_1/bd/PRUEBA_DESING/ip/PRUEBA_DESING_FUENTE_PRUEBA_0_0/synth/PRUEBA_DESING_FUENTE_PRUEBA_0_0.vhd:79]
+INFO: [Synth 8-638] synthesizing module 'FUENTE_PRUEBA' [C:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.srcs/sources_1/new/FUENTE_prueba.vhd:39]
+INFO: [Synth 8-256] done synthesizing module 'FUENTE_PRUEBA' (1#1) [C:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.srcs/sources_1/new/FUENTE_prueba.vhd:39]
+INFO: [Synth 8-256] done synthesizing module 'PRUEBA_DESING_FUENTE_PRUEBA_0_0' (2#1) [c:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.srcs/sources_1/bd/PRUEBA_DESING/ip/PRUEBA_DESING_FUENTE_PRUEBA_0_0/synth/PRUEBA_DESING_FUENTE_PRUEBA_0_0.vhd:63]
+---------------------------------------------------------------------------------
+Finished Synthesize : Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 405.012 ; gain = 152.973
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 405.012 ; gain = 152.973
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7a100tcsg324-1
+INFO: [Device 21-403] Loading part xc7a100tcsg324-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 405.012 ; gain = 152.973
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 405.012 ; gain = 152.973
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+No constraint files found.
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Hierarchical Component Statistics 
+---------------------------------------------------------------------------------
+Hierarchical RTL Component report 
+---------------------------------------------------------------------------------
+Finished RTL Hierarchical Component Statistics
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 240 (col length:80)
+BRAMs: 270 (col length: RAMB18 80 RAMB36 40)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-3330] design PRUEBA_DESING_FUENTE_PRUEBA_0_0 has an empty top module
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:10 ; elapsed = 00:00:11 . Memory (MB): peak = 525.160 ; gain = 273.121
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:10 ; elapsed = 00:00:11 . Memory (MB): peak = 525.160 ; gain = 273.121
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:10 ; elapsed = 00:00:11 . Memory (MB): peak = 533.863 ; gain = 281.824
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 533.863 ; gain = 281.824
+---------------------------------------------------------------------------------
+
+Report Check Netlist: 
++------+------------------+-------+---------+-------+------------------+
+|      |Item              |Errors |Warnings |Status |Description       |
++------+------------------+-------+---------+-------+------------------+
+|1     |multi_driven_nets |      0|        0|Passed |Multi driven nets |
++------+------------------+-------+---------+-------+------------------+
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 533.863 ; gain = 281.824
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 533.863 ; gain = 281.824
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 533.863 ; gain = 281.824
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 533.863 ; gain = 281.824
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 533.863 ; gain = 281.824
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++-+-----+------+
+| |Cell |Count |
++-+-----+------+
++-+-----+------+
+
+Report Instance Areas: 
++------+---------+-------+------+
+|      |Instance |Module |Cells |
++------+---------+-------+------+
+|1     |top      |       |     0|
++------+---------+-------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 533.863 ; gain = 281.824
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 1 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 533.863 ; gain = 281.824
+Synthesis Optimization Complete : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 533.863 ; gain = 281.824
+INFO: [Project 1-571] Translating synthesized netlist
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+INFO: [Common 17-83] Releasing license: Synthesis
+12 Infos, 1 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:14 ; elapsed = 00:00:16 . Memory (MB): peak = 640.949 ; gain = 398.348
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [Common 17-1381] The checkpoint 'C:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.runs/PRUEBA_DESING_FUENTE_PRUEBA_0_0_synth_1/PRUEBA_DESING_FUENTE_PRUEBA_0_0.dcp' has been generated.
+write_checkpoint: Time (s): cpu = 00:00:09 ; elapsed = 00:00:09 . Memory (MB): peak = 1069.789 ; gain = 428.840
+INFO: [Common 17-1381] The checkpoint 'C:/Users/janag/Documents/IEI/Arquitectura de Computadoras/Proy_23400357/project_23400357/project_23400357.runs/PRUEBA_DESING_FUENTE_PRUEBA_0_0_synth_1/PRUEBA_DESING_FUENTE_PRUEBA_0_0.dcp' has been generated.
+INFO: [runtcl-4] Executing : report_utilization -file PRUEBA_DESING_FUENTE_PRUEBA_0_0_utilization_synth.rpt -pb PRUEBA_DESING_FUENTE_PRUEBA_0_0_utilization_synth.pb
+report_utilization: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.034 . Memory (MB): peak = 1070.141 ; gain = 0.000
+INFO: [Common 17-206] Exiting Vivado at Sat Sep 26 16:05:29 2026...

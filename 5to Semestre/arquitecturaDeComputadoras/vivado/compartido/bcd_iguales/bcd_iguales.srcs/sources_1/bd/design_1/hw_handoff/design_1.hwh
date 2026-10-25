@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Sat Oct 10 14:53:51 2026" VIVADOVERSION="2017.4.1">
+
+  <SYSTEMINFO ARCH="artix7" BOARD="digilentinc.com:nexys4_ddr:part0:1.1" DEVICE="7a100t" NAME="design_1" PACKAGE="csg324" SPEEDGRADE="-1"/>
+
+  <EXTERNALPORTS>
+    <PORT DIR="I" LEFT="3" NAME="SW" RIGHT="0" SIGIS="undef" SIGNAME="External_Ports_SW">
+      <CONNECTIONS>
+        <CONNECTION INSTANCE="Dec_bcd_seg_0" PORT="num"/>
+      </CONNECTIONS>
+    </PORT>
+    <PORT DIR="I" LEFT="7" NAME="SW1" RIGHT="0" SIGIS="undef" SIGNAME="External_Ports_SW1">
+      <CONNECTIONS>
+        <CONNECTION INSTANCE="Dec_bcd_seg_0" PORT="display"/>
+      </CONNECTIONS>
+    </PORT>
+    <PORT DIR="O" LEFT="7" NAME="AN" RIGHT="0" SIGIS="undef" SIGNAME="Dec_bcd_seg_0_an">
+      <CONNECTIONS>
+        <CONNECTION INSTANCE="Dec_bcd_seg_0" PORT="an"/>
+      </CONNECTIONS>
+    </PORT>
+    <PORT DIR="O" LEFT="7" NAME="seg" RIGHT="0" SIGIS="undef" SIGNAME="Dec_bcd_seg_0_seg">
+      <CONNECTIONS>
+        <CONNECTION INSTANCE="Dec_bcd_seg_0" PORT="seg"/>
+      </CONNECTIONS>
+    </PORT>
+  </EXTERNALPORTS>
+
+  <EXTERNALINTERFACES/>
+
+  <MODULES>
+    <MODULE FULLNAME="/Dec_bcd_seg_0" HWVERSION="1.0" INSTANCE="Dec_bcd_seg_0" IPTYPE="PERIPHERAL" IS_ENABLE="1" MODCLASS="PERIPHERAL" MODTYPE="Dec_bcd_seg" VLNV="xilinx.com:module_ref:Dec_bcd_seg:1.0">
+      <DOCUMENTS/>
+      <PARAMETERS>
+        <PARAMETER NAME="Component_Name" VALUE="design_1_Dec_bcd_seg_0_0"/>
+        <PARAMETER NAME="EDK_IPTYPE" VALUE="PERIPHERAL"/>
+      </PARAMETERS>
+      <PORTS>
+        <PORT DIR="I" LEFT="3" NAME="num" RIGHT="0" SIGIS="undef" SIGNAME="External_Ports_SW">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="External_Ports" PORT="SW"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="I" LEFT="7" NAME="display" RIGHT="0" SIGIS="undef" SIGNAME="External_Ports_SW1">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="External_Ports" PORT="SW1"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="O" LEFT="7" NAME="an" RIGHT="0" SIGIS="undef" SIGNAME="Dec_bcd_seg_0_an">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="External_Ports" PORT="AN"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="O" LEFT="7" NAME="seg" RIGHT="0" SIGIS="undef" SIGNAME="Dec_bcd_seg_0_seg">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="External_Ports" PORT="seg"/>
+          </CONNECTIONS>
+        </PORT>
+      </PORTS>
+      <BUSINTERFACES/>
+    </MODULE>
+  </MODULES>
+
+</EDKSYSTEM>

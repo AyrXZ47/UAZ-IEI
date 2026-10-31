@@ -2,7 +2,7 @@
 // Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2026.1 (lin64) Build 6511674 Tue Jun 16 11:01:26 MDT 2026
-// Date        : Fri Oct 30 21:50:18 2026
+// Date        : Sat Oct 31 01:29:07 2026
 // Host        : nixos-pc running 64-bit unknown
 // Command     : write_verilog -force -mode funcsim {/home/yovick/repos/UAZ-IEI/5to
 //               Semestre/arquitecturaDeComputadoras/vivado/compartido/mensajes/mensajes.gen/sources_1/bd/design_1/ip/design_1_rom_mensajes_0_0/design_1_rom_mensajes_0_0_sim_netlist.v}
@@ -30,22 +30,16 @@ module design_1_rom_mensajes_0_0
 
   design_1_rom_mensajes_0_0_rom_mensajes U0
        (.dir(dir),
-        .seg(seg[5:0]),
+        .seg({seg[7:6],seg[4:0]}),
         .sel(sel));
   LUT4 #(
-    .INIT(16'h004B)) 
-    \seg[6]_INST_0 
-       (.I0(dir[1]),
-        .I1(dir[0]),
+    .INIT(16'h0024)) 
+    \seg[5]_INST_0 
+       (.I0(dir[0]),
+        .I1(dir[1]),
         .I2(dir[2]),
         .I3(sel),
-        .O(seg[6]));
-  LUT2 #(
-    .INIT(4'h2)) 
-    \seg[7]_INST_0 
-       (.I0(dir[0]),
-        .I1(sel),
-        .O(seg[7]));
+        .O(seg[5]));
 endmodule
 
 (* ORIG_REF_NAME = "rom_mensajes" *) 
@@ -53,15 +47,14 @@ module design_1_rom_mensajes_0_0_rom_mensajes
    (seg,
     sel,
     dir);
-  output [5:0]seg;
+  output [6:0]seg;
   input sel;
   input [2:0]dir;
 
   wire [2:0]dir;
-  wire [5:0]seg;
+  wire [6:0]seg;
   wire sel;
 
-  (* SOFT_HLUTNM = "soft_lutpair2" *) 
   LUT4 #(
     .INIT(16'hBFFF)) 
     \seg[0]_INST_0 
@@ -72,7 +65,7 @@ module design_1_rom_mensajes_0_0_rom_mensajes
         .O(seg[0]));
   (* SOFT_HLUTNM = "soft_lutpair0" *) 
   LUT4 #(
-    .INIT(16'h17E0)) 
+    .INIT(16'h3D4A)) 
     \seg[1]_INST_0 
        (.I0(sel),
         .I1(dir[1]),
@@ -81,7 +74,7 @@ module design_1_rom_mensajes_0_0_rom_mensajes
         .O(seg[1]));
   (* SOFT_HLUTNM = "soft_lutpair0" *) 
   LUT4 #(
-    .INIT(16'hCF82)) 
+    .INIT(16'hED0A)) 
     \seg[2]_INST_0 
        (.I0(sel),
         .I1(dir[1]),
@@ -90,7 +83,7 @@ module design_1_rom_mensajes_0_0_rom_mensajes
         .O(seg[2]));
   (* SOFT_HLUTNM = "soft_lutpair1" *) 
   LUT4 #(
-    .INIT(16'h7831)) 
+    .INIT(16'hFAB3)) 
     \seg[3]_INST_0 
        (.I0(sel),
         .I1(dir[2]),
@@ -99,7 +92,7 @@ module design_1_rom_mensajes_0_0_rom_mensajes
         .O(seg[3]));
   (* SOFT_HLUTNM = "soft_lutpair1" *) 
   LUT4 #(
-    .INIT(16'h0790)) 
+    .INIT(16'h2D1A)) 
     \seg[4]_INST_0 
        (.I0(sel),
         .I1(dir[1]),
@@ -108,13 +101,22 @@ module design_1_rom_mensajes_0_0_rom_mensajes
         .O(seg[4]));
   (* SOFT_HLUTNM = "soft_lutpair2" *) 
   LUT4 #(
-    .INIT(16'h8542)) 
-    \seg[5]_INST_0 
+    .INIT(16'h12A5)) 
+    \seg[6]_INST_0 
        (.I0(sel),
-        .I1(dir[0]),
+        .I1(dir[1]),
         .I2(dir[2]),
-        .I3(dir[1]),
+        .I3(dir[0]),
         .O(seg[5]));
+  (* SOFT_HLUTNM = "soft_lutpair2" *) 
+  LUT4 #(
+    .INIT(16'h4F30)) 
+    \seg[7]_INST_0 
+       (.I0(dir[1]),
+        .I1(dir[2]),
+        .I2(sel),
+        .I3(dir[0]),
+        .O(seg[6]));
 endmodule
 `ifndef GLBL
 `define GLBL

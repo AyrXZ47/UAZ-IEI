@@ -11,8 +11,8 @@ architecture t of tb_rom_mensajes is
   signal dir : STD_LOGIC_VECTOR(2 downto 0) := "000";
   signal seg : STD_LOGIC_VECTOR(7 downto 0);
 
-  constant MSG0 : string(1 to 8) := "HOLA EIS";
-  constant MSG1 : string(1 to 8) := "27803872";
+  constant MSG0 : string(1 to 8) := "HOLAIEIS";
+  constant MSG1 : string(1 to 8) := "35167151";
 
   -- Patrones activo bajo {a,b,c,d,e,f,g,dp}
   function patron(c : character) return STD_LOGIC_VECTOR is
@@ -27,8 +27,11 @@ architecture t of tb_rom_mensajes is
       when 'I'    => return "10011111";
       when 'S'    => return "01001001";
       when '0'    => return "00000011";
+      when '1'    => return "10011111";
       when '2'    => return "00100101";
       when '3'    => return "00001101";
+      when '5'    => return "01001001";
+      when '6'    => return "01000001";
       when '7'    => return "00011111";
       when '8'    => return "00000001";
       when others => return "11111111";
@@ -63,7 +66,7 @@ begin
       end loop;
     end loop;
 
-    report "OK: 'HOLA EIS' y '27803872' verificados en los 8 displays.";
+    report "OK: 'HOLAIEIS' y '35167151' verificados en los 8 displays.";
     wait;
   end process;
 

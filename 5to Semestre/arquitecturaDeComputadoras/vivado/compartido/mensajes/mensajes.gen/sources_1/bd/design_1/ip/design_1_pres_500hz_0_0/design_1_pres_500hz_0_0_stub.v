@@ -2,7 +2,7 @@
 // Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2026.1 (lin64) Build 6511674 Tue Jun 16 11:01:26 MDT 2026
-// Date        : Fri Oct 30 21:50:19 2026
+// Date        : Sat Oct 31 01:29:06 2026
 // Host        : nixos-pc running 64-bit unknown
 // Command     : write_verilog -force -mode synth_stub {/home/yovick/repos/UAZ-IEI/5to
 //               Semestre/arquitecturaDeComputadoras/vivado/compartido/mensajes/mensajes.gen/sources_1/bd/design_1/ip/design_1_pres_500hz_0_0/design_1_pres_500hz_0_0_stub.v}

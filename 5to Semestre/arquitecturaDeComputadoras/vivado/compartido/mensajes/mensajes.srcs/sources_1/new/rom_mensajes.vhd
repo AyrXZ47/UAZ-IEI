@@ -8,8 +8,8 @@
 -- Project Name: mensajes
 -- Target Devices: Nexys4 DDR (xc7a100tcsg324-1)
 -- Description: ROM de caracteres para los 8 displays de 7 segmentos.
---   sel = 0 -> "HOLA EIS"
---   sel = 1 -> "27803872"
+--   sel = 0 -> "HOLAIEIS"
+--   sel = 1 -> "35167151"
 --   dir = posicion del display (0 = AN0, el de la derecha).
 --   seg = {a,b,c,d,e,f,g,dp}, activo bajo (mismo orden que Dec_bcd_seg).
 ----------------------------------------------------------------------------------
@@ -35,24 +35,24 @@ dir_sel <= sel & dir;
 process(dir_sel)
 begin
     case dir_sel is
-        -- sel = 0: "HOLA EIS"
+        -- sel = 0: "HOLAIEIS"
         when "0000" => seg <= "01001001"; -- S
         when "0001" => seg <= "10011111"; -- I
         when "0010" => seg <= "01100001"; -- E
-        when "0011" => seg <= "11111111"; -- (espacio)
+        when "0011" => seg <= "10011111"; -- I
         when "0100" => seg <= "00010001"; -- A
         when "0101" => seg <= "11100011"; -- L
         when "0110" => seg <= "00000011"; -- O
         when "0111" => seg <= "10001100"; -- H
-        -- sel = 1: "27803872"
-        when "1000" => seg <= "00100101"; -- 2
-        when "1001" => seg <= "00011111"; -- 7
-        when "1010" => seg <= "00000001"; -- 8
-        when "1011" => seg <= "00001101"; -- 3
-        when "1100" => seg <= "00000011"; -- 0
-        when "1101" => seg <= "00000001"; -- 8
-        when "1110" => seg <= "00011111"; -- 7
-        when "1111" => seg <= "00100101"; -- 2
+        -- sel = 1: "35167151"
+        when "1000" => seg <= "10011111"; -- 1
+        when "1001" => seg <= "01001001"; -- 5
+        when "1010" => seg <= "10011111"; -- 1
+        when "1011" => seg <= "00011111"; -- 7
+        when "1100" => seg <= "01000001"; -- 6
+        when "1101" => seg <= "10011111"; -- 1
+        when "1110" => seg <= "01001001"; -- 5
+        when "1111" => seg <= "00001101"; -- 3
         when others => seg <= "11111111";
     end case;
 end process;

@@ -2,7 +2,7 @@
 -- Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2026.1 (lin64) Build 6511674 Tue Jun 16 11:01:26 MDT 2026
--- Date        : Fri Oct 30 21:50:18 2026
+-- Date        : Sat Oct 31 01:29:07 2026
 -- Host        : nixos-pc running 64-bit unknown
 -- Command     : write_vhdl -force -mode funcsim {/home/yovick/repos/UAZ-IEI/5to
 --               Semestre/arquitecturaDeComputadoras/vivado/compartido/mensajes/mensajes.gen/sources_1/bd/design_1/ip/design_1_rom_mensajes_0_0/design_1_rom_mensajes_0_0_sim_netlist.vhdl}
@@ -17,7 +17,7 @@ library UNISIM;
 use UNISIM.VCOMPONENTS.ALL;
 entity design_1_rom_mensajes_0_0_rom_mensajes is
   port (
-    seg : out STD_LOGIC_VECTOR ( 5 downto 0 );
+    seg : out STD_LOGIC_VECTOR ( 6 downto 0 );
     sel : in STD_LOGIC;
     dir : in STD_LOGIC_VECTOR ( 2 downto 0 )
   );
@@ -27,12 +27,12 @@ end design_1_rom_mensajes_0_0_rom_mensajes;
 
 architecture STRUCTURE of design_1_rom_mensajes_0_0_rom_mensajes is
   attribute SOFT_HLUTNM : string;
-  attribute SOFT_HLUTNM of \seg[0]_INST_0\ : label is "soft_lutpair2";
   attribute SOFT_HLUTNM of \seg[1]_INST_0\ : label is "soft_lutpair0";
   attribute SOFT_HLUTNM of \seg[2]_INST_0\ : label is "soft_lutpair0";
   attribute SOFT_HLUTNM of \seg[3]_INST_0\ : label is "soft_lutpair1";
   attribute SOFT_HLUTNM of \seg[4]_INST_0\ : label is "soft_lutpair1";
-  attribute SOFT_HLUTNM of \seg[5]_INST_0\ : label is "soft_lutpair2";
+  attribute SOFT_HLUTNM of \seg[6]_INST_0\ : label is "soft_lutpair2";
+  attribute SOFT_HLUTNM of \seg[7]_INST_0\ : label is "soft_lutpair2";
 begin
 \seg[0]_INST_0\: unisim.vcomponents.LUT4
     generic map(
@@ -47,7 +47,7 @@ begin
     );
 \seg[1]_INST_0\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"17E0"
+      INIT => X"3D4A"
     )
         port map (
       I0 => sel,
@@ -58,7 +58,7 @@ begin
     );
 \seg[2]_INST_0\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"CF82"
+      INIT => X"ED0A"
     )
         port map (
       I0 => sel,
@@ -69,7 +69,7 @@ begin
     );
 \seg[3]_INST_0\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"7831"
+      INIT => X"FAB3"
     )
         port map (
       I0 => sel,
@@ -80,7 +80,7 @@ begin
     );
 \seg[4]_INST_0\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"0790"
+      INIT => X"2D1A"
     )
         port map (
       I0 => sel,
@@ -89,16 +89,27 @@ begin
       I3 => dir(0),
       O => seg(4)
     );
-\seg[5]_INST_0\: unisim.vcomponents.LUT4
+\seg[6]_INST_0\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"8542"
+      INIT => X"12A5"
     )
         port map (
       I0 => sel,
-      I1 => dir(0),
+      I1 => dir(1),
       I2 => dir(2),
-      I3 => dir(1),
+      I3 => dir(0),
       O => seg(5)
+    );
+\seg[7]_INST_0\: unisim.vcomponents.LUT4
+    generic map(
+      INIT => X"4F30"
+    )
+        port map (
+      I0 => dir(1),
+      I1 => dir(2),
+      I2 => sel,
+      I3 => dir(0),
+      O => seg(6)
     );
 end STRUCTURE;
 library IEEE;
@@ -128,27 +139,19 @@ begin
 U0: entity work.design_1_rom_mensajes_0_0_rom_mensajes
      port map (
       dir(2 downto 0) => dir(2 downto 0),
-      seg(5 downto 0) => seg(5 downto 0),
+      seg(6 downto 5) => seg(7 downto 6),
+      seg(4 downto 0) => seg(4 downto 0),
       sel => sel
     );
-\seg[6]_INST_0\: unisim.vcomponents.LUT4
+\seg[5]_INST_0\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"004B"
-    )
-        port map (
-      I0 => dir(1),
-      I1 => dir(0),
-      I2 => dir(2),
-      I3 => sel,
-      O => seg(6)
-    );
-\seg[7]_INST_0\: unisim.vcomponents.LUT2
-    generic map(
-      INIT => X"2"
+      INIT => X"0024"
     )
         port map (
       I0 => dir(0),
-      I1 => sel,
-      O => seg(7)
+      I1 => dir(1),
+      I2 => dir(2),
+      I3 => sel,
+      O => seg(5)
     );
 end STRUCTURE;

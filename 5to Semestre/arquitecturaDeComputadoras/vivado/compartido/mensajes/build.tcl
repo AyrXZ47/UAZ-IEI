@@ -15,9 +15,10 @@ if {[file exists mensajes.xpr]} {
 }
 
 # --- fuentes y restricciones -------------------------------------------------
-set srcs [glob -nocomplain mensajes.srcs/sources_1/new/*.vhd]
-if {[llength $srcs]} {
-    add_files -norecurse $srcs
+foreach f [glob -nocomplain mensajes.srcs/sources_1/new/*.vhd] {
+    if {[llength [get_files -quiet [file tail $f]]] == 0} {
+        add_files -norecurse $f
+    }
 }
 
 if {[llength [get_files -quiet *Nexys4-DDR-Master.xdc]] == 0} {
@@ -80,12 +81,19 @@ set_property top design_1_wrapper [current_fileset]
 update_compile_order -fileset sources_1
 
 # --- sintesis e implementacion ----------------------------------------------
+# Los IP de module_ref no se marcan out-of-date cuando cambia su VHDL:
+# resetearlos fuerza que se re-sinteticen desde la fuente actual.
+foreach r [get_runs -quiet design_1_*_synth_1] {
+    reset_run $r
+}
+reset_run synth_1
 launch_runs synth_1 -jobs 8
 wait_on_run synth_1
 if {[get_property PROGRESS [get_runs synth_1]] != "100%"} {
     error "Fallo la sintesis"
 }
 
+reset_run impl_1
 launch_runs impl_1 -to_step write_bitstream -jobs 8
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {

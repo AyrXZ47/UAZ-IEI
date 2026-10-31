@@ -5,8 +5,10 @@ un switch:
 
 | SW[0] | displays (izq → der) |
 |-------|----------------------|
-| 0     | `HOLA EIS`           |
-| 1     | `27803872`           |
+| 0     | `HOLAIEIS`           |
+| 1     | `35167151`           |
+
+`HOLAIEIS` = "Hola Ingeniería Electrónica Industrial Semiescolarizado".
 
 Es el mismo flujo que `bcd_diferentes`: un prescaler refresca los 8 displays en
 multiplexado. Lo único que cambia es la fuente de datos.
@@ -32,8 +34,8 @@ ya están en la ROM.
 
 | dir    | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
 |--------|---|---|---|---|---|---|---|---|
-| sel=0  | S | I | E | ␣ | A | L | O | H |
-| sel=1  | 2 | 7 | 8 | 3 | 0 | 8 | 7 | 2 |
+| sel=0  | S | I | E | I | A | L | O | H |
+| sel=1  | 1 | 5 | 1 | 7 | 6 | 1 | 5 | 3 |
 
 ## Construir
 

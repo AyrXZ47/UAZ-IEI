@@ -1,0 +1,244 @@
+{
+  "design": {
+    "design_info": {
+      "boundary_crc": "0xB0A40A53FEFB7FE9",
+      "device": "xc7a100tcsg324-1",
+      "gen_directory": "../../../../mensajes.gen/sources_1/bd/design_1",
+      "name": "design_1",
+      "rev_ctrl_bd_flag": "RevCtrlBdOff",
+      "synth_flow_mode": "Hierarchical",
+      "tool_version": "2026.1",
+      "validated": "true"
+    },
+    "design_tree": {
+      "pres_500hz_0": "",
+      "contador_0": "",
+      "dec_an_0": "",
+      "rom_mensajes_0": ""
+    },
+    "ports": {
+      "CLK100MHZ": {
+        "type": "clk",
+        "direction": "I",
+        "parameters": {
+          "ASSOCIATED_RESET": {
+            "value": "rst",
+            "value_src": "default"
+          },
+          "CLK_DOMAIN": {
+            "value": "design_1_CLK100MHZ",
+            "value_src": "default"
+          },
+          "FREQ_HZ": {
+            "value": "100000000"
+          },
+          "FREQ_TOLERANCE_HZ": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "INSERT_VIP": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "PHASE": {
+            "value": "0.0",
+            "value_src": "default"
+          }
+        }
+      },
+      "rst": {
+        "direction": "I"
+      },
+      "SW": {
+        "direction": "I",
+        "left": "0",
+        "right": "0"
+      },
+      "seg": {
+        "direction": "O",
+        "left": "7",
+        "right": "0"
+      },
+      "AN": {
+        "direction": "O",
+        "left": "7",
+        "right": "0"
+      }
+    },
+    "components": {
+      "pres_500hz_0": {
+        "vlnv": "xilinx.com:module_ref:pres_500hz:1.0",
+        "ip_revision": "1",
+        "xci_name": "design_1_pres_500hz_0_0",
+        "xci_path": "ip/design_1_pres_500hz_0_0/design_1_pres_500hz_0_0.xci",
+        "inst_hier_path": "pres_500hz_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "pres_500hz",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "clk": {
+            "type": "clk",
+            "direction": "I",
+            "parameters": {
+              "ASSOCIATED_RESET": {
+                "value": "rst",
+                "value_src": "constant"
+              },
+              "FREQ_HZ": {
+                "value": "100000000",
+                "value_src": "user_prop"
+              },
+              "CLK_DOMAIN": {
+                "value": "design_1_CLK100MHZ",
+                "value_src": "default_prop"
+              }
+            }
+          },
+          "rst": {
+            "type": "rst",
+            "direction": "I"
+          },
+          "clk_pres": {
+            "direction": "O"
+          }
+        }
+      },
+      "contador_0": {
+        "vlnv": "xilinx.com:module_ref:contador:1.0",
+        "ip_revision": "1",
+        "xci_name": "design_1_contador_0_0",
+        "xci_path": "ip/design_1_contador_0_0/design_1_contador_0_0.xci",
+        "inst_hier_path": "contador_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "contador",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "clk": {
+            "type": "clk",
+            "direction": "I",
+            "parameters": {
+              "ASSOCIATED_RESET": {
+                "value": "rst",
+                "value_src": "constant"
+              }
+            }
+          },
+          "rst": {
+            "type": "rst",
+            "direction": "I"
+          },
+          "display": {
+            "direction": "O",
+            "left": "2",
+            "right": "0"
+          }
+        }
+      },
+      "dec_an_0": {
+        "vlnv": "xilinx.com:module_ref:dec_an:1.0",
+        "ip_revision": "1",
+        "xci_name": "design_1_dec_an_0_0",
+        "xci_path": "ip/design_1_dec_an_0_0/design_1_dec_an_0_0.xci",
+        "inst_hier_path": "dec_an_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "dec_an",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "ent": {
+            "direction": "I",
+            "left": "2",
+            "right": "0"
+          },
+          "sal": {
+            "direction": "O",
+            "left": "7",
+            "right": "0"
+          }
+        }
+      },
+      "rom_mensajes_0": {
+        "vlnv": "xilinx.com:module_ref:rom_mensajes:1.0",
+        "ip_revision": "1",
+        "xci_name": "design_1_rom_mensajes_0_0",
+        "xci_path": "ip/design_1_rom_mensajes_0_0/design_1_rom_mensajes_0_0.xci",
+        "inst_hier_path": "rom_mensajes_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "rom_mensajes",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "sel": {
+            "direction": "I"
+          },
+          "dir": {
+            "direction": "I",
+            "left": "2",
+            "right": "0"
+          },
+          "seg": {
+            "direction": "O",
+            "left": "7",
+            "right": "0"
+          }
+        }
+      }
+    },
+    "nets": {
+      "CLK100MHZ_1": {
+        "ports": [
+          "CLK100MHZ",
+          "pres_500hz_0/clk"
+        ]
+      },
+      "SW_1": {
+        "ports": [
+          "SW",
+          "rom_mensajes_0/sel"
+        ]
+      },
+      "contador_0_display": {
+        "ports": [
+          "contador_0/display",
+          "dec_an_0/ent",
+          "rom_mensajes_0/dir"
+        ]
+      },
+      "dec_an_0_sal": {
+        "ports": [
+          "dec_an_0/sal",
+          "AN"
+        ]
+      },
+      "pres_500hz_0_clk_pres": {
+        "ports": [
+          "pres_500hz_0/clk_pres",
+          "contador_0/clk"
+        ]
+      },
+      "rom_mensajes_0_seg": {
+        "ports": [
+          "rom_mensajes_0/seg",
+          "seg"
+        ]
+      },
+      "rst_1": {
+        "ports": [
+          "rst",
+          "pres_500hz_0/rst",
+          "contador_0/rst"
+        ]
+      }
+    }
+  }
+}

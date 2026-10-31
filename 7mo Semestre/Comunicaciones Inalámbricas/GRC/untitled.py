@@ -75,7 +75,7 @@ class untitled(gr.top_block, Qt.QWidget):
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
-            106.5e6, #fc
+            91.5e6, #fc
             2400000, #bw
             "", #name
             1, #number of inputs
@@ -110,7 +110,7 @@ class untitled(gr.top_block, Qt.QWidget):
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
-            106.5e6, #fc
+            91.5e6, #fc
             2400000, #bw
             "", #name
             1,
@@ -154,7 +154,7 @@ class untitled(gr.top_block, Qt.QWidget):
         )
         self.osmosdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
         self.osmosdr_source_0.set_sample_rate(2400000)
-        self.osmosdr_source_0.set_center_freq(106.5e6, 0)
+        self.osmosdr_source_0.set_center_freq(91.5e6, 0)
         self.osmosdr_source_0.set_freq_corr(0, 0)
         self.osmosdr_source_0.set_dc_offset_mode(2, 0)
         self.osmosdr_source_0.set_iq_balance_mode(0, 0)

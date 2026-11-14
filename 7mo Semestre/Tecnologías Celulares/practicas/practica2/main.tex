@@ -1,0 +1,185 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{2}{Generación y análisis de secuencias pseudoaleatorias (PN)}
+
+\textbf{Script:} \texttt{practica2.py} (Python con NumPy; el manual pide MATLAB, pero el
+algoritmo del LFSR y las correlaciones son idénticos)
+
+\section{Objetivo}
+
+Generar secuencias pseudoaleatorias de longitud máxima con registros de corrimiento con
+retroalimentación lineal (LFSR) y analizar sus propiedades de balance, autocorrelación y
+correlación cruzada.
+
+\section{Fundamento teórico}
+
+Un LFSR de $m$ etapas genera una secuencia binaria mediante la recurrencia lineal
+\begin{equation}
+  s_{n+m} = \bigoplus_{i \in T} s_{n+i} \pmod 2,
+\end{equation}
+donde $T$ es el conjunto de taps que define el polinomio característico. Si el polinomio
+es primitivo, la secuencia recorre todos los estados no nulos del registro y su periodo es
+\begin{equation}
+  N = 2^m - 1.
+\end{equation}
+Para $m=5$ se usa el trinomio $x^5+x^2+1$, que da $N=31$; para $m=4,6,7$ se usan
+$x^4+x+1$, $x^6+x+1$ y $x^7+x^3+1$, con longitudes 15, 63 y 127.
+
+Una secuencia de longitud máxima cumple la propiedad de balance: en cada periodo hay
+$2^{m-1}$ unos y $2^{m-1}-1$ ceros, es decir, la diferencia es exactamente uno. Su
+autocorrelación periódica es de dos valores:
+\begin{equation}
+  R(\tau) =
+  \begin{cases}
+    1, & \tau = 0 \pmod N,\\
+    -\dfrac{1}{N}, & \tau \neq 0 \pmod N.
+  \end{cases}
+\end{equation}
+La correlación cruzada entre dos secuencias distintas debe mantenerse baja; para un par
+preferido de secuencias-$m$ su valor máximo es del orden de $2^{(m+1)/2}/N$. Esa
+propiedad es la que permite separar usuarios en CDMA: cada usuario multiplica sus datos
+por un código casi ortogonal con los de los demás.
+
+\section{Desarrollo experimental}
+
+\subsection{Generación}
+
+Se implementó el LFSR en forma de Fibonacci con estado inicial todos unos y salida por la
+primera etapa. Para cada $m$ se generaron $N$ chips y se midió el periodo observado como
+el primer desplazamiento en el que la secuencia se repite. La secuencia principal es la de
+$m=5$ con $x^5+x^2+1$; para la correlación cruzada se generó una segunda secuencia de
+$m=5$ con $x^5+x^4+1$.
+
+\subsection{Análisis}
+
+\begin{enumerate}
+  \item Conversión bipolar $x_b[n]=2x[n]-1$, con valores $\{-1,+1\}$.
+  \item Histograma para verificar el balance.
+  \item Autocorrelación lineal normalizada (equivalente a \texttt{xcorr(x,'coeff')}) y
+        autocorrelación periódica calculada como la transformada inversa de
+        $|X(f)|^2$, que es la que exhibe la propiedad de dos valores.
+  \item Correlación cruzada normalizada entre las dos secuencias de 31 chips.
+\end{enumerate}
+
+\section{Código}
+
+\begin{codigo}
+def lfsr(m, k, n=None, estado_inicial=None):
+    n = n or 2**m - 1
+    estado = list(estado_inicial or [1] * m)
+    salida = np.empty(n, dtype=int)
+    for i in range(n):
+        salida[i] = estado[0]
+        retro = estado[0] ^ estado[k]
+        estado = estado[1:] + [retro]
+    return salida
+
+def autocorrelacion_periodica(x):
+    n = len(x)
+    r = np.fft.ifft(np.abs(np.fft.fft(x)) ** 2).real
+    r = np.concatenate((r[-(n // 2):], r[: n // 2 + 1]))
+    return r / r[n // 2]
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{Secuencia generada}
+
+\figura{figs/secuencia.png}{Secuencia PN de 31 chips ($m=5$) y su versión bipolar.}
+
+La secuencia contiene 16 unos y 15 ceros, exactamente el balance teórico
+$2^{4}=16$ y $2^{4}-1=15$. El periodo observado es 31: la secuencia no se repite antes
+de agotar el periodo.
+
+\subsection{Distribución y balance}
+
+\figura[0.62]{figs/histograma.png}{Histograma de la secuencia bipolar.}
+
+\subsection{Autocorrelación}
+
+\figura{figs/autocorrelacion.png}{Autocorrelación lineal (arriba) y periódica (abajo).}
+
+La autocorrelación periódica presenta un pico unitario en $\tau=0$ y un valor constante
+de $-1/31=-0.0323$ en todos los demás retardos. La autocorrelación lineal muestra el mismo
+pico dominante, pero sus valores laterales oscilan porque la correlación se calcula sobre
+una sola réplica finita y no sobre la secuencia periódica.
+
+\subsection{Correlación cruzada}
+
+\figura{figs/correlacion_cruzada.png}{Correlación cruzada entre las secuencias $x^5+x^2+1$ y $x^5+x^4+1$.}
+
+El máximo de la correlación cruzada es \textbf{0.3226} y el valor medio absoluto
+\textbf{0.0936}. Son valores bajos frente al pico de autocorrelación (1.0), lo que indica
+que las dos secuencias son casi ortogonales.
+
+\subsection{Longitudes para distintos $m$}
+
+\begin{tabular}{@{}cccccc@{}}
+  \toprule
+  $m$ & Polinomio & $N$ teórica & $N$ observada & Unos & Ceros \\
+  \midrule
+  4 & $x^4+x+1$   & 15  & 15  & 8  & 7  \\
+  5 & $x^5+x^2+1$ & 31  & 31  & 16 & 15 \\
+  6 & $x^6+x+1$   & 63  & 63  & 32 & 31 \\
+  7 & $x^7+x^3+1$ & 127 & 127 & 64 & 63 \\
+  \bottomrule
+\end{tabular}
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Por qué las secuencias PN son útiles en espectro disperso?} Porque son
+        determinísticas (el receptor puede reproducirlas) pero se comportan como ruido:
+        tienen espectro ancho y plano, y su autocorrelación impulsiva permite recuperar la
+        sincronía y los datos mediante correlación.
+  \item \textbf{¿Qué características presenta la autocorrelación?} Un pico agudo en el
+        origen y un nivel residual constante de $-1/N$. Cuanto mayor es $N$, más pequeño
+        es el residuo y más se parece la autocorrelación a un impulso.
+  \item \textbf{¿Por qué la correlación cruzada es importante en CDMA?} Porque los códigos
+        de distintos usuarios se suman en el mismo canal; si la correlación cruzada es
+        baja, el receptor de un usuario rechaza la energía de los demás y solo ve la
+        interferencia residual.
+  \item \textbf{¿Cómo cambia la longitud de la secuencia al aumentar $m$?} Crece
+        exponencialmente: $N=2^m-1$, de 15 a 127 al pasar de $m=4$ a $m=7$. El número de
+        estados posibles se duplica con cada etapa y el residuo de autocorrelación se
+        reduce a la mitad.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Qué es una secuencia PN?} Una secuencia binaria periódica generada por un
+        proceso determinístico que imita las propiedades estadísticas del ruido: balance
+        de unos y ceros, autocorrelación impulsiva y baja correlación cruzada.
+  \item \textbf{¿Qué es un LFSR?} Un registro de corrimiento de $m$ etapas cuya entrada es
+        una combinación lineal (XOR) de algunas de sus salidas. Con un polinomio primitivo
+        recorre todos los estados no nulos y produce una secuencia de longitud máxima.
+  \item \textbf{¿Qué significa secuencia de longitud máxima?} Que su periodo es el máximo
+        posible para un registro de $m$ etapas, $N=2^m-1$, es decir, que pasa por todos
+        los estados no nulos antes de repetirse.
+  \item \textbf{¿Por qué las secuencias PN son determinísticas pero parecen aleatorias?}
+        Porque las genera una recurrencia fija y reproducible, pero su periodo largo, su
+        balance y su espectro plano hacen que un observador que no conoce el polinomio ni
+        el estado inicial no pueda predecirlas ni distinguirlas de ruido.
+  \item \textbf{¿Cuál es la ventaja de una autocorrelación impulsiva?} Permite sincronizar
+        el receptor y separar la señal útil del ruido y de otras señales: al correlacionar
+        con la réplica local, solo el retardo correcto produce un pico grande.
+  \item \textbf{¿Por qué se utilizan secuencias PN en sistemas celulares?} Para dispersar
+        el espectro (DSSS/CDMA), identificar celdas y usuarios, sincronizar tramas y
+        aleatorizar la transmisión. En LTE, por ejemplo, las secuencias Zadoff-Chu y los
+        códigos Gold cumplen funciones análogas de sincronización e identificación.
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se implementó un LFSR de Fibonacci y se generaron secuencias de longitud máxima para
+$m=4,5,6,7$, con periodos 15, 31, 63 y 127 y balance $2^{m-1}$ unos contra
+$2^{m-1}-1$ ceros. La secuencia de 31 chips presentó autocorrelación periódica de dos
+valores (1 en el origen y $-0.0323$ fuera de él) y una correlación cruzada máxima de
+0.3226 con otra secuencia del mismo periodo. Estas propiedades son la base de los
+sistemas de espectro disperso y del acceso múltiple por código.
+
+\end{document}

@@ -1,0 +1,237 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{12}{Proyecto integrador: caracterización experimental de una red LTE utilizando RTL-SDR y MATLAB}
+
+\textbf{Script:} \texttt{practica12.py} (Python con NumPy/SciPy)
+
+\section{Resumen}
+
+Se caracterizó una red LTE en la banda de 850 MHz a partir de capturas IQ de 262\,144
+muestras (17.1 ms) en tres ubicaciones: exterior del edificio, interior del laboratorio y
+pasillo. Para cada una se estimaron la potencia recibida, el piso de ruido, la relación
+señal a ruido, el ancho de banda ocupado y la capacidad aproximada. La potencia cayó de
+$-$29.16 dBFS en el exterior a $-$47.29 dBFS en el laboratorio y $-$54.30 dBFS en el
+pasillo, con SNR de 40.7, 21.9 y 15.9 dB y capacidades de 188.3, 102.7 y 74.2 Mbps. La
+multitrayectoria del pasillo fragmentó el espectro de las portadoras, evidencia directa de
+la dispersión del canal. Las capturas son sintéticas porque no había RTL-SDR conectado; el
+procesamiento es el mismo que se aplicaría a una captura real.
+
+\section{Introducción}
+
+LTE utiliza OFDM en el enlace descendente y técnicas MIMO para aumentar la capacidad y la
+eficiencia espectral. Caracterizar una red real implica medir su ocupación espectral, su
+potencia y su relación señal a ruido en distintos puntos, y relacionar esas medidas con los
+conceptos de propagación, dispersión y capacidad estudiados durante el curso.
+
+Este proyecto integra las prácticas anteriores: la adquisición y el análisis espectral de
+la práctica 1, el modelo OFDM de las prácticas 5 y 6, y la capacidad MIMO de la práctica 9.
+
+\section{Marco teórico}
+
+\subsection{Banda de 850 MHz y estructura LTE}
+
+En México, la banda celular de 850 MHz utiliza el bloque de enlace descendente
+869--894 MHz. Un canal LTE ocupa un ancho nominal de 1.4, 3, 5, 10, 15 o 20 MHz y se
+construye con subportadoras de 15 kHz. Para un ancho de 10 MHz se usan 600 subportadoras
+(9 MHz ocupados) y para 5 MHz, 300 subportadoras (4.5 MHz).
+
+La señal LTE es multiportadora: su densidad espectral de potencia es aproximadamente plana
+dentro del canal y cae abruptamente en los bordes, con bandas de guarda entre canales. Esa
+forma es la firma espectral de OFDM y permite identificar las portadoras con una FFT.
+
+\subsection{Propagación y capacidad}
+
+La potencia recibida disminuye con la distancia y con los obstáculos. Las pérdidas de
+penetración en interiores y la atenuación adicional de un pasillo explican las diferencias
+entre ubicaciones. La multitrayectoria produce desvanecimientos selectivos en frecuencia:
+ciertas subportadoras caen en un nulo y otras no, lo que fragmenta el espectro observado.
+
+La capacidad aproximada de un canal AWGN de ancho $B$ es
+\begin{equation}
+  C = B\log_2\left(1+\mathrm{SNR}\right),
+\end{equation}
+donde la SNR se estima a partir de la PSD medida. Para una red MIMO con $N_t$ antenas
+transmisoras y $N_r$ receptoras, la capacidad puede crecer hasta en un factor
+$\min(N_t,N_r)$ respecto de SISO.
+
+\section{Metodología}
+
+\subsection{Adquisición}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Frecuencia central & 881 MHz \\
+  Frecuencia de muestreo & 15.36 MSPS (1024 FFT, 15 kHz por subportadora) \\
+  Muestras & 262\,144 (17.1 ms) \\
+  Portadoras & 10 MHz en 878 MHz y 5 MHz en 885.5 MHz \\
+  Receptor & RTL-SDR (captura sintética; el equipo no estaba conectado) \\
+  \bottomrule
+\end{tabularx}
+
+Las capturas se generaron con dos portadoras OFDM de 15 kHz por subportadora, un canal
+multitrayectoria de tres ecos y ruido gaussiano. Se aplicó un filtro de banda con flancos
+de coseno alzado para reproducir la emisión fuera de banda de un transmisor real. No se
+incluyó el prefijo cíclico porque el análisis es espectral, no de demodulación.
+
+\subsection{Procesamiento}
+
+\begin{enumerate}
+  \item PSD de Welch con 4096 muestras por segmento y 50\,\% de solapamiento.
+  \item Piso de ruido estimado con el percentil 5 de la PSD (las portadoras ocupan la mayor
+        parte del ancho de banda).
+  \item Detección de regiones 8 dB por encima del piso; ancho de banda al 99\,\% de la
+        potencia por integración de la PSD.
+  \item Potencia total $P=\frac{1}{N}\sum|x[n]|^2$ en dBFS.
+  \item SNR en banda a partir de la potencia de las regiones detectadas y el piso de ruido.
+  \item Capacidad con $C=B\log_2(1+\mathrm{SNR})$.
+\end{enumerate}
+
+\section{Escenarios de medición}
+
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}Xcc@{}}
+  \toprule
+  Ubicación & Descripción & Potencia relativa & Ecos \\
+  \midrule
+  Exterior & Explanada frente al edificio, línea de vista a la estación base &
+  $-$30 / $-$38 dBFS & 0, 1 y 3 muestras \\
+  Laboratorio & Interior, paredes y equipo, sin línea de vista &
+  $-$48 / $-$56 dBFS & 0, 4 y 9 muestras \\
+  Pasillo & Corredor largo, reflexiones múltiples &
+  $-$55 / $-$63 dBFS & 0, 7 y 15 muestras \\
+  \bottomrule
+\end{tabularx}
+
+La potencia indicada corresponde a las dos portadoras (10 y 5 MHz) antes del canal. El
+canal multitrayectoria se normaliza a energía unitaria y el ruido térmico se fija en
+$-$72 dBFS en las tres ubicaciones.
+
+\section{Resultados experimentales}
+
+\subsection{Espectros}
+
+\figura[0.98]{figs/espectros.png}{PSD de las tres ubicaciones. La línea punteada es el piso de ruido estimado y las sombras marcan las regiones detectadas.}
+
+En el exterior se distinguen con claridad las dos portadoras, con una meseta de
+9 MHz y otra de 4.5 MHz separadas por una guarda; la ligera inclinación de la meseta es
+la respuesta en frecuencia del canal, no de la emisión. En el laboratorio la meseta aparece
+ondulada por los desvanecimientos selectivos. En el pasillo los ecos producen nulos
+profundos que fragmentan cada portadora en varias regiones.
+
+\subsection{Espectrogramas}
+
+\figura[0.98]{figs/espectrogramas.png}{Espectrogramas de las tres ubicaciones.}
+
+Las tres capturas son estacionarias en la ventana de 17 ms: no hay saltos de frecuencia ni
+ráfagas. La diferencia entre ubicaciones está en el nivel y en la forma del espectro, no en
+la estabilidad temporal.
+
+\subsection{Mediciones}
+
+\begin{tabular}{@{}lcccccc@{}}
+  \toprule
+  Ubicación & Potencia & Piso & SNR & Ancho 99\,\% & Capacidad \\
+            & (dBFS) & (dBFS/Hz) & (dB) & (MHz) & (Mbps) \\
+  \midrule
+  Exterior    & $-$29.16 & $-$141.33 & 40.74 & 13.92 & 188.3 \\
+  Laboratorio & $-$47.29 & $-$140.57 & 21.93 & 14.08 & 102.7 \\
+  Pasillo     & $-$54.30 & $-$141.16 & 15.86 & 13.99 & 74.2 \\
+  \bottomrule
+\end{tabular}
+
+\subsection{Portadoras detectadas}
+
+\begin{tabular}{@{}lccc@{}}
+  \toprule
+  Ubicación & Portadora & Frecuencia (MHz) & Ancho (MHz) \\
+  \midrule
+  Exterior & 10 MHz & 878.54 & 8.88 \\
+           & 5 MHz  & 885.38 & 4.45 \\
+  Laboratorio & 10 MHz & 878.08 & 8.88 \\
+              & 5 MHz  & 885.24 & 4.39 \\
+  Pasillo & 10 MHz & 874.42 a 881.00 & 4 fragmentos \\
+          & 5 MHz  & 883.60 a 887.26 & 3 fragmentos \\
+  \bottomrule
+\end{tabular}
+
+En el exterior y el laboratorio se detectaron dos regiones, una por portadora. En el pasillo
+la portadora de 10 MHz se partió en cuatro fragmentos (874.42, 876.60, 878.77 y
+881.00 MHz) y la de 5 MHz en tres (883.60, 885.39 y 887.26 MHz). Esa fragmentación es
+consecuencia de los nulos de desvanecimiento del canal, no de que la emisión haya cambiado.
+
+\section{Comparación entre ubicaciones}
+
+\figura{figs/comparacion.png}{Potencia total y SNR en banda para las tres ubicaciones.}
+
+La potencia cae 18.1 dB del exterior al laboratorio y 7.0 dB adicionales al pasillo. La SNR
+sigue la misma tendencia: 40.7, 21.9 y 15.9 dB. El piso de ruido es prácticamente el mismo
+en las tres mediciones ($-$140.6 a $-$141.3 dBFS/Hz), lo que confirma que la diferencia se
+debe a la atenuación y a la dispersión del canal, no al receptor.
+
+La mayor degradación del pasillo proviene de dos efectos combinados: la atenuación por las
+paredes y la multitrayectoria, que reparte la energía en ecos con retardos de hasta
+15 muestras ($\approx$1 µs) y crea desvanecimientos profundos cada 1--2 MHz.
+
+\section{Relación con OFDM y MIMO}
+
+\figura{figs/estructura_ofdm.png}{Detalle de la portadora de 10 MHz (meseta característica de OFDM, inclinada por la respuesta del canal) y forma de onda temporal.}
+
+La meseta con bordes abruptos es la misma que se obtuvo en la práctica 5 al generar
+una señal OFDM con la IFFT: la suma de cientos de subportadoras de 15 kHz produce una
+densidad espectral casi constante dentro del canal. En el tiempo, la envolvente tiene el
+aspecto gaussiano de una suma de muchas componentes independientes, con picos que obligan a
+reservar margen en el amplificador (práctica 8).
+
+La estructura fina de 15 kHz no se resuelve en la PSD promediada, porque el ruido de
+medición y el promediado de Welch la suavizan; para verla habría que demodular la señal con
+un receptor LTE. Lo que sí se observa es la huella espectral de OFDM y la ocupación de
+9 MHz y 4.5 MHz, compatible con 600 y 300 subportadoras.
+
+Respecto de MIMO, la capacidad medida es la de un enlace SISO equivalente. Si la estación
+base usara 2x2 o 4x4, la capacidad podría multiplicarse por 2 o 4 en las mismas
+condiciones de SNR, como se mostró en la práctica 9. El límite práctico lo ponen la
+correlación entre antenas, el scattering del entorno y la calidad del canal.
+
+\section{Cálculo de capacidad}
+
+\begin{tabular}{@{}lcccc@{}}
+  \toprule
+  Ubicación & SNR (dB) & SNR lineal & Eficiencia (bps/Hz) & Capacidad (Mbps) \\
+  \midrule
+  Exterior    & 40.74 & $1.19\times10^{4}$ & 13.53 & 188.3 \\
+  Laboratorio & 21.93 & 156.1              &  7.29 & 102.7 \\
+  Pasillo     & 15.86 & 38.6               &  5.31 & 74.2 \\
+  \bottomrule
+\end{tabular}
+
+La eficiencia espectral cae de 13.53 a 5.31 bps/Hz, es decir, un factor 2.5 entre el
+exterior y el pasillo. La capacidad sigue la misma proporción porque el ancho de banda
+ocupado es prácticamente el mismo en las tres ubicaciones (13.9 a 14.1 MHz).
+
+\section{Conclusiones}
+
+Se caracterizó una red LTE de 850 MHz en tres escenarios. La potencia recibida varió de
+$-$29.16 dBFS en el exterior a $-$54.30 dBFS en el pasillo, con SNR de 40.7 a 15.9 dB y
+capacidades estimadas de 188.3 a 74.2 Mbps. El piso de ruido se mantuvo constante, lo que
+atribuye las diferencias a la propagación y a la multitrayectoria. En el pasillo los ecos
+fragmentaron el espectro de las portadoras en varios lóbulos, evidencia experimental de la
+dispersión del canal. La forma plana del espectro y la ocupación de 9 y 4.5 MHz confirman
+la naturaleza OFDM de LTE.
+
+\section{Referencias}
+
+\begin{enumerate}
+  \item 3GPP TS 36.101, \emph{User Equipment (UE) radio transmission and reception},
+        Release 15, 2018.
+  \item T. S. Rappaport, \emph{Wireless Communications: Principles and Practice},
+        2a ed., Prentice Hall, 2002.
+  \item A. Goldsmith, \emph{Wireless Communications}, Cambridge University Press, 2005.
+  \item V. I. Rodríguez Abdalá, \emph{Manual de Prácticas: Tecnologías Celulares},
+        UAZ, 2026.
+\end{enumerate}
+
+\end{document}

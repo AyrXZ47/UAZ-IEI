@@ -1,0 +1,172 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{9}{Modelado de canales MIMO y capacidad de sistemas de antena múltiple}
+
+\textbf{Script:} \texttt{practica9.py} (Python con NumPy)
+
+\section{Objetivo}
+
+Modelar canales MIMO Rayleigh, generar matrices de canal aleatorias y evaluar la capacidad
+de canal para configuraciones SISO, 2x2 y 4x4, analizando la influencia del número de
+antenas y de la relación señal a ruido.
+
+\section{Fundamento teórico}
+
+Un sistema MIMO se describe por
+\begin{equation}
+  \mathbf{y} = \mathbf{H}\mathbf{x} + \mathbf{n},
+\end{equation}
+donde $\mathbf{H}\in\mathbb{C}^{N_r\times N_t}$ es la matriz de canal, $\mathbf{x}$ el
+vector transmitido y $\mathbf{n}$ el ruido gaussiano. Para un canal Rayleigh con
+desvanecimiento i.i.d., cada entrada de $\mathbf{H}$ es una variable compleja gaussiana de
+media cero y varianza unitaria.
+
+La capacidad ergódica, suponiendo que el transmisor no conoce el canal y reparte la
+potencia por igual entre las $N_t$ antenas, es
+\begin{equation}
+  C = \mathbb{E}\left[\log_2\det\left(\mathbf{I}_{N_r}
+      + \frac{\rho}{N_t}\mathbf{H}\mathbf{H}^{H}\right)\right],
+\end{equation}
+con $\rho$ la SNR lineal. Para SISO se reduce a
+\begin{equation}
+  C_{\mathrm{SISO}} = \mathbb{E}\left[\log_2\left(1+\rho|h|^2\right)\right].
+\end{equation}
+Si se descompone $\mathbf{H}=\mathbf{U}\boldsymbol{\Sigma}\mathbf{V}^{H}$, la capacidad se
+escribe como
+\begin{equation}
+  C = \sum_{i=1}^{\min(N_t,N_r)}
+      \log_2\left(1+\frac{\rho}{N_t}\sigma_i^2\right),
+\end{equation}
+es decir, cada valor singular abre un subcanal paralelo con ganancia $\sigma_i^2$. El
+número de subcanales utilizables (ganancia de multiplexación) es
+$\min(N_t,N_r)$.
+
+\section{Desarrollo experimental}
+
+\subsection{Parámetros}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Configuraciones & SISO 1x1, MIMO 2x2, MIMO 4x4 \\
+  SNR & 0, 5, 10, 15, 20, 25 y 30 dB \\
+  Realizaciones por punto & 1000 \\
+  Distribución del canal & Rayleigh i.i.d., $\mathcal{CN}(0,1)$ \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Procedimiento}
+
+\begin{enumerate}
+  \item Para cada realización se genera $\mathbf{H}$ con entradas gaussianas complejas
+        normalizadas.
+  \item Se calcula la capacidad instantánea con la fórmula de determinante.
+  \item Se promedian 1000 realizaciones para obtener la capacidad ergódica.
+  \item Se obtienen los valores singulares de 1000 matrices 2x2 y 4x4 para estudiar su
+        distribución.
+\end{enumerate}
+
+\section{Código}
+
+\begin{codigo}
+def canal(nr, nt, rng):
+    return (rng.standard_normal((nr, nt))
+            + 1j * rng.standard_normal((nr, nt))) / np.sqrt(2)
+
+def capacidad(h, rho):
+    nr, nt = h.shape
+    return float(np.real(np.log2(np.linalg.det(
+        np.eye(nr) + (rho / nt) * h @ h.conj().T))))
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{Capacidad versus SNR}
+
+\begin{tabular}{@{}cccc@{}}
+  \toprule
+  SNR (dB) & SISO 1x1 & MIMO 2x2 & MIMO 4x4 \\
+  \midrule
+  0  & 0.86  & 1.69  & 3.35 \\
+  5  & 1.77  & 3.28  & 6.53 \\
+  10 & 2.96  & 5.56  & 10.89 \\
+  15 & 4.31  & 8.28  & 16.25 \\
+  20 & 5.81  & 11.37 & 22.17 \\
+  25 & 7.57  & 14.51 & 28.32 \\
+  30 & 9.18  & 17.78 & 34.98 \\
+  \bottomrule
+\end{tabular}
+
+\figura{figs/capacidad.png}{Capacidad ergódica de canales Rayleigh para SISO, 2x2 y 4x4.}
+
+La capacidad crece con la SNR y con el número de antenas. A 10 dB, el sistema 2x2 alcanza
+5.56 bps/Hz frente a 2.96 del SISO (1.88 veces), y el 4x4 llega a 10.89 bps/Hz (3.68 veces
+el SISO). Al duplicar el número de antenas de 2 a 4 la capacidad pasa de 5.56 a
+10.89 bps/Hz, casi exactamente el doble.
+
+\subsection{Valores singulares}
+
+\figura{figs/valores_singulares.png}{Distribución de los valores singulares de canales 2x2 y 4x4.}
+
+En el ejemplo 2x2 generado, los valores singulares fueron $\sigma_1=1.330$ y
+$\sigma_2=0.684$. La capacidad instantánea a 10 dB para esa matriz es la suma de dos
+términos, uno por cada subcanal. La dispersión de los valores singulares explica por qué la
+capacidad instantánea varía tanto alrededor de la media: cuando los $\sigma_i$ son
+similares, todos los subcanales aportan; cuando uno es muy pequeño, ese subcanal queda
+casi inutilizable.
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Por qué MIMO incrementa la capacidad?} Porque crea varios subcanales
+        espaciales en la misma banda de frecuencia. Con $N_t$ antenas y $N_r$ antenas se
+        pueden transmitir hasta $\min(N_t,N_r)$ flujos en paralelo, sin gastar más espectro
+        ni más potencia total.
+  \item \textbf{¿Cómo influye la SNR sobre el desempeño?} La capacidad crece de forma
+        aproximadamente logarítmica con la SNR: cada 3 dB adicionales añaden del orden de
+        1 bps/Hz por subcanal cuando la SNR es alta. A baja SNR los canales débiles aportan
+        poco.
+  \item \textbf{¿Qué sucede al duplicar el número de antenas?} La capacidad se
+        aproximadamente duplica, porque se duplica el número de subcanales paralelos. En la
+        simulación, 4x4 dio 34.98 bps/Hz frente a 17.78 de 2x2 a 30 dB.
+  \item \textbf{¿Qué representan físicamente los valores singulares de la matriz de canal?}
+        La ganancia (amplitud) de cada subcanal espacial independiente. Un valor singular
+        grande indica una dirección en la que el canal transmite bien; uno pequeño, una
+        dirección con desvanecimiento o alta atenuación.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Qué significa MIMO?} Multiple Input Multiple Output: uso de múltiples
+        antenas en transmisión y recepción para aumentar la capacidad, la confiabilidad o
+        la cobertura de un enlace inalámbrico.
+  \item \textbf{¿Cuál es la diferencia entre SISO y MIMO?} SISO usa una antena en cada
+        extremo y un solo flujo; MIMO usa varias antenas y puede transmitir varios flujos
+        simultáneos en la misma banda, además de aportar diversidad espacial.
+  \item \textbf{¿Qué es la capacidad de canal?} La máxima tasa de información que se puede
+        transmitir con una probabilidad de error arbitrariamente pequeña, dada una relación
+        señal a ruido y un ancho de banda. Se mide en bits por segundo por hertzio.
+  \item \textbf{¿Por qué LTE utiliza MIMO?} Para aumentar la tasa de datos y la robustez sin
+        necesitar más espectro. LTE usa MIMO 2x2 y 4x4 en el enlace descendente, con
+        multiplexación espacial y diversidad de transmisión.
+  \item \textbf{¿Qué ventaja ofrece un sistema 4x4 respecto de un 2x2?} Aproximadamente el
+        doble de capacidad en el mismo ancho de banda y con la misma SNR, porque ofrece
+        cuatro subcanales espaciales en lugar de dos. El costo es mayor complejidad de
+        procesamiento, más antenas y más consumo.
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se modelaron canales MIMO Rayleigh y se calculó su capacidad ergódica. A 10 dB se obtuvo
+2.96 bps/Hz para SISO, 5.56 para 2x2 y 10.89 para 4x4; a 30 dB, 9.18, 17.78 y
+34.98 bps/Hz, respectivamente. La capacidad crece de forma aproximadamente lineal con
+$\min(N_t,N_r)$ y logarítmica con la SNR. Los valores singulares del canal explican la
+variabilidad de la capacidad instantánea y confirman que MIMO aprovecha el espacio, no el
+espectro.
+
+\end{document}

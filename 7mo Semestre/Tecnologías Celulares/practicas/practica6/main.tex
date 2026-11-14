@@ -1,0 +1,166 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{6}{Demodulación de señales OFDM}
+
+\textbf{Script:} \texttt{practica6.py} (Python con NumPy/SciPy)
+
+\section{Objetivo}
+
+Implementar un receptor OFDM que recupere los símbolos transmitidos mediante la FFT,
+demodule QPSK y evalúe el desempeño del sistema a través de la tasa de error de bit para
+distintos valores de relación señal a ruido.
+
+\section{Fundamento teórico}
+
+El receptor OFDM aplica la FFT a cada símbolo recibido:
+\begin{equation}
+  Y[k] = \sum_{n=0}^{N-1} r[n]\,e^{-j2\pi kn/N} = X[k] + N[k],
+\end{equation}
+donde $N[k]$ es el ruido proyectado sobre la subportadora $k$. Gracias a la ortogonalidad,
+cada subportadora se demodula por separado y la decisión QPSK se toma comparando las
+partes real e imaginaria con cero.
+
+La tasa de error de bit se estima por Monte Carlo:
+\begin{equation}
+  \mathrm{BER} = \frac{N_e}{N_b},
+\end{equation}
+con $N_e$ bits erróneos y $N_b$ bits transmitidos. Para QPSK con mapeo Gray, la BER
+teórica en canal AWGN es
+\begin{equation}
+  P_b = Q\!\left(\sqrt{\frac{2E_b}{N_0}}\right).
+\end{equation}
+Si la energía por símbolo es $E_s=1$, entonces $E_b=E_s/2$ y la varianza total del ruido
+complejo por muestra se fija en $N_0=E_b/(E_b/N_0)$.
+
+\section{Desarrollo experimental}
+
+\subsection{Parámetros}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Bits por trama & 4096 \\
+  Tramas por punto de SNR & 50 (204\,800 bits) \\
+  Subportadoras & 64 \\
+  Modulación & QPSK \\
+  Canal & AWGN complejo \\
+  $E_b/N_0$ evaluados & 0 a 14 dB en pasos de 2 dB \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Procedimiento}
+
+\begin{enumerate}
+  \item Se generan 4096 bits aleatorios y se modulan en QPSK.
+  \item Se aplica la IFFT por bloques de 64 y se serializa la señal.
+  \item Se añade ruido gaussiano complejo con la varianza necesaria para el $E_b/N_0$
+        deseado.
+  \item En recepción se reordena la señal en bloques de 64, se aplica la FFT y se decide
+        bit por bit con el signo de $I$ y $Q$.
+  \item Se repite para 50 tramas por punto y se acumulan los errores.
+\end{enumerate}
+
+\section{Código}
+
+\begin{codigo}
+def recibir(rx, nfft=64):
+    y = np.fft.fft(rx.reshape(-1, nfft).T, axis=0) / np.sqrt(nfft)
+    return y.flatten(order="F")
+
+def demodular_qpsk(simbolos):
+    bits = np.empty(2 * len(simbolos), dtype=int)
+    bits[0::2] = np.real(simbolos) > 0
+    bits[1::2] = np.imag(simbolos) > 0
+    return bits
+
+sigma2 = 1 / (2 * 10 ** (ebn0_db / 10))   # Es = 1, Eb = Es/2
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{Constelaciones}
+
+\figura{figs/constelacion.png}{Constelación transmitida y constelación recibida con $E_b/N_0=10$ dB.}
+
+Con 10 dB la nube de ruido rodea cada punto de la constelación sin cruzar los ejes, por lo
+que la mayoría de los símbolos se decide correctamente. El error vectorial normalizado
+(RMS) medido fue de \textbf{0.224}, consistente con una relación $E_s/N_0=13$ dB.
+
+\subsection{Tasa de error de bit}
+
+\begin{tabular}{@{}ccc@{}}
+  \toprule
+  $E_b/N_0$ (dB) & BER simulada & BER teórica \\
+  \midrule
+  0  & 0.07912 & 0.07865 \\
+  2  & 0.03772 & 0.03751 \\
+  4  & 0.01289 & 0.01250 \\
+  6  & 0.002412 & 0.002388 \\
+  8  & 0.000200 & 0.000191 \\
+  10 & $4.88\times10^{-6}$ & $3.87\times10^{-6}$ \\
+  12 & 0 & $9.0\times10^{-9}$ \\
+  14 & 0 & $6.8\times10^{-13}$ \\
+  \bottomrule
+\end{tabular}
+
+\figura{figs/ber.png}{Curva de BER del sistema OFDM frente a la curva teórica de QPSK.}
+
+La simulación sigue la curva teórica hasta 10 dB. A partir de 12 dB no se registran
+errores en 204\,800 bits, lo que fija una cota superior de $4.9\times10^{-6}$, compatible
+con los valores teóricos del orden de $10^{-8}$.
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Cómo afecta el ruido a la constelación?} Convierte cada punto en una nube
+        gaussiana centrada en el símbolo transmitido. Al aumentar el ruido, la nube crece y
+        algunos símbolos cruzan los ejes, produciendo errores de bit.
+  \item \textbf{¿Qué ocurre con la BER al incrementar la SNR?} Disminuye de forma
+        aproximadamente exponencial: pasa de $7.9\times10^{-2}$ a 0 dB a
+        $4.9\times10^{-6}$ a 10 dB. La pendiente coincide con la de QPSK en AWGN.
+  \item \textbf{¿Por qué la FFT permite separar las subportadoras?} Porque las funciones
+        base son ortogonales: la FFT proyecta la señal recibida sobre cada una de ellas y
+        anula la contribución de las demás. Es la operación inversa de la IFFT del
+        transmisor.
+  \item \textbf{¿Qué diferencias existirían si las subportadoras no fueran ortogonales?}
+        Aparecería interferencia entre subportadoras (ICI): la energía de una se sumaría
+        como ruido en las vecinas, la constelación se dispersaría y la BER tendría un piso
+        que no bajaría al aumentar la potencia.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Cuál es la función de la FFT en un receptor OFDM?} Separar las
+        subportadoras ortogonales y entregar una muestra compleja por subportadora, que es
+        el símbolo transmitido más el ruido del canal.
+  \item \textbf{¿Qué representa la BER?} La fracción de bits que el receptor decide
+        incorrectamente respecto del total transmitido; es una medida directa de la
+        confiabilidad del enlace.
+  \item \textbf{¿Por qué OFDM utiliza múltiples subportadoras?} Para dividir un flujo de
+        alta velocidad en muchos flujos lentos, alargar el símbolo y hacer que cada
+        subcanal sea aproximadamente plano, lo que simplifica la ecualización y mejora la
+        robustez frente a la dispersión.
+  \item \textbf{¿Cómo se interpreta una constelación QPSK recibida?} Cada punto debería
+        estar en una de las cuatro esquinas; la dispersión alrededor de cada esquina mide
+        el ruido y la distorsión. Si la nube cruza los ejes, esos símbolos se deciden mal.
+  \item \textbf{¿Qué factores limitan el desempeño de un sistema OFDM?} El ruido térmico,
+        la interferencia entre subportadoras por desajustes de frecuencia o fase, la
+        dispersión del canal más allá del prefijo cíclico, la no linealidad del amplificador
+        (PAPR) y los errores de sincronización.
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se implementó un receptor OFDM completo y se midió su BER para $E_b/N_0$ de 0 a 14 dB. La
+curva simulada coincidió con la teoría de QPSK en AWGN: $7.91\times10^{-2}$ a 0 dB,
+$2.41\times10^{-3}$ a 6 dB y $4.88\times10^{-6}$ a 10 dB. La constelación recibida mostró
+la nube de ruido esperada y la FFT recuperó correctamente las 64 subportadoras. El
+resultado confirma que un enlace OFDM ideal, sin dispersión ni desajustes, se comporta
+como un conjunto de canales QPSK paralelos.
+
+\end{document}

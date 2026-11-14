@@ -1,0 +1,51 @@
+{
+  "m": 5,
+  "polinomio": "x^5 + x^2 + 1",
+  "longitud": 31,
+  "unos": 16,
+  "ceros": 15,
+  "autocorrelacion_pico": 1.0,
+  "autocorrelacion_secundaria": -0.03225806451612903,
+  "autocorrelacion_lineal_pico": 1.0,
+  "correlacion_cruzada_max": 0.3225806451612903,
+  "correlacion_cruzada_media": 0.09360126916975146,
+  "tabla_longitudes": [
+    {
+      "m": 4,
+      "polinomio": "x^4 + x^1 + 1",
+      "longitud_teorica": 15,
+      "longitud_observada": 15,
+      "unos": 8,
+      "ceros": 7
+    },
+    {
+      "m": 5,
+      "polinomio": "x^5 + x^2 + 1",
+      "longitud_teorica": 31,
+      "longitud_observada": 31,
+      "unos": 16,
+      "ceros": 15
+    },
+    {
+      "m": 6,
+      "polinomio": "x^6 + x^1 + 1",
+      "longitud_teorica": 63,
+      "longitud_observada": 63,
+      "unos": 32,
+      "ceros": 31
+    },
+    {
+      "m": 7,
+      "polinomio": "x^7 + x^3 + 1",
+      "longitud_teorica": 127,
+      "longitud_observada": 127,
+      "unos": 64,
+      "ceros": 63
+    }
+  ],
+  "balance_teorico": {
+    "unos": 16,
+    "ceros": 15
+  },
+  "periodo_observado": 31
+}

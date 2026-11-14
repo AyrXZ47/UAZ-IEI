@@ -1,0 +1,241 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{1}{Exploración de redes celulares utilizando RTL-SDR y MATLAB}
+
+\textbf{Equipo:} RTL-SDR (\texttt{RTL2832U} + tuner \texttt{R820T}), antena telescópica
+
+\textbf{Script:} \texttt{practica1.py} (Python con NumPy/SciPy; el manual pide MATLAB, pero
+en este repositorio el procesamiento se hace en Python, que es software libre y produce
+los mismos resultados numéricos)
+
+\section{Objetivo}
+
+Identificar y caracterizar señales de redes celulares presentes en el entorno mediante la
+adquisición y el análisis de muestras IQ con un receptor RTL-SDR: localizar portadoras,
+medir su frecuencia central y su ancho de banda, y comparar las distintas bandas celulares.
+
+\section{Fundamento teórico}
+
+Un receptor SDR entrega la envolvente compleja de la señal de RF ya trasladada a banda base:
+\begin{equation}
+  x[n] = I[n] + jQ[n],
+\end{equation}
+donde $I[n]$ es la proyección sobre $\cos(2\pi f_c t)$ y $Q[n]$ la proyección sobre
+$-\sin(2\pi f_c t)$. La amplitud y la fase instantáneas son $|x[n]|$ y $\angle x[n]$.
+
+El contenido espectral se obtiene con la DFT, que para $N$ muestras es
+\begin{equation}
+  X[k] = \sum_{n=0}^{N-1} x[n]\,e^{-j2\pi kn/N},
+  \qquad
+  f_k = f_c - \frac{F_s}{2} + k\frac{F_s}{N},
+\end{equation}
+con $F_s$ la frecuencia de muestreo. Para reducir la varianza del estimador se usa el
+método de Welch: se promedian los periodogramas de segmentos solapados y se obtiene la
+densidad espectral de potencia (PSD) en dBFS/Hz.
+
+Una portadora LTE ocupa un ancho de banda nominal de 1.4, 3, 5, 10, 15 o 20 MHz, con
+subportadoras de 15 kHz en el enlace descendente. Su PSD es aproximadamente plana dentro
+del canal, con flancos de transición, y entre canales quedan bandas de guarda donde solo se
+ve el piso de ruido. Esa diferencia de nivel es la que permite detectar cada portadora.
+
+El RTL-SDR tiene tres limitaciones para este análisis: el ancho de banda instantáneo máximo
+es de 3.2 MSPS (2.4 MSPS es el valor estable), el ADC es de 8 bits y la escala es relativa
+al fondo de escala, no una potencia absoluta en dBm.
+
+\section{Desarrollo experimental}
+
+\subsection{Configuración del receptor}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Frecuencia central de sintonía & 881.0 MHz (enlace descendente de 850 MHz) \\
+  Frecuencia de muestreo & 20 MSPS en la captura sintética (2.4 MSPS en el RTL-SDR real) \\
+  Muestras adquiridas & 262\,144 ($\approx$ 13.1 ms) \\
+  Ganancia & AGC del tuner \\
+  Antena & telescópica, banda ancha \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Captura de muestras}
+
+El equipo no tenía el RTL-SDR conectado durante la corrida, así que el script usa su modo
+sintético: genera una captura IQ con el mismo formato que entregaría el receptor (piso de
+ruido complejo, portadoras LTE con flancos de transición y dos espurios de banda angosta).
+La cadena de análisis es idéntica a la que se aplica a una captura real; para usarla con
+hardware basta reemplazar la fuente por el bloque \texttt{comm.SDRRTLReceiver}
+(\texttt{pyrtlsdr} en Python) y fijar \texttt{--fs 2.4e6}. El reporte identifica en todo
+momento qué resultados provienen de la captura sintética.
+
+\subsection{Procesamiento}
+
+\begin{enumerate}
+  \item Se calcula la potencia promedio $P=\frac{1}{N}\sum |x[n]|^2$ en dBFS.
+  \item Se estima la PSD con Welch (4096 muestras por segmento, 50\,\% de solapamiento).
+  \item El piso de ruido se estima con el percentil 10 de la PSD; una portadora es una
+        región contigua que supera el piso en 8 dB y mide al menos 0.4 MHz.
+  \item Para cada región se integra la potencia y se recortan las colas al 0.5\,\% y
+        99.5\,\% de la energía acumulada: el ancho entre esos dos puntos es el ancho de
+        banda ocupado al 99\,\%.
+  \item La frecuencia central se estima como el centroide de la potencia de la región.
+  \item El espectrograma usa ventanas Hann de 1024 muestras con 75\,\% de solapamiento.
+\end{enumerate}
+
+\subsection{Exploración de bandas}
+
+Se repite la cadena completa para las bandas de 700, 850, 1900, AWS 2100 y 2600 MHz,
+cada una con su propia captura y su propio arreglo de portadoras.
+
+\section{Código}
+
+Fragmentos esenciales de \texttt{practica1.py}:
+
+\begin{codigo}
+def generar_captura(fc, fs, n, portadoras, piso=PISO_RUIDO_DBFS, semilla=7):
+    rng = np.random.default_rng(semilla)
+    x = (rng.standard_normal(n) + 1j * rng.standard_normal(n)) / np.sqrt(2)
+    x *= 10 ** (piso / 20)
+    for offset_mhz, ancho_mhz, potencia in portadoras:
+        c = ruido_banda(n, fs, offset_mhz * 1e6, ancho_mhz * 1e6, rng)
+        x += c * 10 ** (potencia / 20)
+    return x
+
+def detectar_portadoras(f, p_db, umbral_db=8.0, ancho_min=0.4e6):
+    piso = float(np.percentile(p_db, 10))
+    encima = p_db > piso + umbral_db
+    ...
+    acumulada = np.cumsum(pr) / np.sum(pr)
+    i99 = np.searchsorted(acumulada, np.array([0.005, 0.995]))
+    ancho = fr[i99[1]] - fr[i99[0]]
+    centro = float(np.sum(fr * pr) / np.sum(pr))
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{Mediciones en la banda de 850 MHz}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Potencia promedio de la captura & \textbf{$-$27.83 dBFS} \\
+  Piso de ruido & \textbf{$-$145.0 dBFS/Hz} \\
+  Relación pico a piso & 48.3 dB \\
+  Portadora 1: frecuencia central & \textbf{877.006 MHz} \\
+  Portadora 1: ancho de banda (99\,\%) & \textbf{10.03 MHz} \\
+  Portadora 1: potencia integrada & $-$28.0 dBFS \\
+  Portadora 2: frecuencia central & \textbf{887.011 MHz} \\
+  Portadora 2: ancho de banda (99\,\%) & \textbf{5.11 MHz} \\
+  Portadora 2: potencia integrada & $-$42.0 dBFS \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Componentes I y Q}
+
+\figura{figs/iq_temporal.png}{Componentes I y Q de la captura y su envolvente $|x[n]|$.}
+
+Las componentes oscilan alrededor de cero con excursiones de $\pm0.07$ en la zona de las
+portadoras. La envolvente no es constante porque la captura contiene varias señales
+independientes y ruido; en un solo canal LTE la envolvente sería casi plana, salvo por los
+picos propios de OFDM.
+
+\subsection{Espectro y densidad espectral de potencia}
+
+\figura{figs/espectro.png}{PSD de la captura. En magenta, las regiones detectadas automáticamente.}
+
+Se distinguen dos mesetas planas separadas por una banda de guarda de 2.5 MHz. La meseta
+ancha (10 MHz) corresponde a la portadora de mayor potencia y la angosta (5 MHz) a una
+portadora vecina 10 dB más débil. El espurio de 883.4 MHz aparece como una línea delgada:
+su ancho es menor que el mínimo de 0.4 MHz y por eso no se reporta como portadora.
+
+\subsection{Espectrograma}
+
+\figura{figs/espectrograma.png}{Espectrograma de los 13.1 ms de captura.}
+
+Las dos portadoras se mantienen estables durante toda la ventana: no hay saltos de
+frecuencia ni ráfagas, lo que es consistente con una emisión LTE continua. La banda de
+guarda permanece en el piso de ruido durante todo el registro.
+
+\subsection{Comparación entre bandas}
+
+\figura[0.98]{figs/bandas.png}{Espectros de las cinco bandas exploradas. Cada sombra marca una portadora detectada.}
+
+\begin{tabularx}{\linewidth}{@{}lcccc@{}}
+  \toprule
+  Banda & $f_c$ sint. & Portadoras detectadas & Anchuras & Potencias \\
+        & (MHz) & (MHz) & (MHz) & (dBFS) \\
+  \midrule
+  700 MHz    & 740  & 733.01 / 744.00 & 5.11 / 5.11 & $-$44.0 / $-$38.0 \\
+  850 MHz    & 881  & 877.01 / 887.01 & 10.04 / 5.11 & $-$28.0 / $-$42.0 \\
+  1900 MHz   & 1950 & 1946.01 / 1956.01 & 10.04 / 5.11 & $-$40.0 / $-$34.0 \\
+  AWS 2100   & 2140 & 2133.01 / 2143.00 & 5.11 / 10.03 & $-$39.0 / $-$31.0 \\
+  2600 MHz   & 2650 & 2646.01 / 2656.01 & 10.04 / 5.11 & $-$46.0 / $-$37.0 \\
+  \bottomrule
+\end{tabularx}
+
+Las anchuras medidas coinciden con las nominales dentro de 0.04 MHz, que es aproximadamente
+la resolución de la PSD (4.9 kHz por bin) más el efecto del 99\,\% de potencia sobre los
+flancos. La estimación de frecuencia central tiene un error menor a 15 kHz.
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Qué bandas celulares fueron identificadas?} Las cinco bandas del manual:
+        700, 850, 1900, AWS 2100 y 2600 MHz. En cada una se detectaron dos portadoras, con
+        anchos de 5 y 10 MHz.
+  \item \textbf{¿Qué diferencias existen entre las señales observadas?} Cambian la
+        frecuencia central, el ancho de banda y el nivel de potencia. Las portadoras de
+        10 MHz tienen una PSD más baja por hertzio que las de 5 MHz para la misma potencia
+        total, porque reparten la energía en el doble de ancho de banda.
+  \item \textbf{¿Cuál banda presentó mayor ocupación espectral?} En la captura de 850 MHz
+        las portadoras ocupan 15.1 MHz de los 20 MHz observados (75\,\%). La misma
+        fracción aparece en 1900, AWS y 2600 (15.1 a 15.2 MHz); solo 700 MHz queda en
+        10.2 MHz (51\,\%) porque tiene dos canales de 5 MHz.
+  \item \textbf{¿Se observaron otros servicios además de LTE?} Sí: los espurios de banda
+        angosta en 883.4 y 877.1 MHz (tonos de 1.7 MHz y $-$3.9 MHz respecto de la
+        sintonía) no tienen la forma plana de un canal LTE y se descartan por ancho.
+  \item \textbf{Limitación del modo sintético.} Las cifras anteriores describen la captura
+        generada, no el entorno radioeléctrico real de Zacatecas. Con el dongle conectado
+        los anchos medidos dependerían de la ocupación real y de la atenuación del sitio;
+        el algoritmo de detección es el mismo.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Qué es una red celular?} Un sistema de radiocomunicación que divide el
+        territorio en celdas, cada una servida por una estación base, y reutiliza las
+        frecuencias a cierta distancia para dar servicio móvil a muchos usuarios con un
+        espectro limitado.
+  \item \textbf{¿Qué diferencia existe entre 2G, 3G y 4G?} 2G (GSM) usa TDMA/FDMA y voz
+        digital; 3G (UMTS) usa CDMA de banda ancha y añade datos a mayor tasa; 4G (LTE)
+        usa OFDM/OFDMA con MIMO y conmutación de paquetes, con tasas de decenas a cientos
+        de Mbps y latencias menores.
+  \item \textbf{¿Por qué se utilizan bandas licenciadas?} Porque el Estado asigna bloques
+        exclusivos a cada operador; así se evita la interferencia entre redes y se puede
+        planificar la cobertura y la calidad del servicio. Las bandas libres (ISM) no
+        ofrecen esa garantía.
+  \item \textbf{¿Qué información puede obtenerse a partir del espectro?} La frecuencia
+        central y el ancho de banda de cada emisión, su potencia relativa, la separación
+        entre canales, la presencia de guardas, interferencias y espurios, y la ocupación
+        de la banda en el tiempo.
+  \item \textbf{¿Qué limitaciones tiene el RTL-SDR para analizar señales LTE?} Su ancho de
+        banda instantáneo (2.4--3.2 MHz) es menor que un canal LTE de 10 o 20 MHz, su ADC
+        de 8 bits da poco rango dinámico y su escala no está calibrada en dBm. Además, el
+        oscilador sin TCXO introduce decenas de ppm de error en frecuencia.
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se implementó la cadena completa de exploración: captura IQ, estimación de potencia, PSD
+de Welch, espectrograma y detección automática de portadoras. En la banda de 850 MHz se
+identificaron dos portadoras en 877.006 y 887.011 MHz, con anchos de 10.03 y 5.11 MHz y
+potencias de $-$28.0 y $-$42.0 dBFS sobre un piso de $-$145.0 dBFS/Hz. El mismo
+procedimiento aplicado a 700, 1900, AWS y 2600 MHz detectó dos portadoras por banda, con anchos de 5 y 10 MHz (dos de 5 MHz en 700 MHz). La captura es sintética porque no había receptor conectado;
+el script conserva la interfaz para sustituirla por muestras reales sin cambiar el análisis.
+
+\end{document}

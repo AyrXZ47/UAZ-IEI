@@ -1,0 +1,170 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{10}{Detección de símbolos en sistemas MIMO utilizando ZF y MMSE}
+
+\textbf{Script:} \texttt{practica10.py} (Python con NumPy)
+
+\section{Objetivo}
+
+Implementar los detectores Zero-Forcing (ZF) y Minimum Mean Square Error (MMSE) para un
+sistema MIMO 2x2 con modulación BPSK y comparar su desempeño mediante simulaciones de la
+tasa de error de bit.
+
+\section{Fundamento teórico}
+
+El modelo del sistema es
+\begin{equation}
+  \mathbf{y} = \mathbf{H}\mathbf{x} + \mathbf{n},
+  \qquad
+  \mathbf{H}\in\mathbb{C}^{N_r\times N_t}.
+\end{equation}
+Cada antena transmisora envía un símbolo BPSK $\pm1$ y el receptor observa una mezcla de
+ambos flujos más ruido. Los detectores lineales estiman $\mathbf{x}$ con una matriz
+$\mathbf{W}$:
+\begin{equation}
+  \hat{\mathbf{x}} = \mathbf{W}\mathbf{y}.
+\end{equation}
+
+\paragraph{Zero-Forcing.} Anula por completo la interferencia entre flujos:
+\begin{equation}
+  \mathbf{W}_{\mathrm{ZF}} = \left(\mathbf{H}^{H}\mathbf{H}\right)^{-1}\mathbf{H}^{H}.
+\end{equation}
+Su desventaja es que amplifica el ruido cuando $\mathbf{H}$ está mal condicionada: la
+potencia de ruido a la salida es proporcional a
+$\left(\mathbf{H}^{H}\mathbf{H}\right)^{-1}$.
+
+\paragraph{MMSE.} Minimiza el error cuadrático medio y balancea interferencia y ruido:
+\begin{equation}
+  \mathbf{W}_{\mathrm{MMSE}} = \left(\mathbf{H}^{H}\mathbf{H}
+      + \frac{1}{\rho}\mathbf{I}\right)^{-1}\mathbf{H}^{H},
+\end{equation}
+con $\rho$ la SNR lineal. A alta SNR el término $1/\rho$ se vuelve despreciable y MMSE
+tiende a ZF; a baja SNR prefiere no invertir los modos débiles del canal.
+
+\section{Desarrollo experimental}
+
+\subsection{Parámetros}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Antenas & $N_t=N_r=2$ \\
+  Modulación & BPSK ($\pm1$) \\
+  Canal & Rayleigh i.i.d., $\mathcal{CN}(0,1)$ \\
+  Bits por realización & 10\,000 por antena \\
+  Realizaciones por punto & 500 \\
+  $E_b/N_0$ & 0 a 20 dB en pasos de 2 dB \\
+  Varianza del ruido & $\sigma^2=1/\rho$ (potencia unitaria por antena) \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Procedimiento}
+
+\begin{enumerate}
+  \item Se generan bits independientes para las dos antenas y se convierten a $\pm1$.
+  \item Se genera una matriz $\mathbf{H}$ Rayleigh por realización y se calcula
+        $\mathbf{y}=\mathbf{H}\mathbf{x}+\mathbf{n}$.
+  \item Se aplican los detectores ZF y MMSE a la misma observación.
+  \item Se decide por el signo de la parte real y se acumulan los errores de ambos
+        detectores.
+\end{enumerate}
+
+\section{Código}
+
+\begin{codigo}
+w_zf = np.linalg.inv(h.conj().T @ h) @ h.conj().T
+w_mmse = np.linalg.inv(h.conj().T @ h + (1 / rho) * np.eye(NT)) @ h.conj().T
+
+err_zf += np.sum((np.real(w_zf @ y) > 0).astype(int) != bits)
+err_mmse += np.sum((np.real(w_mmse @ y) > 0).astype(int) != bits)
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{BER versus $E_b/N_0$}
+
+\begin{tabular}{@{}ccc@{}}
+  \toprule
+  $E_b/N_0$ (dB) & BER ZF & BER MMSE \\
+  \midrule
+  0  & 0.15521 & 0.09651 \\
+  2  & 0.11223 & 0.06692 \\
+  4  & 0.07886 & 0.04462 \\
+  6  & 0.04251 & 0.02476 \\
+  8  & 0.03649 & 0.01838 \\
+  10 & 0.02507 & 0.01221 \\
+  12 & 0.01741 & 0.00827 \\
+  14 & 0.01017 & 0.00518 \\
+  16 & 0.00837 & 0.00428 \\
+  18 & 0.00221 & 0.00166 \\
+  20 & 0.00148 & 0.00102 \\
+  \bottomrule
+\end{tabular}
+
+\figura{figs/ber.png}{Curvas de BER de los detectores ZF y MMSE.}
+
+MMSE es mejor en todo el rango simulado, con una ventaja máxima a baja SNR: a 0 dB reduce
+la BER de 0.155 a 0.097 y a 10 dB de 0.0251 a 0.0122 (factor 2.05). A 18--20 dB las curvas
+se acercan, como predice la teoría, porque el término de ruido de la matriz MMSE se vuelve
+despreciable.
+
+\subsection{Constelaciones recuperadas}
+
+\figura{figs/constelaciones.png}{Símbolos detectados por ZF y MMSE a $E_b/N_0=10$ dB (primer flujo).}
+
+Con ZF la nube es más ancha y aparecen puntos alejados del eje real: la inversión del canal
+amplificó el ruido en las direcciones débiles. Con MMSE la dispersión es menor, sobre todo
+en los símbolos que caen cerca del origen.
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Por qué MMSE suele superar a ZF?} Porque no invierte por completo el canal:
+        añade un término de regularización $1/\rho$ que evita amplificar el ruido en los
+        modos con poca ganancia. A cambio acepta algo de interferencia residual.
+  \item \textbf{¿En qué condiciones ambos detectores presentan desempeños similares?} A alta
+        SNR, cuando $1/\rho$ es pequeño frente a los valores propios de
+        $\mathbf{H}^{H}\mathbf{H}$; en ese límite MMSE converge a ZF.
+  \item \textbf{¿Cómo afecta el ruido a cada detector?} ZF elimina la interferencia pero
+        amplifica el ruido según el condicionamiento de $\mathbf{H}$; MMSE reparte el error
+        entre interferencia y ruido, por lo que es más robusto cuando el canal está mal
+        condicionado.
+  \item \textbf{¿Qué ventajas ofrece cada método?} ZF es simple y elimina totalmente la
+        interferencia entre flujos; MMSE es óptimo en el sentido de mínimo error cuadrático
+        medio y funciona mejor a baja SNR. Ambos son lineales y de bajo costo comparados
+        con detectores no lineales como ML o V-BLAST.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Qué hace el detector ZF?} Aplica la pseudo-inversa del canal para anular la
+        interferencia entre los flujos transmitidos y recuperar cada símbolo por separado.
+  \item \textbf{¿Qué desventaja presenta ZF?} Amplifica el ruido cuando la matriz de canal
+        está mal condicionada o tiene desvanecimientos profundos, lo que degrada la BER a
+        baja SNR.
+  \item \textbf{¿Qué ventaja tiene MMSE?} Balancea la interferencia y el ruido mediante la
+        regularización $1/\rho$, por lo que ofrece menor BER que ZF, especialmente a baja
+        SNR.
+  \item \textbf{¿Por qué MMSE considera la potencia de ruido?} Porque su criterio es
+        minimizar $\mathbb{E}\{|\hat{\mathbf{x}}-\mathbf{x}|^2\}$, que depende de la
+        varianza del ruido; el término $1/\rho$ es precisamente la inversa de la SNR.
+  \item \textbf{¿Qué detector utiliza LTE con técnicas avanzadas de recepción?} LTE usa
+        ecualización MMSE (y variantes como MMSE-IRC para interferencia) en el receptor,
+        junto con cancelación sucesiva de interferencia y detección ML en esquemas
+        avanzados.
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se implementaron los detectores ZF y MMSE para un MIMO 2x2 con BPSK sobre canal Rayleigh.
+MMSE presentó menor BER en todo el rango, con una mejora de 2.05 veces a 10 dB
+(0.0122 frente a 0.0251) y una diferencia que se reduce a alta SNR. Las constelaciones
+mostraron la amplificación de ruido característica de ZF. El experimento confirma que la
+regularización de MMSE es la opción práctica cuando la SNR no es alta.
+
+\end{document}

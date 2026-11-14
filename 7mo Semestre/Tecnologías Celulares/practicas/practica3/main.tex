@@ -1,0 +1,190 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{3}{Implementación de un sistema DSSS}
+
+\textbf{Script:} \texttt{practica3.py} (Python con NumPy/SciPy)
+
+\section{Objetivo}
+
+Implementar un sistema de espectro disperso por secuencia directa (DSSS), verificar el
+ensanchamiento espectral que produce el código PN y evaluar la recuperación de los datos
+frente al ruido mediante la tasa de error de bit.
+
+\section{Fundamento teórico}
+
+En DSSS la señal de información $b(t)$ se multiplica por un código pseudoaleatorio $c(t)$
+de velocidad mucho mayor:
+\begin{equation}
+  s(t) = b(t)\,c(t).
+\end{equation}
+Cada bit de datos se transmite como $N$ chips. Si $R_b$ es la velocidad de datos y $R_c$
+la velocidad de chips, la ganancia de procesamiento es
+\begin{equation}
+  G_p = \frac{R_c}{R_b} = N,
+  \qquad
+  G_{p,\mathrm{dB}} = 10\log_{10} N.
+\end{equation}
+Para $N=31$, $G_p=14.91$ dB. El ancho de banda ocupado crece en el mismo factor, de modo
+que la densidad espectral de potencia baja proporcionalmente.
+
+En el receptor, la correlación con el código local,
+\begin{equation}
+  z = \sum_{k=0}^{N-1} r[k]\,c[k],
+\end{equation}
+suma coherentemente la señal útil (ganancia $N$) y solo suma incoherentemente el ruido
+(ganancia $\sqrt{N}$), con lo que la relación señal a ruido de la decisión mejora en $N$.
+Con chips de energía unitaria, la energía por bit es $E_b=N$ y la BER coincide con la de
+BPSK:
+\begin{equation}
+  P_b = Q\!\left(\sqrt{\frac{2E_b}{N_0}}\right).
+\end{equation}
+La ventaja del DSSS no es reducir la BER para un $E_b/N_0$ dado, sino tolerar
+interferencia de banda angosta: al desdispersar, una interferencia concentrada en
+frecuencia se reparte y se atenúa en $G_p$.
+
+\section{Desarrollo experimental}
+
+\subsection{Parámetros}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Bits de la demostración & 100 \\
+  Código PN & $m=5$, $x^5+x^2+1$, 31 chips \\
+  Chips por bit & 31 \\
+  Ganancia de procesamiento & 14.91 dB \\
+  Modulación & BPSK bipolar \\
+  Canal & AWGN complejo \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Procedimiento}
+
+\begin{enumerate}
+  \item Se generan 100 bits aleatorios y se convierten a $\pm1$.
+  \item Cada bit se multiplica por el código PN de 31 chips (\texttt{kron}), produciendo
+        3100 chips.
+  \item Se compara la PSD de la señal de datos (cada bit repetido durante 31 chips) con la
+        de la señal dispersa.
+  \item Para la curva de BER se simulan 200\,000 bits por punto de $E_b/N_0$. El ruido
+        complejo tiene varianza $N/E_bN_0$ para que la energía por bit sea $E_b=N$ y la
+        comparación con BPSK sea directa.
+  \item El receptor correlaciona cada bloque de 31 chips con el código y decide por el
+        signo de la parte real.
+\end{enumerate}
+
+\section{Código}
+
+\begin{codigo}
+def dispersar(bits, codigo):
+    return np.kron(2 * np.asarray(bits) - 1, codigo)
+
+def simular_ber(ebn0_db, codigo, nbits=200_000, rng=None):
+    ebn0 = 10 ** (ebn0_db / 10)
+    bits = rng.integers(0, 2, nbits)
+    tx = dispersar(bits, codigo)
+    sigma2 = N / ebn0                       # Eb = N chips de energia unitaria
+    ruido = np.sqrt(sigma2 / 2) * (rng.standard_normal(tx.size)
+                                   + 1j * rng.standard_normal(tx.size))
+    z = np.real(desdispersar(tx + ruido, codigo, nbits))
+    return float(np.mean((z > 0).astype(int) != bits))
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{Señal dispersa}
+
+\figura{figs/senal_dsss.png}{Dos bits dispersados con el código PN de 31 chips.}
+
+Cada bit se convierte en una ráfaga de 31 chips de $\pm1$; los cambios de bit se ven como
+un cambio de polaridad del código, no como un pulso rectangular.
+
+\subsection{Espectro}
+
+\figura{figs/espectro.png}{PSD de la señal de datos y de la señal DSSS, normalizadas.}
+
+La señal de datos concentra su energía en un lóbulo de ancho relativo
+$1/31\approx0.032$; la señal dispersa ocupa todo el ancho de banda disponible
+($f/F_s$ de $-0.5$ a $0.5$). El ensanchamiento es de 31 veces, es decir, 14.91 dB, y la
+densidad espectral baja en la misma proporción.
+
+\subsection{Tasa de error de bit}
+
+\begin{tabular}{@{}cccc@{}}
+  \toprule
+  $E_b/N_0$ (dB) & BER simulada & BER teórica BPSK & Error relativo \\
+  \midrule
+  0  & 0.078995 & 0.078650 & 0.4\,\% \\
+  2  & 0.038355 & 0.037506 & 2.3\,\% \\
+  4  & 0.012360 & 0.012501 & 1.1\,\% \\
+  6  & 0.002400 & 0.002388 & 0.5\,\% \\
+  8  & 0.000170 & 0.000191 & 11\,\% \\
+  10 & $<5\times10^{-6}$ & $3.87\times10^{-6}$ & --- \\
+  \bottomrule
+\end{tabular}
+
+\figura{figs/ber.png}{BER del DSSS comparada con la curva teórica de BPSK.}
+
+La simulación sigue la curva teórica dentro del error estadístico de Monte Carlo. A
+10 dB no se registró ningún error en 200\,000 bits, lo que fija una cota superior de
+$5\times10^{-6}$, consistente con el valor teórico $3.9\times10^{-6}$. A 8 dB la
+discrepancia es mayor porque se esperan solo 38 errores en 200\,000 bits.
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Cómo cambia el espectro después del proceso de dispersión?} Se ensancha
+        por un factor $N=31$ y su densidad espectral baja 14.91 dB. La forma es
+        aproximadamente plana porque el código PN tiene espectro plano.
+  \item \textbf{¿Cuál es la función del código PN?} Multiplicar los datos por una secuencia
+        de alta velocidad conocida por el receptor. Eso reparte la energía en banda ancha
+        y permite recuperar los datos por correlación, rechazando interferencias y
+        separando usuarios.
+  \item \textbf{¿Por qué se recuperan los datos mediante correlación?} Porque el código
+        local solo coincide con la réplica recibida en el retardo correcto; en ese punto
+        las 31 contribuciones se suman coherentemente y producen un valor $\pm N$, mientras
+        que el ruido y las señales no sincronizadas se suman de forma incoherente.
+  \item \textbf{¿Qué ocurre cuando aumenta la longitud del código?} Aumenta la ganancia de
+        procesamiento, el ancho de banda ocupado y la inmunidad a interferencia, pero se
+        reduce la velocidad de datos para un ancho de banda fijo y crece la complejidad de
+        sincronización.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Qué es DSSS?} Espectro disperso por secuencia directa: una técnica en la
+        que la información se multiplica por un código pseudoaleatorio de alta velocidad,
+        de modo que la señal ocupa mucho más ancho de banda que el necesario para los
+        datos.
+  \item \textbf{¿Qué es la ganancia de procesamiento?} La relación entre la velocidad de
+        chips y la de datos, $G_p=R_c/R_b=N$. Expresada en dB, es la mejora en la relación
+        señal a ruido que se obtiene al desdispersar.
+  \item \textbf{¿Por qué DSSS ofrece inmunidad al ruido?} Porque el receptor integra
+        coherentemente $N$ chips de la señal útil, mientras que el ruido se integra
+        incoherentemente: la SNR de la decisión mejora en $N$. Además, una interferencia de
+        banda angosta se dispersa al desdispersar y se atenúa en $G_p$.
+  \item \textbf{¿Qué aplicaciones tuvo DSSS en sistemas celulares?} Fue la base de IS-95
+        (cdmaOne) y de UMTS/WCDMA, donde los códigos PN y las secuencias de
+        scrambling separan usuarios y celdas. También se usa en Wi-Fi (DSSS en 802.11b),
+        GPS y comunicaciones militares.
+  \item \textbf{¿Cuál es la diferencia entre DSSS y FHSS?} En DSSS la señal ocupa
+        simultáneamente toda la banda y se dispersa con un código; en FHSS la portadora
+        salta de frecuencia en frecuencia siguiendo una secuencia pseudoaleatoria. DSSS
+        dispersa en frecuencia, FHSS diversifica en frecuencia.
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se implementó un sistema DSSS con un código PN de 31 chips y se verificó un ensanchamiento
+espectral de 31 veces (14.91 dB de ganancia de procesamiento). La BER simulada coincidió
+con la curva teórica de BPSK para $E_b/N_0$ de 0 a 8 dB, y a 10 dB no se registraron
+errores en 200\,000 bits. El resultado confirma que el DSSS no mejora la BER en un canal
+AWGN puro, sino que aporta inmunidad frente a interferencia y permite el acceso múltiple
+por código.
+
+\end{document}

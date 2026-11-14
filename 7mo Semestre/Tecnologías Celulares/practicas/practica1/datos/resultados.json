@@ -1,0 +1,115 @@
+{
+  "receptor": "RTL-SDR (captura sintética; el equipo no estaba conectado)",
+  "fs_mhz": 20.0,
+  "muestras": 262144,
+  "fc_mhz": 881.0,
+  "potencia_dbfs": -27.830109076513665,
+  "piso_ruido_dbfs_hz": -145.01822602492797,
+  "snr_db": 48.26605384736786,
+  "portadoras": [
+    {
+      "centro_mhz": -3.9943897885123483,
+      "ancho_mhz": 10.029296875,
+      "potencia_dbfs": -27.999135162725374,
+      "centro_mhz_abs": 877.0056102114877
+    },
+    {
+      "centro_mhz": 6.01143571744296,
+      "ancho_mhz": 5.1123046875,
+      "potencia_dbfs": -41.99932400536737,
+      "centro_mhz_abs": 887.011435717443
+    }
+  ],
+  "bandas": {
+    "700 MHz": {
+      "fc_mhz": 740.0,
+      "piso_ruido_dbfs_hz": -145.35824057403505,
+      "portadoras": [
+        {
+          "centro_mhz": -6.993408498823406,
+          "ancho_mhz": 5.1123046875,
+          "potencia_dbfs": -43.99802285815666,
+          "centro_mhz_abs": 733.0065915011766
+        },
+        {
+          "centro_mhz": 4.002585989946762,
+          "ancho_mhz": 5.107421875,
+          "potencia_dbfs": -38.00216176438517,
+          "centro_mhz_abs": 744.0025859899467
+        }
+      ]
+    },
+    "850 MHz": {
+      "fc_mhz": 881.0,
+      "piso_ruido_dbfs_hz": -145.0347298662203,
+      "portadoras": [
+        {
+          "centro_mhz": -3.9884373545693084,
+          "ancho_mhz": 10.0390625,
+          "potencia_dbfs": -28.000726421467572,
+          "centro_mhz_abs": 877.0115626454307
+        },
+        {
+          "centro_mhz": 6.0136828660451265,
+          "ancho_mhz": 5.1123046875,
+          "potencia_dbfs": -42.004120224229226,
+          "centro_mhz_abs": 887.0136828660451
+        }
+      ]
+    },
+    "1900 MHz": {
+      "fc_mhz": 1950.0,
+      "piso_ruido_dbfs_hz": -145.0347268734282,
+      "portadoras": [
+        {
+          "centro_mhz": -3.988567852038936,
+          "ancho_mhz": 10.0390625,
+          "potencia_dbfs": -39.998619907958584,
+          "centro_mhz_abs": 1946.0114321479612
+        },
+        {
+          "centro_mhz": 6.013668389316436,
+          "ancho_mhz": 5.1123046875,
+          "potencia_dbfs": -34.00509592591534,
+          "centro_mhz_abs": 1956.0136683893165
+        }
+      ]
+    },
+    "AWS 2100 MHz": {
+      "fc_mhz": 2140.0,
+      "piso_ruido_dbfs_hz": -145.02131934967576,
+      "portadoras": [
+        {
+          "centro_mhz": -6.993445386285491,
+          "ancho_mhz": 5.1123046875,
+          "potencia_dbfs": -38.99956483359616,
+          "centro_mhz_abs": 2133.0065546137143
+        },
+        {
+          "centro_mhz": 3.0016604454260203,
+          "ancho_mhz": 10.0341796875,
+          "potencia_dbfs": -30.998915158408128,
+          "centro_mhz_abs": 2143.001660445426
+        }
+      ]
+    },
+    "2600 MHz": {
+      "fc_mhz": 2650.0,
+      "piso_ruido_dbfs_hz": -145.03878209880895,
+      "portadoras": [
+        {
+          "centro_mhz": -3.9887192967858844,
+          "ancho_mhz": 10.0390625,
+          "potencia_dbfs": -45.99219324933568,
+          "centro_mhz_abs": 2646.011280703214
+        },
+        {
+          "centro_mhz": 6.013672240557852,
+          "ancho_mhz": 5.1123046875,
+          "potencia_dbfs": -37.00491152463546,
+          "centro_mhz_abs": 2656.0136722405578
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,212 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{7}{Uso del prefijo cíclico para eliminar la dispersión del canal}
+
+\textbf{Script:} \texttt{practica7.py} (Python con NumPy)
+
+\section{Objetivo}
+
+Analizar el efecto de la dispersión temporal de un canal multitrayectoria sobre señales
+OFDM, implementar el prefijo cíclico y comparar el desempeño del sistema con y sin prefijo
+mediante la tasa de error de bit.
+
+\section{Fundamento teórico}
+
+Un canal multitrayectoria se modela con una respuesta impulsional finita
+\begin{equation}
+  h[n] = \sum_{l=0}^{L-1} h_l\,\delta[n-l].
+\end{equation}
+La señal recibida es la convolución lineal $y[n]=h[n]*x[n]+n[n]$. En OFDM, la convolución
+lineal entre símbolos consecutivos produce interferencia entre símbolos (ISI).
+
+El prefijo cíclico copia las últimas $N_{cp}$ muestras del símbolo OFDM al inicio del
+mismo. Si $N_{cp}\ge L-1$, la parte útil del bloque recibido contiene una convolución
+\emph{circular} con $h[n]$, y entonces
+\begin{equation}
+  Y[k] = H[k]\,X[k] + N[k],
+  \qquad
+  H[k] = \sum_{l=0}^{L-1} h_l\,e^{-j2\pi kl/N}.
+\end{equation}
+Cada subportadora queda multiplicada por un solo coeficiente complejo y se puede ecualizar
+con una división:
+\begin{equation}
+  \hat{X}[k] = \frac{Y[k]}{H[k]}.
+\end{equation}
+El precio es una pérdida de eficiencia espectral de $N_{cp}/(N+N_{cp})$ y una cierta
+amplificación del ruido en las subportadoras donde $|H[k]|$ es pequeño.
+
+\section{Desarrollo experimental}
+
+\subsection{Canal utilizado}
+
+El manual propone $h=[1,\,0.6,\,0.3]$. Con tres taps adyacentes la ISI afecta solo 2 de
+las 64 muestras de cada bloque (3\,\%), y el efecto del prefijo resulta marginal. Para que
+el experimento muestre el fenómeno se conserva la misma energía pero se reparten los ecos
+en las muestras 0, 5 y 12:
+\begin{equation}
+  h = [1,\ 0,\ 0,\ 0,\ 0,\ 0.6,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0,\ 0.3],
+\end{equation}
+con un retardo máximo de 12 muestras, menor que $N_{cp}=16$. Se reporta además el caso del
+manual como referencia.
+
+\subsection{Parámetros}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  $N_{\mathrm{FFT}}$ & 64 \\
+  Prefijo cíclico & $N_{cp}=16$ \\
+  Modulación & QPSK \\
+  Bits por trama & 4096 \\
+  Tramas por punto & 30 (122\,880 bits) \\
+  Ecualización & zero-forcing por subportadora \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Procedimiento}
+
+\begin{enumerate}
+  \item Se genera la señal OFDM y se transmite por el canal con \texttt{np.convolve}.
+  \item Caso sin prefijo: se toman bloques de 64 muestras, se aplica la FFT y se ecualiza
+        con $H[k]$.
+  \item Caso con prefijo: se añaden 16 muestras al inicio de cada símbolo, se transmite,
+        se eliminan las 16 muestras del prefijo y se aplica FFT y ecualización.
+  \item Se calcula la BER para $E_b/N_0$ de 0 a 20 dB y se grafican las constelaciones a
+        15 dB.
+\end{enumerate}
+
+\section{Código}
+
+\begin{codigo}
+def transmitir_con_cp(x, h, ncp=16):
+    tx = np.vstack((x[-ncp:], x)).flatten(order="F")
+    return tx, np.convolve(tx, h)[: tx.size]
+
+def recibir_con_cp(rx, h, ncp=16):
+    bloques = rx.reshape(-1, NFFT + ncp).T
+    y = np.fft.fft(bloques[ncp:], axis=0) / np.sqrt(NFFT)
+    hh = np.fft.fft(h, NFFT) / np.sqrt(NFFT)
+    return (y / hh[:, None]).flatten(order="F")
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{Canal}
+
+\figura{figs/canal.png}{Canal del manual y canal dispersivo utilizado en la comparación.}
+
+\subsection{Interferencia entre símbolos}
+
+\figura{figs/tiempo_isi.png}{Señal recibida sin prefijo (arriba) y con prefijo (abajo). Las zonas sombreadas marcan las muestras invadidas por el símbolo anterior.}
+
+Sin prefijo, las 12 primeras muestras de cada bloque contienen la cola del símbolo
+anterior; con prefijo, esa cola cae dentro de las 16 muestras descartadas. La discontinuidad
+en los bordes de bloque es la ISI que la FFT ya no puede separar.
+
+\subsection{Constelaciones}
+
+\figura{figs/constelaciones.png}{Constelaciones recibidas a $E_b/N_0=15$ dB, sin y con prefijo cíclico.}
+
+Sin prefijo la constelación aparece dispersa y con puntos alejados de las cuatro esquinas;
+con prefijo los símbolos se concentran alrededor de $(\pm1,\pm1)/\sqrt{2}$, aunque con
+cierta amplificación de ruido en las subportadoras de baja ganancia.
+
+\subsection{BER}
+
+\begin{tabular}{@{}ccc@{}}
+  \toprule
+  $E_b/N_0$ (dB) & BER sin prefijo & BER con prefijo \\
+  \midrule
+  0  & 0.10460 & 0.09242 \\
+  4  & 0.05374 & 0.04174 \\
+  8  & 0.03005 & 0.01755 \\
+  12 & 0.02270 & 0.00802 \\
+  16 & 0.01937 & 0.00339 \\
+  20 & 0.01830 & 0.00068 \\
+  \bottomrule
+\end{tabular}
+
+\figura{figs/ber.png}{Curvas de BER con y sin prefijo cíclico.}
+
+Sin prefijo la BER se estanca alrededor de $1.8\times10^{-2}$: es un piso de ISI que no
+disminuye al aumentar la potencia. Con prefijo la BER sigue bajando hasta
+$6.8\times10^{-4}$ a 20 dB. A 14 dB la reducción es de 0.0201 a 0.0054 (factor 3.7) y a
+20 dB de 0.0183 a 0.00068 (factor 27).
+
+\subsection{Casos de referencia}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Caso & BER \\
+  \midrule
+  Canal del manual $[1,\,0.6,\,0.3]$, sin y con prefijo, 15 dB & 0 en ambos \\
+  Canal dispersivo sin prefijo y sin ecualizar, 15 dB & 0.0718 \\
+  Prefijo insuficiente: eco en la muestra 20 $>N_{cp}=16$, 20 dB & 0.0025 \\
+  \bottomrule
+\end{tabularx}
+
+Con el canal de tres taps adyacentes el prefijo no cambia la BER medible, porque la ISI
+solo afecta 2 muestras por bloque. Si además se omite la ecualización, la BER sube a
+0.0718 por la rotación de fase de $H[k]$, no por la ISI. Cuando el eco llega después del
+prefijo, la BER vuelve a subir a 0.0025 y aparece un piso: el prefijo solo es efectivo si
+cubre el retardo máximo del canal.
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Qué efecto produce la multitrayectoria?} Cada eco llega con un retardo y
+        una atenuación distintos, de modo que la señal recibida es la suma de varias
+        réplicas. En el dominio del tiempo eso alarga la respuesta y hace que un símbolo
+        invada al siguiente; en frecuencia produce desvanecimientos selectivos.
+  \item \textbf{¿Cómo afecta la ISI a los símbolos OFDM?} Rompe la ortogonalidad: la FFT
+        del bloque ya no corresponde a la convolución circular, así que la energía del
+        símbolo anterior se reparte como error en todas las subportadoras. El resultado es
+        un piso de BER que no se corrige aumentando la potencia.
+  \item \textbf{¿Por qué el prefijo cíclico mejora el desempeño?} Porque absorbe la cola
+        del símbolo anterior dentro de las muestras que el receptor descarta. La parte útil
+        queda como una convolución circular, que en frecuencia es una multiplicación por
+        $H[k]$ y se puede ecualizar con una sola división.
+  \item \textbf{¿Qué ocurre si el retardo del canal supera la longitud del prefijo?} La
+        cola invade las muestras útiles y reaparece la ISI. En la simulación, un eco en la
+        muestra 20 con $N_{cp}=16$ elevó la BER a 0.0025 a 20 dB, frente a 0.00068 con el
+        eco dentro del prefijo.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Qué es la interferencia entre símbolos?} La contaminación de un símbolo
+        por la energía de los símbolos anteriores o posteriores, causada por la memoria
+        (dispersión temporal) del canal.
+  \item \textbf{¿Cuál es la función del prefijo cíclico?} Extender cada símbolo con una
+        copia de su cola para que, tras la convolución con el canal, la parte útil se
+        comporte como una convolución circular y se pueda ecualizar subportadora por
+        subportadora.
+  \item \textbf{¿Por qué LTE utiliza prefijo cíclico?} Porque el canal móvil es
+        multitrayectoria y el prefijo permite ecualizar en frecuencia con bajo costo,
+        manteniendo la ortogonalidad entre subportadoras. LTE usa prefijo normal
+        ($\approx4.7\,\mu$s) y extendido ($\approx16.7\,\mu$s) según el entorno.
+  \item \textbf{¿Qué relación existe entre la longitud del prefijo y el retardo máximo del
+        canal?} Debe cumplirse $N_{cp}\ge L-1$ (en muestras), es decir, el prefijo debe
+        durar al menos el retardo máximo del canal. Si no, la ISI reaparece.
+  \item \textbf{¿Qué costo tiene agregar un prefijo cíclico?} Reduce la eficiencia
+        espectral en $N_{cp}/(N+N_{cp})$ y consume potencia de transmisión en muestras que
+        el receptor descarta. También puede amplificar el ruido en las subportadoras con
+        desvanecimiento profundo al ecualizar.
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se comparó un sistema OFDM con y sin prefijo cíclico sobre un canal multitrayectoria con
+retardos en 0, 5 y 12 muestras. Sin prefijo, la ISI produjo un piso de BER de
+$1.8\times10^{-2}$ que no bajó al aumentar la potencia. Con un prefijo de 16 muestras y
+ecualización zero-forcing, la BER descendió hasta $6.8\times10^{-4}$ a 20 dB. El
+experimento también mostró que el prefijo deja de ser efectivo cuando el eco supera su
+longitud, y que la ecualización por subportadora es indispensable para explotar la
+ortogonalidad.
+
+\end{document}

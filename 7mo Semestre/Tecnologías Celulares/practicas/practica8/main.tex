@@ -1,0 +1,167 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{8}{Relación de potencia pico a promedio en sistemas OFDM}
+
+\textbf{Script:} \texttt{practica8.py} (Python con NumPy/SciPy)
+
+\section{Objetivo}
+
+Analizar la relación de potencia pico a promedio (PAPR) de señales OFDM, calcular su valor
+para distintos números de subportadoras y estudiar su distribución estadística mediante la
+CCDF.
+
+\section{Fundamento teórico}
+
+La PAPR de una señal se define como
+\begin{equation}
+  \mathrm{PAPR} = \frac{\max_n |x[n]|^2}{\mathbb{E}\{|x[n]|^2\}},
+  \qquad
+  \mathrm{PAPR}_{\mathrm{dB}} = 10\log_{10}(\mathrm{PAPR}).
+\end{equation}
+En OFDM, $x[n]$ es la suma de $N$ fasores independientes. Por el teorema central del
+límite, la amplitud tiende a una distribución gaussiana compleja, de modo que la
+probabilidad de que muchas subportadoras se sumen en fase no es despreciable. La PAPR
+crece aproximadamente como $\ln N$ y su valor máximo teórico es $N$ (10$\log_{10}N$ dB),
+aunque en la práctica los valores observados son mucho menores.
+
+Como la PAPR es aleatoria, se describe con la función de distribución complementaria
+acumulada:
+\begin{equation}
+  \mathrm{CCDF}(\gamma) = P\{\mathrm{PAPR} > \gamma\},
+\end{equation}
+que indica la fracción de símbolos OFDM cuya PAPR supera un umbral $\gamma$.
+
+Un amplificador de potencia debe operar con un margen (back-off) respecto de la
+saturación para no recortar los picos. Ese margen reduce la eficiencia energética y es una
+de las desventajas prácticas más importantes de OFDM.
+
+\section{Desarrollo experimental}
+
+\subsection{Parámetros}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Subportadoras evaluadas & 16, 32, 64, 128 y 256 \\
+  Realizaciones por configuración & 3000 \\
+  Modulación & QPSK \\
+  Distribución de la CCDF & 3000 símbolos por $N_{\mathrm{FFT}}$ \\
+  Umbrales & 0 a 15 dB en pasos de 0.1 dB \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Procedimiento}
+
+\begin{enumerate}
+  \item Para cada $N_{\mathrm{FFT}}$ se generan símbolos QPSK aleatorios y se aplica la
+        IFFT con normalización de potencia unitaria.
+  \item Se calcula la PAPR de cada símbolo y se promedian 3000 realizaciones.
+  \item Se grafica un símbolo de 64 subportadoras para ver los picos en el tiempo y la
+        potencia instantánea.
+  \item Se construye la CCDF para 64, 128 y 256 subportadoras.
+\end{enumerate}
+
+\section{Código}
+
+\begin{codigo}
+def senal_ofdm(rng, nfft):
+    x = np.fft.ifft(simbolo_qpsk(rng, nfft)) * np.sqrt(nfft)
+    return x
+
+def papr_db(x):
+    p = np.abs(x) ** 2
+    return float(10 * np.log10(np.max(p) / np.mean(p)))
+
+ccdf = np.array([np.mean(papr_samples > u) for u in umbrales])
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{Potencia instantánea}
+
+\figura{figs/potencia_instantanea.png}{Símbolo OFDM de 64 subportadoras y su potencia instantánea. La línea punteada es la potencia media.}
+
+La potencia instantánea fluctúa alrededor de la media con picos que la superan varias
+veces. En este símbolo la PAPR fue de 7.84 dB, es decir, el pico tuvo casi seis veces la
+potencia media.
+
+\subsection{PAPR en función del número de subportadoras}
+
+\begin{tabular}{@{}cccc@{}}
+  \toprule
+  $N_{\mathrm{FFT}}$ & PAPR media (dB) & Desviación (dB) & PAPR máxima (dB) \\
+  \midrule
+  16  & 5.29 & 1.15 & 9.59 \\
+  32  & 6.07 & 1.08 & 10.21 \\
+  64  & 6.71 & 1.00 & 11.48 \\
+  128 & 7.30 & 0.88 & 11.32 \\
+  256 & 7.80 & 0.80 & 12.35 \\
+  \bottomrule
+\end{tabular}
+
+\figura{figs/papr_vs_nfft.png}{PAPR media con barras de desviación estándar.}
+
+La PAPR media crece de 5.29 a 7.80 dB al pasar de 16 a 256 subportadoras, un aumento de
+2.51 dB para un factor 16 en $N$. El crecimiento es aproximadamente logarítmico, como
+predice el modelo gaussiano. La dispersión alrededor de la media disminuye porque, con más
+subportadoras, el promedio estadístico se estabiliza.
+
+\subsection{CCDF}
+
+\figura{figs/ccdf.png}{CCDF de la PAPR para 64, 128 y 256 subportadoras.}
+
+Para una probabilidad de $10^{-2}$, la PAPR umbral es 9.4 dB con 64 subportadoras, 9.7 dB
+con 128 y 10.1 dB con 256. Es decir, en el 1\,\% de los símbolos la PAPR supera esos
+valores, y el amplificador debe reservar ese margen si no se aplica ninguna técnica de
+reducción.
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Por qué OFDM presenta valores elevados de PAPR?} Porque la señal es la suma
+        coherente de muchas subportadoras. Cuando varias llegan en fase, sus amplitudes se
+        suman y producen un pico mucho mayor que el valor eficaz.
+  \item \textbf{¿Qué ocurre al incrementar el número de subportadoras?} La PAPR media
+        aumenta de forma logarítmica y la CCDF se desplaza hacia la derecha: hay más
+        ocasiones de alineación constructiva. En la simulación pasó de 5.29 a 7.80 dB.
+  \item \textbf{¿Cómo afecta la PAPR a los amplificadores de potencia?} Obliga a operar con
+        back-off para no recortar los picos. Un recorte produce distorsión no lineal,
+        radiación fuera de banda y errores de demodulación.
+  \item \textbf{¿Qué impacto tiene la PAPR sobre la eficiencia energética?} El amplificador
+        trabaja lejos de su punto de máxima eficiencia; una PAPR de 8 dB puede reducir la
+        eficiencia a la mitad o menos, lo que aumenta el consumo y el calor en la estación
+        base y en el terminal.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Qué es la PAPR?} La relación entre la potencia pico y la potencia promedio
+        de una señal. Se expresa en dB y mide cuánto se alejan los picos del valor eficaz.
+  \item \textbf{¿Por qué es un problema en OFDM?} Porque la suma de muchas subportadoras
+        produce picos grandes con probabilidad no despreciable, lo que obliga a usar
+        amplificadores con mucho margen y baja eficiencia.
+  \item \textbf{¿Qué sistemas de comunicación utilizan OFDM?} LTE, 5G NR, Wi-Fi
+        (802.11a/g/n/ac/ax), DVB-T, WiMAX, ADSL y comunicaciones por línea eléctrica.
+  \item \textbf{¿Qué sucede si el amplificador opera en saturación?} Recorta los picos,
+        genera distorsión no lineal, ensancha el espectro (interferencia fuera de banda) y
+        aumenta la BER. Puede además dañar el amplificador por sobrecalentamiento.
+  \item \textbf{¿Qué técnicas existen para reducir la PAPR?} El recorte (clipping) con
+        filtrado, el mapeo selectivo (SLM), la transmisión de secuencias parciales (PTS),
+        la reserva de tonos, la codificación de bloques y técnicas de precodificación como
+        DFT-spreading (SC-FDMA).
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se midió la PAPR de señales OFDM QPSK para 16 a 256 subportadoras. La PAPR media creció de
+5.29 a 7.80 dB y la CCDF mostró que el 1\,\% de los símbolos supera 9.4 dB con 64
+subportadoras y 10.1 dB con 256. El resultado confirma el carácter probabilístico de los
+picos y la necesidad de reservar margen en el amplificador o aplicar técnicas de reducción
+de PAPR.
+
+\end{document}

@@ -1,0 +1,172 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{5}{Generación de una señal OFDM}
+
+\textbf{Script:} \texttt{practica5.py} (Python con NumPy/SciPy)
+
+\section{Objetivo}
+
+Implementar un transmisor OFDM basado en la IFFT, generar símbolos QPSK sobre 64
+subportadoras y verificar la ortogonalidad entre subportadoras y las características
+temporales y espectrales de la señal resultante.
+
+\section{Fundamento teórico}
+
+Una señal OFDM es la suma de $N$ subportadoras ortogonales moduladas por símbolos
+complejos:
+\begin{equation}
+  s(t) = \sum_{k=0}^{N-1} X_k\,e^{j2\pi k t/T},
+  \qquad 0 \le t < T.
+\end{equation}
+Muestreando en $t_n=nT/N$ queda
+\begin{equation}
+  x[n] = \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1} X_k\,e^{j2\pi kn/N},
+\end{equation}
+que es exactamente la transformada discreta inversa de Fourier multiplicada por
+$\sqrt{N}$. La IFFT permite generar en $O(N\log N)$ lo que en un transmisor analógico
+requeriría $N$ osciladores.
+
+La ortogonalidad se comprueba con el producto interno
+\begin{equation}
+  \langle s_k, s_m\rangle = \sum_{n=0}^{N-1} e^{j2\pi kn/N}\,e^{-j2\pi mn/N}
+  = N\,\delta_{km},
+\end{equation}
+de modo que cada subportadora se puede separar en el receptor sin interferencia de las
+demás, aunque sus espectros se superpongan.
+
+\section{Desarrollo experimental}
+
+\subsection{Parámetros}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Bits generados & 1024 \\
+  Modulación & QPSK con mapeo Gray \\
+  Símbolos QPSK & 512 \\
+  Subportadoras ($N_{\mathrm{FFT}}$) & 64 \\
+  Símbolos OFDM & 8 \\
+  Muestras transmitidas & 512 \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Procedimiento}
+
+\begin{enumerate}
+  \item Los 1024 bits se agrupan en pares y se convierten en 512 símbolos QPSK
+        $(\pm1\pm j)/\sqrt{2}$.
+  \item Los símbolos se ordenan en una matriz de $64\times8$; cada columna es un símbolo
+        OFDM.
+  \item Se aplica la IFFT por columnas y se serializa la señal en orden de columnas.
+  \item Se grafican la señal temporal, la constelación, la PSD, las magnitudes de las
+        subportadoras y los productos internos.
+\end{enumerate}
+
+\section{Código}
+
+\begin{codigo}
+def modular_qpsk(bits):
+    b = np.asarray(bits).reshape(-1, 2)
+    return ((2 * b[:, 0] - 1) + 1j * (2 * b[:, 1] - 1)) / np.sqrt(2)
+
+def generar_ofdm(simbolos, nfft=64):
+    x = np.fft.ifft(simbolos.reshape(-1, nfft).T, axis=0) * np.sqrt(nfft)
+    return x.flatten(order="F"), x
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{Señal OFDM en el tiempo}
+
+\figura{figs/senal_ofdm.png}{Parte real de los primeros cuatro símbolos OFDM. Las líneas punteadas marcan los límites entre símbolos.}
+
+La señal tiene una apariencia ruidosa, con picos que superan varias veces el valor eficaz.
+Esa suma constructiva de 64 subportadoras es la causa de la relación de potencia pico a
+promedio (PAPR) que se estudia en la práctica 8; en esta corrida resultó de 8.21 dB.
+
+\subsection{Constelación QPSK}
+
+\figura[0.55]{figs/constelacion.png}{Constelación de los 512 símbolos QPSK transmitidos.}
+
+Los símbolos se ubican exactamente en las cuatro esquinas $(\pm1,\pm1)/\sqrt{2}$, como
+corresponde a una modulación QPSK sin ruido.
+
+\subsection{Espectro}
+
+\figura{figs/espectro.png}{Densidad espectral de potencia de la señal OFDM.}
+
+El espectro es aproximadamente plano dentro de la banda ocupada, con las ondulaciones
+propias de la suma finita de subportadoras y los lóbulos de las transiciones entre
+símbolos. Ocupa todo el ancho de banda de muestreo, que es la firma de una señal
+multiportadora.
+
+\subsection{Subportadoras}
+
+\figura{figs/subportadoras.png}{Magnitud de las 64 subportadoras del primer símbolo OFDM.}
+
+\subsection{Ortogonalidad}
+
+\figura{figs/ortogonalidad.png}{Dos subportadoras consecutivas (arriba) y producto interno de cada subportadora con la subportadora 5 (abajo).}
+
+El producto interno $\langle s_5,s_6\rangle$ resultó de \textbf{7.41$\times10^{-15}$} y el
+máximo producto fuera de la diagonal, \textbf{1.06$\times10^{-13}$}. Ambos son del orden
+del error de redondeo de punto flotante, es decir, cero en la práctica: las subportadoras
+son ortogonales.
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Por qué las subportadoras no interfieren entre sí?} Porque sus funciones
+        base son ortogonales en el intervalo del símbolo: el producto interno entre dos
+        subportadoras distintas es cero. Cada una tiene un número entero de ciclos en $T$,
+        de modo que los lóbulos de una caen en los nulos de las demás.
+  \item \textbf{¿Cuál es la función de la IFFT?} Convertir los símbolos en el dominio de la
+        frecuencia (una muestra por subportadora) en la forma de onda temporal que se
+        transmite. Es la implementación eficiente de la suma de subportadoras.
+  \item \textbf{¿Qué diferencias existen entre OFDM y una transmisión monocanal?} En
+        monocanal un solo flujo ocupa todo el ancho de banda con un símbolo largo; en OFDM
+        muchos flujos de baja tasa se transmiten en paralelo, cada uno en una subportadora
+        angosta. Eso alarga la duración del símbolo y reduce la sensibilidad a la
+        dispersión del canal.
+  \item \textbf{¿Cómo cambia el espectro al aumentar el número de subportadoras?} La banda
+        total depende de la separación entre subportadoras ($\Delta f = F_s/N$), no del
+        número: al aumentar $N$ con la misma $F_s$, cada subportadora se hace más angosta
+        y hay más, pero la ocupación total es la misma. Lo que cambia es la densidad de
+        subportadoras y la duración del símbolo.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Qué es OFDM?} Multiplexación por división de frecuencia ortogonal: una
+        técnica multiportadora que divide el flujo de datos en muchos flujos paralelos
+        transmitidos simultáneamente en subportadoras ortogonales.
+  \item \textbf{¿Por qué se utilizan subportadoras ortogonales?} Para que los espectros se
+        puedan superponer sin interferencia mutua y el receptor pueda separarlas con una
+        FFT, aprovechando el espectro de forma más eficiente que con canales separados por
+        bandas de guarda.
+  \item \textbf{¿Cuál es la función de la IFFT?} Generar la señal temporal a partir de los
+        símbolos en frecuencia. Es la operación inversa que el receptor deshace con la FFT.
+  \item \textbf{¿Qué ventajas ofrece OFDM en canales selectivos en frecuencia?} Convierte
+        un canal selectivo en muchos subcanales aproximadamente planos, de modo que la
+        ecualización se reduce a un factor complejo por subportadora. Además, el símbolo
+        largo tolera mejor la dispersión temporal.
+  \item \textbf{¿Qué tecnologías utilizan OFDM actualmente?} LTE y 5G NR (OFDMA/SC-FDMA en
+        el enlace descendente/ascendente), Wi-Fi (802.11a/g/n/ac/ax), DVB-T, WiMAX, ADSL y
+        PLC.
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se generó una señal OFDM de 8 símbolos con 64 subportadoras QPSK a partir de 1024 bits.
+La IFFT produjo una señal temporal con PAPR de 8.21 dB y un espectro plano dentro de la
+banda. La verificación numérica de ortogonalidad dio $7.41\times10^{-15}$ para el producto
+entre las subportadoras 5 y 6 y $1.06\times10^{-13}$ como máximo fuera de la diagonal, lo
+que confirma que las subportadoras son ortogonales y que la IFFT es equivalente a la suma
+de moduladores independientes.
+
+\end{document}

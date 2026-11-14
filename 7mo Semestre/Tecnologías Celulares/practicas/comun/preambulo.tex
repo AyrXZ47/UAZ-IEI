@@ -1,0 +1,77 @@
+% Preambulo comun de los reportes de Tecnologias Celulares.
+% Cada main.tex hace: \documentclass ... \input{../comun/preambulo.tex}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,mexico]{babel}
+\usepackage{graphicx}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{fvextra}
+\usepackage[hidelinks]{hyperref}
+
+\onehalfspacing
+\setlength{\parskip}{6pt}
+\sloppy
+\setlength{\emergencystretch}{3em}
+\setlength{\headheight}{40pt}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\tabcolsep}{6pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\includegraphics[width=1cm]{/home/yovick/repos/UAZ-IEI/Assets/UIE.png}}
+\fancyhead[R]{\small Tecnologías Celulares}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\DefineVerbatimEnvironment{codigo}{Verbatim}{%
+  breaklines=true,breakanywhere=true,fontsize=\small,frame=single,
+  framesep=3pt,rulecolor=\color{gray!50}}
+
+% Figura centrada con pie: \figura[ancho]{archivo}{leyenda}
+\newcommand{\figura}[3][0.85]{%
+  \begin{center}
+    \includegraphics[width=#1\linewidth]{#2}\\[2pt]
+    {\small #3}
+  \end{center}}
+
+% Portada: \portada{numero}{titulo de la practica}
+\newcommand{\portada}[2]{%
+\begin{titlepage}
+  \thispagestyle{empty}
+  \begin{center}
+    \vspace*{1cm}
+    \includegraphics[width=4.5cm]{/home/yovick/repos/UAZ-IEI/Assets/uaz.png}
+    \vspace{0.8cm}
+
+    {\large Universidad Autónoma de Zacatecas}\\[4pt]
+    {\large Unidad Académica de Ingeniería Eléctrica}\\[4pt]
+    {\normalsize Ingeniería Electrónica Industrial con especialidad en Telecomunicaciones}
+
+    \vspace{1.8cm}
+    {\LARGE\bfseries Práctica #1}\\[10pt]
+    {\Large\bfseries #2}
+  \end{center}
+
+  \vspace{2.2cm}
+  \begin{center}
+    \begin{tabular}{rl}
+      \textbf{Materia:} & Tecnologías Celulares\\
+      \textbf{Docente:} & Dr. Víktor Iván Rodríguez Abdalá\\
+      \textbf{Alumno:}  & Arnold Yovick Ríos Zaldívar\\
+      \textbf{Fecha:}   & Noviembre de 2026\\
+    \end{tabular}
+  \end{center}
+  \vfill
+\end{titlepage}}

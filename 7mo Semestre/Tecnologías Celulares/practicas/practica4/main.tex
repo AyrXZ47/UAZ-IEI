@@ -1,0 +1,184 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{4}{Implementación de un sistema FHSS}
+
+\textbf{Script:} \texttt{practica4.py} (Python con NumPy/SciPy)
+
+\section{Objetivo}
+
+Implementar un sistema de espectro disperso por salto de frecuencia (FHSS), generar la
+secuencia pseudoaleatoria de saltos y evaluar su desempeño frente a una interferencia de
+banda parcial, comparándolo con una transmisión convencional de frecuencia fija.
+
+\section{Fundamento teórico}
+
+En FHSS la portadora cambia de frecuencia en cada símbolo siguiendo una secuencia
+pseudoaleatoria conocida por el transmisor y el receptor. Si hay $M$ canales disponibles,
+\begin{equation}
+  f_h(k) = f_{m(k)},
+\end{equation}
+donde $m(k)\in\{1,\dots,M\}$ es el índice generado por la secuencia PN. El receptor conoce
+la secuencia y sintoniza el mismo canal en cada intervalo.
+
+La ventaja aparece cuando la interferencia ocupa solo una parte del espectro: si el canal
+$j$ está interferido, el sistema convencional que transmite siempre en $j$ sufre la
+interferencia en el 100\,\% de los símbolos, mientras que el FHSS solo la sufre en la
+fracción $1/M$. Para una interferencia gaussiana de desviación $A_I$ sobre BPSK, la
+probabilidad de error de un símbolo afectado es $Q(1/A_I)$ y la BER promedio resulta
+\begin{equation}
+  P_b^{\mathrm{FHSS}} = \frac{1}{M}\,Q\!\left(\frac{1}{A_I}\right),
+  \qquad
+  P_b^{\mathrm{conv}} = Q\!\left(\frac{1}{A_I}\right).
+\end{equation}
+El factor $1/M$ es la ganancia de diversidad en frecuencia: el sistema no evita la
+interferencia, pero la reparte en el tiempo.
+
+\section{Desarrollo experimental}
+
+\subsection{Parámetros}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Bits de la demostración & 200 \\
+  Canales disponibles & $M=8$ \\
+  Canal interferido & 4 \\
+  Modulación & BPSK de amplitud unitaria \\
+  Interferencia & ruido gaussiano real de desviación $A_I$ \\
+  Niveles evaluados & $A_I=2,4,6,8,10$ \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Modelo}
+
+El manual multiplica los bits por el número de canal (\texttt{fhSignal = hops.*b}) y luego
+añade ruido solo en los símbolos del canal 4. Ese modelo no mide bien la interferencia:
+como la amplitud del símbolo crece con el número de canal, la detección por signo casi
+nunca falla. En este trabajo se usa el modelo equivalente correcto: cada símbolo BPSK tiene
+amplitud unitaria y se transmite en el canal seleccionado; el receptor conoce el salto y
+detecta por signo. La interferencia se suma únicamente cuando el salto cae en el canal 4.
+El sistema convencional transmite siempre en el canal 4, por lo que recibe la interferencia
+en todos los símbolos.
+
+\subsection{Procedimiento}
+
+\begin{enumerate}
+  \item Se generan 200 bits y 200 saltos pseudoaleatorios uniformes entre 1 y 8.
+  \item Se construye la señal transmitida y se contamina con interferencia en los símbolos
+        cuyo salto es el canal 4.
+  \item Se repite con 200\,000 bits por nivel de $A_I$ para obtener curvas estables.
+  \item Se calcula la BER del FHSS y la de un sistema convencional con portadora fija en
+        el canal interferido.
+\end{enumerate}
+
+\section{Código}
+
+\begin{codigo}
+def simular(ai, nbits=200_000, rng=None):
+    bits = rng.integers(0, 2, nbits)
+    b = 2 * bits - 1
+    hops = rng.integers(1, CANALES + 1, nbits)
+    afectados = hops == CANAL_JAM
+
+    rx = b.astype(float).copy()
+    rx[afectados] += ai * rng.standard_normal(afectados.sum())
+    ber_fhss = np.mean((rx > 0).astype(int) != bits)
+
+    rx_conv = b + ai * rng.standard_normal(nbits)
+    ber_conv = np.mean((rx_conv > 0).astype(int) != bits)
+    return ber_fhss, ber_conv
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{Secuencia de salto}
+
+\figura{figs/saltos.png}{Secuencia de salto para 200 símbolos; en magenta, los que caen en el canal interferido.}
+
+Los saltos se distribuyen de forma aproximadamente uniforme entre los ocho canales. En la
+demostración, 21 de los 200 símbolos (10.5\,\%) cayeron en el canal 4, valor cercano al
+12.5\,\% esperado.
+
+\subsection{Representación tiempo--frecuencia}
+
+\figura{figs/tiempo_frecuencia.png}{Cada símbolo ocupa un canal distinto; la banda sombreada es el canal interferido.}
+
+\subsection{Señal afectada por la interferencia}
+
+\figura{figs/senal_interferida.png}{Señal transmitida y recibida con $A_I=8$. Solo los símbolos del canal 4 se separan del valor nominal.}
+
+\subsection{BER frente a la interferencia}
+
+\begin{tabular}{@{}cccc@{}}
+  \toprule
+  $A_I$ & BER FHSS & BER convencional & Teórica FHSS \\
+  \midrule
+  2  & 0.03851 & 0.30817 & 0.03857 \\
+  4  & 0.05018 & 0.40043 & 0.05016 \\
+  6  & 0.05422 & 0.43217 & 0.05423 \\
+  8  & 0.05715 & 0.45138 & 0.05628 \\
+  10 & 0.05795 & 0.46060 & 0.05752 \\
+  \bottomrule
+\end{tabular}
+
+\figura{figs/ber.png}{Comparación FHSS contra transmisión convencional.}
+
+La BER del FHSS es aproximadamente ocho veces menor que la del sistema convencional en
+todos los niveles, que es exactamente la fracción de símbolos afectados. La simulación
+coincide con el modelo teórico $Q(1/A_I)/8$ dentro del error de Monte Carlo.
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Cómo afecta la interferencia a cada sistema?} Al sistema convencional lo
+        afecta en todos los símbolos porque su portadora está fija en el canal interferido.
+        Al FHSS solo lo afecta cuando el salto cae en ese canal, es decir, una fracción
+        $1/M$ del tiempo.
+  \item \textbf{¿Por qué FHSS es más robusto?} Porque la diversidad en frecuencia convierte
+        una interferencia continua en una interferencia intermitente: el receptor pierde
+        pocos símbolos y puede recuperar el resto, o corregirlos con codificación de canal.
+  \item \textbf{¿Qué ocurre si se incrementa el número de frecuencias disponibles?} La
+        fracción de símbolos afectados baja como $1/M$, así que la BER promedio mejora.
+        El costo es que el receptor debe cubrir un ancho de banda mayor y sincronizar
+        saltos más rápidos.
+  \item \textbf{¿Cómo influye la secuencia de salto en el desempeño?} Una secuencia con
+        buena uniformidad y bajo solapamiento evita que el transmisor permanezca mucho
+        tiempo en un canal interferido. Si la secuencia es predecible, un interferidor
+        inteligente puede seguirla y anular la ventaja.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Qué es FHSS?} Espectro disperso por salto de frecuencia: la portadora
+        cambia de frecuencia siguiendo una secuencia pseudoaleatoria, de modo que la
+        transmisión ocupa en promedio todo el ancho de banda disponible.
+  \item \textbf{¿Cuál es la principal diferencia entre FHSS y DSSS?} DSSS transmite
+        simultáneamente en toda la banda y dispersa con un código; FHSS transmite en una
+        banda angosta por vez y cambia de frecuencia con el tiempo.
+  \item \textbf{¿Qué papel desempeña la secuencia pseudoaleatoria?} Define el orden de los
+        saltos. Debe ser conocida por el receptor para sintonizar el canal correcto y debe
+        tener buena uniformidad para no concentrarse en canales interferidos.
+  \item \textbf{¿Por qué FHSS proporciona diversidad en frecuencia?} Porque la información
+        se reparte en muchos canales distintos; si uno está interferido o atenuado, solo
+        se pierde la fracción de símbolos que cayó en él.
+  \item \textbf{¿Qué aplicaciones comerciales utilizan FHSS?} Bluetooth clásico (79 canales
+        y 1600 saltos por segundo), algunos sistemas inalámbricos de telefonía DECT,
+        micrófonos y radios militares, y redes de sensores que buscan robustez frente a
+        interferencia.
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se implementó un sistema FHSS de ocho canales y se comparó con una transmisión de
+portadora fija frente a una interferencia localizada en el canal 4. La BER del FHSS varió
+entre 0.0385 y 0.0580 para $A_I$ de 2 a 10, mientras que el sistema convencional varió
+entre 0.3082 y 0.4606: una reducción de aproximadamente ocho veces, igual a la fracción
+$1/M$ de símbolos afectados. El resultado confirma que la diversidad en frecuencia es la
+ventaja central del FHSS frente a interferencias de banda parcial.
+
+\end{document}

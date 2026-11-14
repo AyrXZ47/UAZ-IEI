@@ -1,0 +1,101 @@
+{
+  "fc_mhz": 881.0,
+  "fs_mhz": 15.36,
+  "muestras": 262144,
+  "receptor": "captura sintética (RTL-SDR no conectado)",
+  "ubicaciones": {
+    "Exterior": {
+      "potencia_dbfs": -29.161438299339157,
+      "piso_ruido_dbfs_hz": -141.32582110671996,
+      "snr_db": 40.74258462007977,
+      "ancho_total_mhz": 13.91625,
+      "capacidad_mbps": 188.34969771913873,
+      "portadoras": [
+        {
+          "centro_mhz": -2.459506906991304,
+          "centro_mhz_abs": 878.5404930930086,
+          "ancho_mhz": 8.88375,
+          "potencia_dbfs": -29.728539265500284
+        },
+        {
+          "centro_mhz": 4.38462201346243,
+          "centro_mhz_abs": 885.3846220134624,
+          "ancho_mhz": 4.45125,
+          "potencia_dbfs": -38.295066370214165
+        }
+      ]
+    },
+    "Laboratorio": {
+      "potencia_dbfs": -47.2856208468004,
+      "piso_ruido_dbfs_hz": -140.56818506834378,
+      "snr_db": 21.92698395406564,
+      "ancho_total_mhz": 14.0775,
+      "capacidad_mbps": 102.67021946103586,
+      "portadoras": [
+        {
+          "centro_mhz": -2.918585314947377,
+          "centro_mhz_abs": 878.0814146850527,
+          "ancho_mhz": 8.87625,
+          "potencia_dbfs": -47.90087690408093
+        },
+        {
+          "centro_mhz": 4.238192598753962,
+          "centro_mhz_abs": 885.2381925987539,
+          "ancho_mhz": 4.39125,
+          "potencia_dbfs": -56.1372686740433
+        }
+      ]
+    },
+    "Pasillo": {
+      "potencia_dbfs": -54.302205565896514,
+      "piso_ruido_dbfs_hz": -141.15628156959121,
+      "snr_db": 15.86107592330414,
+      "ancho_total_mhz": 13.99125,
+      "capacidad_mbps": 74.2358266525689,
+      "portadoras": [
+        {
+          "centro_mhz": -6.575970215977758,
+          "centro_mhz_abs": 874.4240297840222,
+          "ancho_mhz": 1.7475,
+          "potencia_dbfs": -61.081133004540646
+        },
+        {
+          "centro_mhz": -4.39702404341603,
+          "centro_mhz_abs": 876.6029759565839,
+          "ancho_mhz": 1.78125,
+          "potencia_dbfs": -61.09969034195933
+        },
+        {
+          "centro_mhz": -2.2276304012156984,
+          "centro_mhz_abs": 878.7723695987843,
+          "ancho_mhz": 1.80375,
+          "potencia_dbfs": -61.156502708676605
+        },
+        {
+          "centro_mhz": 0.0023589872419288874,
+          "centro_mhz_abs": 881.0023589872419,
+          "ancho_mhz": 2.505,
+          "potencia_dbfs": -60.83056090001407
+        },
+        {
+          "centro_mhz": 2.6022486877629967,
+          "centro_mhz_abs": 883.602248687763,
+          "ancho_mhz": 0.9375,
+          "potencia_dbfs": -70.07898270399279
+        },
+        {
+          "centro_mhz": 4.394426680920653,
+          "centro_mhz_abs": 885.3944266809207,
+          "ancho_mhz": 1.6575,
+          "potencia_dbfs": -65.98584609574561
+        },
+        {
+          "centro_mhz": 6.263464572051054,
+          "centro_mhz_abs": 887.263464572051,
+          "ancho_mhz": 0.96,
+          "potencia_dbfs": -68.09515432663319
+        }
+      ]
+    }
+  }
+}

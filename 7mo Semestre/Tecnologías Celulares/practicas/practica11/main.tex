@@ -1,0 +1,189 @@
+\documentclass[11pt,a4paper]{article}
+\input{../comun/preambulo.tex}
+
+\begin{document}
+
+\portada{11}{Código espacio-tiempo de Alamouti para sistemas MIMO}
+
+\textbf{Script:} \texttt{practica11.py} (Python con NumPy/SciPy)
+
+\section{Objetivo}
+
+Implementar un sistema de transmisión con el código espacio-tiempo de Alamouti (2 antenas
+transmisoras y 1 receptora), evaluar su BER sobre un canal Rayleigh y comparar su desempeño
+con un sistema SISO convencional para evidenciar la ganancia de diversidad.
+
+\section{Fundamento teórico}
+
+El código de Alamouti transmite dos símbolos $s_1$ y $s_2$ en dos intervalos consecutivos
+desde dos antenas:
+\begin{equation}
+  \mathbf{S} =
+  \begin{pmatrix}
+    s_1 & -s_2^{*}\\
+    s_2 & s_1^{*}
+  \end{pmatrix},
+\end{equation}
+donde las filas son los intervalos de tiempo y las columnas las antenas. La matriz es
+ortogonal:
+\begin{equation}
+  \mathbf{S}^{H}\mathbf{S} = \left(|s_1|^2+|s_2|^2\right)\mathbf{I}.
+\end{equation}
+Con coeficientes de canal $h_1$ y $h_2$ (constantes durante los dos intervalos) y ruido
+$n_1,n_2$, las señales recibidas son
+\begin{align}
+  r_1 &= \frac{h_1 s_1 + h_2 s_2}{\sqrt{2}} + n_1,\\
+  r_2 &= \frac{-h_1 s_2^{*} + h_2 s_1^{*}}{\sqrt{2}} + n_2.
+\end{align}
+El decodificador combina linealmente:
+\begin{equation}
+  \hat{s}_1 = \frac{h_1^{*}r_1 + h_2 r_2^{*}}{g},
+  \qquad
+  \hat{s}_2 = \frac{h_2^{*}r_1 - h_1 r_2^{*}}{g},
+  \qquad
+  g = \frac{|h_1|^2+|h_2|^2}{\sqrt{2}},
+\end{equation}
+y la interferencia entre $s_1$ y $s_2$ se cancela gracias a la ortogonalidad. El SNR
+efectivo es $\gamma = (|h_1|^2+|h_2|^2)E_b/(2N_0)$, es decir, la suma de dos ramas
+independientes: el sistema logra \textbf{diversidad de orden 2} manteniendo tasa unitaria
+(dos símbolos en dos intervalos) y sin necesidad de conocer el canal en el transmisor.
+
+Para comparar de forma justa, la potencia total radiada es la misma en ambos sistemas: el
+SISO transmite $s=\pm1$ con energía unitaria y Alamouti transmite $s/\sqrt{2}$ por antena.
+La BER teórica de Alamouti se obtiene promediando $Q(\sqrt{2\gamma})$ sobre la distribución
+Gamma del SNR combinado.
+
+\section{Desarrollo experimental}
+
+\subsection{Parámetros}
+
+\begin{tabularx}{\linewidth}{@{}*{2}{>{\raggedright\arraybackslash}X}@{}}
+  \toprule
+  Parámetro & Valor \\
+  \midrule
+  Antenas & 2 transmisoras, 1 receptora \\
+  Modulación & BPSK \\
+  Bits por punto & 200\,000 \\
+  Canal & Rayleigh i.i.d., $\mathcal{CN}(0,1)$ \\
+  Potencia total & unitaria (cada antena $1/\sqrt{2}$) \\
+  $E_b/N_0$ & 0 a 20 dB en pasos de 2 dB \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Procedimiento}
+
+\begin{enumerate}
+  \item Se generan bits y se agrupan en pares $(s_1,s_2)$.
+  \item Se aplica la matriz de Alamouti y se transmiten los dos intervalos por las dos
+        antenas.
+  \item Se genera un canal Rayleigh independiente por par y se añade ruido complejo con
+        $N_0=1/(E_b/N_0)$.
+  \item Se decodifica con las combinaciones lineales, se normaliza por $g$ y se decide por
+        el signo de la parte real.
+  \item Se repite el experimento para un SISO con la misma potencia y se comparan las
+        curvas.
+\end{enumerate}
+
+\section{Código}
+
+\begin{codigo}
+r1 = (h1 * s1 + h2 * s2) / np.sqrt(2) + ruido(rng, npares, n0)
+r2 = (-h1 * np.conj(s2) + h2 * np.conj(s1)) / np.sqrt(2) + ruido(rng, npares, n0)
+
+ganancia = (np.abs(h1) ** 2 + np.abs(h2) ** 2) / np.sqrt(2)
+s1_hat = (np.conj(h1) * r1 + h2 * np.conj(r2)) / ganancia
+s2_hat = (np.conj(h2) * r1 - h1 * np.conj(r2)) / ganancia
+\end{codigo}
+
+\section{Resultados}
+
+\subsection{BER versus $E_b/N_0$}
+
+\begin{tabular}{@{}ccc@{}}
+  \toprule
+  $E_b/N_0$ (dB) & BER SISO & BER Alamouti \\
+  \midrule
+  0  & 0.14705 & 0.11539 \\
+  2  & 0.10820 & 0.07483 \\
+  4  & 0.07564 & 0.04346 \\
+  6  & 0.05228 & 0.02373 \\
+  8  & 0.03553 & 0.01186 \\
+  10 & 0.02387 & 0.00567 \\
+  12 & 0.01518 & 0.00261 \\
+  14 & 0.00970 & 0.00114 \\
+  16 & 0.00646 & 0.00040 \\
+  18 & 0.00388 & 0.00019 \\
+  20 & 0.00260 & 0.00008 \\
+  \bottomrule
+\end{tabular}
+
+\figura{figs/ber.png}{BER de SISO y Alamouti sobre canal Rayleigh, con sus curvas teóricas.}
+
+La simulación coincide con la teoría en todo el rango. A 10 dB, Alamouti reduce la BER de
+0.0239 a 0.0057 (factor 4.2). La curva de Alamouti cae con una pendiente mucho mayor: a
+partir de 12 dB la diferencia se amplía hasta dos órdenes de magnitud a 20 dB.
+
+\subsection{Ganancia de diversidad}
+
+Para una BER de $10^{-2}$, el SISO requiere 13.86 dB y Alamouti 8.46 dB: una ganancia de
+\textbf{5.4 dB}. Para $10^{-3}$, Alamouti alcanza el objetivo en 14.24 dB, mientras que el
+SISO no llega a ese valor ni siquiera a 20 dB (su BER mínima simulada fue
+$2.6\times10^{-3}$). La pendiente de la curva de Alamouti es de orden 2, frente al orden 1
+del SISO, que es la firma de la diversidad espacial.
+
+\subsection{Constelación detectada}
+
+\figura[0.55]{figs/constelacion.png}{Símbolo $s_1$ detectado a $E_b/N_0=10$ dB.}
+
+Los símbolos se concentran alrededor de $\pm1$ en el eje real. La dispersión es menor que
+la de un SISO a la misma SNR porque el decodificador combina dos réplicas independientes
+de la señal.
+
+\section{Análisis de resultados}
+
+\begin{itemize}
+  \item \textbf{¿Qué ganancia proporciona Alamouti?} Una ganancia de diversidad de orden 2:
+        la BER cae con la segunda potencia del SNR en lugar de la primera. En la práctica,
+        son 5.4 dB a una BER de $10^{-2}$; a $10^{-3}$ el SISO ni siquiera alcanza el umbral en el rango simulado.
+  \item \textbf{¿Por qué la BER disminuye?} Porque el receptor combina dos copias
+        independientes de la señal (una por antena) y la probabilidad de que ambas sufran
+        un desvanecimiento profundo al mismo tiempo es mucho menor que la de una sola.
+  \item \textbf{¿Qué significa diversidad espacial?} Disponer de réplicas de la señal en
+        antenas separadas, de modo que los desvanecimientos independientes de cada camino
+        se promedian y reducen la probabilidad de error.
+  \item \textbf{¿Qué ventajas ofrece frente a incrementar la potencia transmitida?} La
+        diversidad mejora la BER de forma cuadrática con la SNR, mientras que aumentar la
+        potencia solo da una mejora lineal (3 dB por cada duplicación). Además, la
+        diversidad no consume más espectro ni más potencia total.
+\end{itemize}
+
+\section{Cuestionario}
+
+\begin{enumerate}
+  \item \textbf{¿Qué es un código espacio-tiempo?} Un esquema que introduce redundancia en
+        el espacio (varias antenas) y en el tiempo (varios intervalos) para que el receptor
+        obtenga diversidad y/o multiplexación sin sacrificar tasa.
+  \item \textbf{¿Qué ventaja tiene el esquema de Alamouti?} Logra diversidad de orden 2 con
+        tasa unitaria y un decodificador lineal muy simple, sin requerir conocimiento del
+        canal en el transmisor.
+  \item \textbf{¿Qué es la diversidad espacial?} La disponibilidad de varias rutas
+        independientes entre transmisor y receptor gracias a antenas separadas; si una ruta
+        se atenúa, las otras siguen llevando la señal.
+  \item \textbf{¿Por qué la tasa del código Alamouti es unitaria?} Porque transmite dos
+        símbolos en dos intervalos de tiempo; no repite información ni introduce redundancia
+        temporal, solo la distribuye entre las antenas.
+  \item \textbf{¿Qué aplicaciones celulares utilizan técnicas similares?} LTE usa
+        transmisión con diversidad (SFBC, basada en Alamouti) para el canal de control y
+        esquemas de diversidad de transmisión; 5G NR emplea diversidad espacial y
+        precodificación con múltiples antenas.
+\end{enumerate}
+
+\section{Conclusiones}
+
+Se implementó el código de Alamouti 2x1 y se comparó con un SISO sobre canal Rayleigh con
+la misma potencia total. Alamouti presentó diversidad de orden 2: a 10 dB redujo la BER de
+0.0239 a 0.0057, a $10^{-2}$ ganó 5.4 dB y a $10^{-3}$ alcanzó el objetivo en 14.24 dB,
+valor que el SISO no logró en el rango simulado. El experimento confirma que la diversidad
+espacial mejora la confiabilidad del enlace sin aumentar la potencia ni el ancho de banda.
+
+\end{document}

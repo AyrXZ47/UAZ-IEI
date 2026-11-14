@@ -1,0 +1,11 @@
+{
+  "nfft": 64,
+  "bits": 1024,
+  "simbolos_qpsk": 512,
+  "simbolos_ofdm": 8,
+  "muestras_tx": 512,
+  "potencia_media": 0.9999999999999998,
+  "producto_5_6": 7.408607336813087e-15,
+  "max_producto_fuera_diagonal": 1.0585238960988328e-13,
+  "papr_db": 8.211858826088456
+}

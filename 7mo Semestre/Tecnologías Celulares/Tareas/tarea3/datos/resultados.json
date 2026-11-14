@@ -1,0 +1,90 @@
+{
+  "problema1": {
+    "N": 10,
+    "K": 5,
+    "error_muestras": 6.8833827526759706e-15,
+    "error_simbolos": 5.617333549722722e-16,
+    "X": [
+      "+1-3j",
+      "-1+3j",
+      "-3-3j",
+      "+1-3j"
+    ]
+  },
+  "problema2": {
+    "K": 16,
+    "error_fft": 2.220446049250313e-16
+  },
+  "problema3": {
+    "una_realizacion": [
+      {
+        "varianza": 1.0,
+        "errores": 5
+      },
+      {
+        "varianza": 2.0,
+        "errores": 8
+      },
+      {
+        "varianza": 4.0,
+        "errores": 9
+      }
+    ],
+    "monte_carlo": [
+      {
+        "varianza": 0.25,
+        "ser": 0.04475
+      },
+      {
+        "varianza": 0.5,
+        "ser": 0.14675
+      },
+      {
+        "varianza": 1,
+        "ser": 0.29275
+      },
+      {
+        "varianza": 2,
+        "ser": 0.42475
+      },
+      {
+        "varianza": 4,
+        "ser": 0.5255
+      }
+    ]
+  },
+  "problema4": {
+    "pico_db": 3.6530404930353635
+  },
+  "problema5": {
+    "K": 16,
+    "media_db": 8.38837013873168,
+    "std_db": 1.1206905637082614,
+    "max_db": 12.317732571311321,
+    "pct1_db": 11.500000000000007
+  },
+  "problema6": {
+    "papr_medio_db": 8.35236407690993,
+    "umbrales": [
+      {
+        "umbral_db": 4.0,
+        "papr_medio_db": 4.000000002968407,
+        "papr_max_db": 4.000000004341994,
+        "evm_medio": 0.2527167660712092
+      },
+      {
+        "umbral_db": 6.0,
+        "papr_medio_db": 5.997870042572816,
+        "papr_max_db": 6.000000004325205,
+        "evm_medio": 0.1052272582122896
+      }
+    ]
+  },
+  "problema7": {
+    "K": 8,
+    "M": 4,
+    "media_sin_db": 7.454216923708851,
+    "media_con_db": 6.289013053587291,
+    "mejora_db": 1.1652038701215606
+  }
+}

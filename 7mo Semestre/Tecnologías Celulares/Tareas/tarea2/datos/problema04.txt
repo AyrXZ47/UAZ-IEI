@@ -1,0 +1,6 @@
+m = 12, polinomio x^12+x^6+x^4+1, L = 4095
+periodos generados = 5, la secuencia se repite = 1
+unos = 2048, ceros = 2047
+R(0) = 1.0000000000
+cola: min = -2.4420024420e-04, max = -2.4420024420e-04, media = -2.4420024420e-04
+-1/L = -2.4420024420e-04

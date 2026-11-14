@@ -1,0 +1,7 @@
+m = 3 (L = 7) y m = 4 (L = 15); compuesto de 105 chips
+periodo medido = 105, lcm(7,15) = 105
+R(0) = 1.000000
+R(7) = -0.066667 (-1/15)
+R(15) = -0.142857 (-1/7)
+valores distintos (x105): [-15 -7 1 105]
+cola: min = 0.009524, max = -0.142857

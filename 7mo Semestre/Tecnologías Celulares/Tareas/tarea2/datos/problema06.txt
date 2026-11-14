@@ -1,0 +1,5 @@
+Par: x^5+x^2+1 y x^5+x^4+x^2+x+1, L = 31
+niveles R*tau*L: [-9;-1;7]
+conteo: [180;450;300]
+valores normalizados: [-0.2903;-0.03226;0.2258]
+max correlacion cruzada = 9/31 = 0.2903

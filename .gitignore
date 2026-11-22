@@ -91,3 +91,6 @@ credentials
 secrets/
 *.secret
 work-obj*.cf
+
+# --- Instaladores grandes ---
+/5to_Semestre/arquitecturaDeComputadoras/FPGAs_AdaptiveSoCs_*.bin

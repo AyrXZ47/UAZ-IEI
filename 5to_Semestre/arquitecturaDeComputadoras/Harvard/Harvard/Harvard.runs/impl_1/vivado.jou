@@ -1,0 +1,24 @@
+#-----------------------------------------------------------
+# Vivado v2026.1 (64-bit)
+# SW Build 6511674 on Tue Jun 16 11:01:26 MDT 2026
+# IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+# SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+# Start of session at: Sat Nov 21 18:52:39 2026
+# Process ID         : 231541
+# Current directory  : /home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1
+# Command line       : vivado -log harvard_design_wrapper.vdi -applog -product Vivado -messageDb vivado.pb -mode batch -source harvard_design_wrapper.tcl -notrace
+# Log file           : /home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1/harvard_design_wrapper.vdi
+# Journal file       : /home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1/vivado.jou
+# Running On         : nixos-laptop
+# Platform           : unknown
+# Operating System   : unknown
+# Processor Detail   : AMD Ryzen 5 PRO 5650U with Radeon Graphics
+# CPU Frequency      : 3190.129 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 15515 MB
+# Swap memory        : 7757 MB
+# Total Virtual      : 23272 MB
+# Available Virtual  : 17160 MB
+#-----------------------------------------------------------
+source harvard_design_wrapper.tcl -notrace

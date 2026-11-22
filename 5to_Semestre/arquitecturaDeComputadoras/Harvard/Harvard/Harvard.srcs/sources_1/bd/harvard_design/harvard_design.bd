@@ -1,0 +1,720 @@
+{
+  "design": {
+    "design_info": {
+      "boundary_crc": "0xB1D07E1BAECCEDB6",
+      "device": "xc7a35tcpg236-1",
+      "gen_directory": "../../../../Harvard.gen/sources_1/bd/harvard_design",
+      "name": "harvard_design",
+      "rev_ctrl_bd_flag": "RevCtrlBdOff",
+      "synth_flow_mode": "Hierarchical",
+      "tool_version": "2026.1",
+      "validated": "true"
+    },
+    "design_tree": {
+      "pres_500hz_0": "",
+      "mux_datos_0": "",
+      "dec_an_0": "",
+      "contador_0": "",
+      "boton_0": "",
+      "UAL_0": "",
+      "PC_0": "",
+      "M_ROM_0": "",
+      "M_RAM_0": "",
+      "Dec_bcd_7seg_0": "",
+      "UC_0": ""
+    },
+    "ports": {
+      "clk": {
+        "type": "clk",
+        "direction": "I",
+        "parameters": {
+          "ASSOCIATED_RESET": {
+            "value": "rst",
+            "value_src": "default"
+          },
+          "CLK_DOMAIN": {
+            "value": "harvard_design_clk",
+            "value_src": "default"
+          },
+          "FREQ_HZ": {
+            "value": "100000000",
+            "value_src": "default"
+          },
+          "FREQ_TOLERANCE_HZ": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "INSERT_VIP": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "PHASE": {
+            "value": "0.0",
+            "value_src": "default"
+          }
+        }
+      },
+      "rst": {
+        "type": "rst",
+        "direction": "I",
+        "parameters": {
+          "INSERT_VIP": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "POLARITY": {
+            "value": "ACTIVE_LOW",
+            "value_src": "default"
+          }
+        }
+      },
+      "btnU": {
+        "direction": "I"
+      },
+      "sw1": {
+        "direction": "I",
+        "left": "3",
+        "right": "0"
+      },
+      "sw2": {
+        "direction": "I",
+        "left": "3",
+        "right": "0"
+      },
+      "sw3": {
+        "direction": "I",
+        "left": "3",
+        "right": "0"
+      },
+      "seg": {
+        "direction": "O",
+        "left": "7",
+        "right": "0"
+      },
+      "led1": {
+        "direction": "O"
+      },
+      "led2": {
+        "direction": "O"
+      },
+      "an": {
+        "direction": "O",
+        "left": "3",
+        "right": "0"
+      }
+    },
+    "components": {
+      "pres_500hz_0": {
+        "vlnv": "xilinx.com:module_ref:pres_500hz:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_pres_500hz_0_0",
+        "xci_path": "ip/harvard_design_pres_500hz_0_0/harvard_design_pres_500hz_0_0.xci",
+        "inst_hier_path": "pres_500hz_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "pres_500hz",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "clk": {
+            "type": "clk",
+            "direction": "I",
+            "parameters": {
+              "ASSOCIATED_RESET": {
+                "value": "rst",
+                "value_src": "constant"
+              },
+              "CLK_DOMAIN": {
+                "value": "harvard_design_clk",
+                "value_src": "default_prop"
+              }
+            }
+          },
+          "rst": {
+            "type": "rst",
+            "direction": "I"
+          },
+          "clk_pres": {
+            "direction": "O"
+          }
+        }
+      },
+      "mux_datos_0": {
+        "vlnv": "xilinx.com:module_ref:mux_datos:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_mux_datos_0_0",
+        "xci_path": "ip/harvard_design_mux_datos_0_0/harvard_design_mux_datos_0_0.xci",
+        "inst_hier_path": "mux_datos_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "mux_datos",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "A": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "B": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "dir": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "datoRam": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "sel": {
+            "direction": "I",
+            "left": "1",
+            "right": "0"
+          },
+          "sal": {
+            "direction": "O",
+            "left": "3",
+            "right": "0"
+          }
+        }
+      },
+      "dec_an_0": {
+        "vlnv": "xilinx.com:module_ref:dec_an:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_dec_an_0_1",
+        "xci_path": "ip/harvard_design_dec_an_0_1/harvard_design_dec_an_0_1.xci",
+        "inst_hier_path": "dec_an_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "dec_an",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "ent": {
+            "direction": "I",
+            "left": "1",
+            "right": "0"
+          },
+          "sal": {
+            "direction": "O",
+            "left": "3",
+            "right": "0"
+          }
+        }
+      },
+      "contador_0": {
+        "vlnv": "xilinx.com:module_ref:contador:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_contador_0_1",
+        "xci_path": "ip/harvard_design_contador_0_1/harvard_design_contador_0_1.xci",
+        "inst_hier_path": "contador_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "contador",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "clk": {
+            "type": "clk",
+            "direction": "I",
+            "parameters": {
+              "ASSOCIATED_RESET": {
+                "value": "rst",
+                "value_src": "constant"
+              }
+            }
+          },
+          "rst": {
+            "type": "rst",
+            "direction": "I"
+          },
+          "display": {
+            "direction": "O",
+            "left": "1",
+            "right": "0"
+          }
+        }
+      },
+      "boton_0": {
+        "vlnv": "xilinx.com:module_ref:boton:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_boton_0_1",
+        "xci_path": "ip/harvard_design_boton_0_1/harvard_design_boton_0_1.xci",
+        "inst_hier_path": "boton_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "boton",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "clk": {
+            "type": "clk",
+            "direction": "I",
+            "parameters": {
+              "ASSOCIATED_RESET": {
+                "value": "rst",
+                "value_src": "constant"
+              },
+              "CLK_DOMAIN": {
+                "value": "harvard_design_clk",
+                "value_src": "default_prop"
+              }
+            }
+          },
+          "rst": {
+            "type": "rst",
+            "direction": "I"
+          },
+          "ent": {
+            "direction": "I"
+          },
+          "sal": {
+            "direction": "O"
+          }
+        }
+      },
+      "UAL_0": {
+        "vlnv": "xilinx.com:module_ref:UAL:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_UAL_0_0",
+        "xci_path": "ip/harvard_design_UAL_0_0/harvard_design_UAL_0_0.xci",
+        "inst_hier_path": "UAL_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "UAL",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "A": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "B": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "op": {
+            "direction": "I",
+            "left": "2",
+            "right": "0"
+          },
+          "res": {
+            "direction": "O",
+            "left": "3",
+            "right": "0"
+          },
+          "acarreo": {
+            "direction": "O"
+          },
+          "cero": {
+            "direction": "O"
+          }
+        }
+      },
+      "PC_0": {
+        "vlnv": "xilinx.com:module_ref:PC:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_PC_0_0",
+        "xci_path": "ip/harvard_design_PC_0_0/harvard_design_PC_0_0.xci",
+        "inst_hier_path": "PC_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "PC",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "clk": {
+            "type": "clk",
+            "direction": "I",
+            "parameters": {
+              "ASSOCIATED_RESET": {
+                "value": "rst",
+                "value_src": "constant"
+              },
+              "CLK_DOMAIN": {
+                "value": "harvard_design_clk",
+                "value_src": "default_prop"
+              }
+            }
+          },
+          "rst": {
+            "type": "rst",
+            "direction": "I"
+          },
+          "incremento": {
+            "direction": "I"
+          },
+          "Dir": {
+            "direction": "O",
+            "left": "3",
+            "right": "0"
+          }
+        }
+      },
+      "M_ROM_0": {
+        "vlnv": "xilinx.com:module_ref:M_ROM:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_M_ROM_0_0",
+        "xci_path": "ip/harvard_design_M_ROM_0_0/harvard_design_M_ROM_0_0.xci",
+        "inst_hier_path": "M_ROM_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "M_ROM",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "clk": {
+            "type": "clk",
+            "direction": "I",
+            "parameters": {
+              "CLK_DOMAIN": {
+                "value": "harvard_design_clk",
+                "value_src": "default_prop"
+              }
+            }
+          },
+          "dir": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "dato": {
+            "direction": "O",
+            "left": "2",
+            "right": "0"
+          }
+        }
+      },
+      "M_RAM_0": {
+        "vlnv": "xilinx.com:module_ref:M_RAM:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_M_RAM_0_0",
+        "xci_path": "ip/harvard_design_M_RAM_0_0/harvard_design_M_RAM_0_0.xci",
+        "inst_hier_path": "M_RAM_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "M_RAM",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "clk": {
+            "type": "clk",
+            "direction": "I",
+            "parameters": {
+              "CLK_DOMAIN": {
+                "value": "harvard_design_clk",
+                "value_src": "default_prop"
+              }
+            }
+          },
+          "dir_E": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "dir_L": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "dato_in": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "dato_out": {
+            "direction": "O",
+            "left": "3",
+            "right": "0"
+          },
+          "L_E": {
+            "direction": "I"
+          }
+        }
+      },
+      "Dec_bcd_7seg_0": {
+        "vlnv": "xilinx.com:module_ref:Dec_bcd_7seg:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_Dec_bcd_7seg_0_1",
+        "xci_path": "ip/harvard_design_Dec_bcd_7seg_0_1/harvard_design_Dec_bcd_7seg_0_1.xci",
+        "inst_hier_path": "Dec_bcd_7seg_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "Dec_bcd_7seg",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "num": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "seg": {
+            "direction": "O",
+            "left": "7",
+            "right": "0"
+          }
+        }
+      },
+      "UC_0": {
+        "vlnv": "xilinx.com:module_ref:UC:1.0",
+        "ip_revision": "1",
+        "xci_name": "harvard_design_UC_0_0",
+        "xci_path": "ip/harvard_design_UC_0_0/harvard_design_UC_0_0.xci",
+        "inst_hier_path": "UC_0",
+        "has_run_ip_tcl": "true",
+        "reference_info": {
+          "ref_type": "hdl",
+          "ref_name": "UC",
+          "boundary_crc": "0x0"
+        },
+        "ports": {
+          "clk": {
+            "type": "clk",
+            "direction": "I",
+            "parameters": {
+              "ASSOCIATED_RESET": {
+                "value": "rst",
+                "value_src": "constant"
+              },
+              "CLK_DOMAIN": {
+                "value": "harvard_design_clk",
+                "value_src": "default_prop"
+              }
+            }
+          },
+          "rst": {
+            "type": "rst",
+            "direction": "I"
+          },
+          "A_in": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "B_in": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "op_in": {
+            "direction": "I",
+            "left": "2",
+            "right": "0"
+          },
+          "dir_in": {
+            "direction": "I",
+            "left": "3",
+            "right": "0"
+          },
+          "ejecutar": {
+            "direction": "I"
+          },
+          "A_out": {
+            "direction": "O",
+            "left": "3",
+            "right": "0"
+          },
+          "B_out": {
+            "direction": "O",
+            "left": "3",
+            "right": "0"
+          },
+          "op_out": {
+            "direction": "O",
+            "left": "2",
+            "right": "0"
+          },
+          "dir_out": {
+            "direction": "O",
+            "left": "3",
+            "right": "0"
+          },
+          "incrementar": {
+            "direction": "O"
+          },
+          "L_E": {
+            "direction": "O"
+          }
+        }
+      }
+    },
+    "nets": {
+      "A_in_0_1": {
+        "ports": [
+          "sw1",
+          "UC_0/A_in"
+        ]
+      },
+      "B_in_0_1": {
+        "ports": [
+          "sw2",
+          "UC_0/B_in"
+        ]
+      },
+      "Dec_bcd_7seg_0_seg": {
+        "ports": [
+          "Dec_bcd_7seg_0/seg",
+          "seg"
+        ]
+      },
+      "M_RAM_0_dato_out": {
+        "ports": [
+          "M_RAM_0/dato_out",
+          "mux_datos_0/datoRam"
+        ]
+      },
+      "M_ROM_0_dato": {
+        "ports": [
+          "M_ROM_0/dato",
+          "UC_0/op_in"
+        ]
+      },
+      "Net": {
+        "ports": [
+          "UC_0/dir_out",
+          "M_RAM_0/dir_E",
+          "M_ROM_0/dir"
+        ]
+      },
+      "PC_0_Dir": {
+        "ports": [
+          "PC_0/Dir",
+          "UC_0/dir_in",
+          "mux_datos_0/dir"
+        ]
+      },
+      "UAL_0_acarreo": {
+        "ports": [
+          "UAL_0/acarreo",
+          "led1"
+        ]
+      },
+      "UAL_0_cero": {
+        "ports": [
+          "UAL_0/cero",
+          "led2"
+        ]
+      },
+      "UAL_0_res": {
+        "ports": [
+          "UAL_0/res",
+          "M_RAM_0/dato_in"
+        ]
+      },
+      "UC_0_A_out": {
+        "ports": [
+          "UC_0/A_out",
+          "UAL_0/A",
+          "mux_datos_0/A"
+        ]
+      },
+      "UC_0_B_out": {
+        "ports": [
+          "UC_0/B_out",
+          "UAL_0/B",
+          "mux_datos_0/B"
+        ]
+      },
+      "UC_0_L_E": {
+        "ports": [
+          "UC_0/L_E",
+          "M_RAM_0/L_E"
+        ]
+      },
+      "UC_0_incrementar": {
+        "ports": [
+          "UC_0/incrementar",
+          "PC_0/incremento"
+        ]
+      },
+      "UC_0_op_out": {
+        "ports": [
+          "UC_0/op_out",
+          "UAL_0/op"
+        ]
+      },
+      "boton_0_sal": {
+        "ports": [
+          "boton_0/sal",
+          "UC_0/ejecutar"
+        ]
+      },
+      "clk_0_1": {
+        "ports": [
+          "clk",
+          "M_RAM_0/clk",
+          "M_ROM_0/clk",
+          "PC_0/clk",
+          "UC_0/clk",
+          "boton_0/clk",
+          "pres_500hz_0/clk"
+        ]
+      },
+      "contador_0_display": {
+        "ports": [
+          "contador_0/display",
+          "dec_an_0/ent",
+          "mux_datos_0/sel"
+        ]
+      },
+      "dec_an_0_sal": {
+        "ports": [
+          "dec_an_0/sal",
+          "an"
+        ]
+      },
+      "dir_L_0_1": {
+        "ports": [
+          "sw3",
+          "M_RAM_0/dir_L"
+        ]
+      },
+      "ent_0_1": {
+        "ports": [
+          "btnU",
+          "boton_0/ent"
+        ]
+      },
+      "mux_datos_0_sal": {
+        "ports": [
+          "mux_datos_0/sal",
+          "Dec_bcd_7seg_0/num"
+        ]
+      },
+      "pres_500hz_0_clk_pres": {
+        "ports": [
+          "pres_500hz_0/clk_pres",
+          "contador_0/clk"
+        ]
+      },
+      "rst_0_1": {
+        "ports": [
+          "rst",
+          "PC_0/rst",
+          "UC_0/rst",
+          "boton_0/rst",
+          "contador_0/rst",
+          "pres_500hz_0/rst"
+        ]
+      }
+    }
+  }
+}

@@ -1453,7 +1453,7 @@
 			(uuid "ab7f0663-5712-41d5-b88b-67e91277e584")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "C1")
 					(unit 1)
@@ -1519,7 +1519,7 @@
 			(uuid "2d0a686f-b05c-4293-ad77-98d3c20f6a5e")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "#GND03")
 					(unit 1)
@@ -1585,7 +1585,7 @@
 			(uuid "37eca8f8-0ef2-4e56-9a6c-977997b87a1c")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "#GND02")
 					(unit 1)
@@ -1651,7 +1651,7 @@
 			(uuid "81378344-a43a-444e-998a-4b3317de1bb5")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "#GND01")
 					(unit 1)
@@ -1749,7 +1749,7 @@
 			(uuid "80e81536-e015-49e2-b654-dd1010e55513")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "V1")
 					(unit 1)
@@ -1819,7 +1819,7 @@
 			(uuid "e504f7ef-1dff-4c37-8a56-aadb392bb9e7")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "R1")
 					(unit 1)
@@ -1887,7 +1887,7 @@
 			(uuid "68c73a77-4645-445b-97b5-1e47e436d247")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "C2")
 					(unit 1)
@@ -1994,7 +1994,7 @@
 			(uuid "f0e7fba7-ad0b-4c64-9d99-5957356111a6")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "V2")
 					(unit 1)
@@ -2064,7 +2064,7 @@
 			(uuid "3b4cdf5d-394c-42fd-b471-d668154a1ec5")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "R3")
 					(unit 1)
@@ -2173,7 +2173,7 @@
 			(uuid "8e92a240-550c-4df9-8308-d20a15848c3f")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "2N6782")
 					(unit 1)
@@ -2243,7 +2243,7 @@
 			(uuid "4f7a68d7-8ed6-4f84-9691-bd0621ad5ec8")
 		)
 		(instances
-			(project "Mosfet 2N6782"
+			(project "Mosfet_2N6782"
 				(path "/5e09a3e8-9796-4b89-bf9b-fa3596cdc399"
 					(reference "R2")
 					(unit 1)

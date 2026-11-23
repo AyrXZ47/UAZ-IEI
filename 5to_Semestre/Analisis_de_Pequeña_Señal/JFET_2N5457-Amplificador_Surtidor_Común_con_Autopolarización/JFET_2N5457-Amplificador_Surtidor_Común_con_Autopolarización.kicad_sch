@@ -368,7 +368,7 @@
 			(uuid "632d324a-c530-4dbe-8ab2-bc3ce8e427b7")
 		)
 		(instances
-			(project "JFET 2N5457 - Amplificador Surtidor Común con Autopolarización"
+			(project "JFET_2N5457-Amplificador_Surtidor_Común_con_Autopolarización"
 				(path "/7fae73b7-7eda-4491-b67d-4c0866f3b11c"
 					(reference "Q1")
 					(unit 1)

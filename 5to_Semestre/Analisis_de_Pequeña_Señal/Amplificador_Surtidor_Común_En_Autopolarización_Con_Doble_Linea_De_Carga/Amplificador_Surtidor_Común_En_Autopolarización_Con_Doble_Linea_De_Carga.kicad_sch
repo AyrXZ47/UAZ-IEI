@@ -1491,7 +1491,7 @@
 			(uuid "4583218a-b5f8-4bb3-860c-4d3e8d70c17e")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "Rd1")
 					(unit 1)
@@ -1557,7 +1557,7 @@
 			(uuid "bb841756-9e3d-4f54-b29d-e9286317c766")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "#GND03")
 					(unit 1)
@@ -1642,7 +1642,7 @@
 			(uuid "97a51ff9-3149-479e-bead-7d0065484bfd")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "C3")
 					(unit 1)
@@ -1729,7 +1729,7 @@
 			(uuid "05ec479d-20b8-44da-92b8-04d2eb8be27b")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "C2")
 					(unit 1)
@@ -1835,7 +1835,7 @@
 			(uuid "4cffefba-933b-4682-be64-73e2ea140647")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "V1")
 					(unit 1)
@@ -1901,7 +1901,7 @@
 			(uuid "b1b342ce-6c10-4685-8092-5ca35aa3962f")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "#GND01")
 					(unit 1)
@@ -2019,7 +2019,7 @@
 			(uuid "238f3da3-db1c-43f7-ac97-98ed306dab3d")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "Q1")
 					(unit 1)
@@ -2089,7 +2089,7 @@
 			(uuid "252708aa-9958-4c59-b33a-af7dde1bacc2")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "Rc1")
 					(unit 1)
@@ -2187,7 +2187,7 @@
 			(uuid "c5b5f99d-7048-4260-af4a-3806b58047e2")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "V2")
 					(unit 1)
@@ -2253,7 +2253,7 @@
 			(uuid "67e10e31-c4d8-4acb-9358-9fbf8443f2d3")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "#GND02")
 					(unit 1)
@@ -2323,7 +2323,7 @@
 			(uuid "b811f4b6-d237-4daa-89bf-7aff9ee16645")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "Rs1")
 					(unit 1)
@@ -2408,7 +2408,7 @@
 			(uuid "ecc1568a-cd9a-4938-97e2-65753be4138f")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "C1")
 					(unit 1)
@@ -2478,7 +2478,7 @@
 			(uuid "127f04ca-96c6-4ae0-9bb1-4d171de5aa1e")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "C4")
 					(unit 1)
@@ -2567,7 +2567,7 @@
 			(uuid "7abb9c79-3fe7-4431-87b7-88f96ca26f28")
 		)
 		(instances
-			(project "Amplificador Surtidor Común En Autopolarización Con Doble Linea De Carga"
+			(project "Amplificador_Surtidor_Común_En_Autopolarización_Con_Doble_Linea_De_Carga"
 				(path "/cec29d34-94dc-4fef-8b65-c8bf40701861"
 					(reference "Rg1")
 					(unit 1)

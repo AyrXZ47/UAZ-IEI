@@ -50,7 +50,7 @@ def problema1():
         datos[f"sigma2_{s:g}"] = {"media_muestral": float(r.mean()),
                                   "teorica": float(s * np.sqrt(np.pi / 2))}
     fig.tight_layout()
-    guardar(fig, FIGS / "p1_rayleigh.png")
+    guardar(fig, FIGS / "p1_rayleigh.png", cerrar=False)
     return datos
 
 
@@ -102,7 +102,7 @@ def problema2():
     for ax in axes.ravel():
         ax.legend(fontsize=8)
     fig.tight_layout()
-    guardar(fig, FIGS / "p2_taps.png")
+    guardar(fig, FIGS / "p2_taps.png", cerrar=False)
     return datos
 
 
@@ -120,7 +120,7 @@ def problema3():
     ax.set_xlabel("$f$ (Hz)")
     ax.set_ylabel("$S(f)$")
     ax.set_title(f"Espectro Doppler de Jakes ($f_m={fm:.1f}$ Hz)")
-    guardar(fig, FIGS / "p3_jakes.png")
+    guardar(fig, FIGS / "p3_jakes.png", cerrar=False)
     return {"fm_hz": fm, "v_ms": v}
 
 
@@ -204,7 +204,7 @@ def problema4a6():
         ax.legend(fontsize=8)
     axes[0].set_ylabel("BER")
     fig.tight_layout()
-    guardar(fig, FIGS / "p456_binarias.png")
+    guardar(fig, FIGS / "p456_binarias.png", cerrar=False)
     return datos
 
 
@@ -258,7 +258,7 @@ def problema7y8():
         ax.set_ylim([1e-4, 1])
         ax.legend(fontsize=8)
     fig.tight_layout()
-    guardar(fig, FIGS / "p78_rake.png")
+    guardar(fig, FIGS / "p78_rake.png", cerrar=False)
     return datos
 
 
@@ -285,6 +285,9 @@ def main():
     }
     guardar_json(resultados, DATOS / "resultados.json")
     print(json.dumps(resultados, indent=1, ensure_ascii=False))
+    if plt.get_fignums():
+        plt.show()
+        plt.close("all")
 
 
 if __name__ == "__main__":

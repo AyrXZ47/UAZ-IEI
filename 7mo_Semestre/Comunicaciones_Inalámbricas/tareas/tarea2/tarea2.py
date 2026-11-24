@@ -263,73 +263,78 @@ def problema6():
 
 
 # ------------------------------------------- 7. antipodal contra ortogonal
-def problema7():
-    ebn0_db = np.linspace(-2, 16, 500)
-    g = dose(ebn0_db)
-    C_ant = capacidad_bsc_desde_pe(qfunc(np.sqrt(2 * g)))
-    C_ort = capacidad_bsc_desde_pe(qfunc(np.sqrt(g)))
-    fig, ax = plt.subplots(figsize=(6.4, 3.4))
-    ax.plot(ebn0_db, C_ant, color=COLORES[0], lw=2,
-            label="antipodal (BPSK)")
-    ax.plot(ebn0_db, C_ort, color=COLORES[1], lw=2,
-            label="ortogonal")
-    # busca el cruce con C=0.5 en cada curva
-    def cruce(C):
-        idx = np.argmin(np.abs(C - 0.5))
-        return float(ebn0_db[idx])
-    ax.axhline(0.5, color=COLORES[5], ls=":", lw=1)
-    ax.plot([cruce(C_ant), cruce(C_ort)], [0.5, 0.5], "o",
-            color=COLORES[2], ms=5)
-    ax.annotate(f"{cruce(C_ort) - cruce(C_ant):.2f} dB",
-                xy=(0.5 * (cruce(C_ant) + cruce(C_ort)), 0.52),
-                color=COLORES[2], fontsize=9, ha="center")
-    ax.set_xlabel("$E_b/N_0$ (dB)")
-    ax.set_ylabel("$C$ (bits/uso)")
-    ax.set_title("Antipodal contra ortogonal (misma $E_b$)")
-    ax.legend(fontsize=8)
-    ax.grid(True, alpha=0.35)
-    fig.tight_layout()
-    guardar_fig(fig, "p07_antipodal_ortogonal.png")
-    return {"EbN0_C0.5_antipodal_dB": cruce(C_ant),
-            "EbN0_C0.5_ortogonal_dB": cruce(C_ort),
-            "penalizacion_dB": cruce(C_ort) - cruce(C_ant)}
-
-
-# ------------------------------- 8. decision dura contra decision suave
 def capacidad_suave(mean_llr, var_llr):
     """C = 1 - E[log2(1+exp(-L))], con L=log p(y|0)/p(y|1) bajo X=0."""
-    nodos, pesos = np.polynomial.hermite.hermgauss(100)
+    nodos, pesos = np.polynomial.hermite.hermgauss(120)
     L = mean_llr + math.sqrt(2 * var_llr) * nodos
     return 1 - np.sum(pesos * np.logaddexp(0, -L) / math.sqrt(math.pi)) / math.log(2)
 
 
+def _cruce_05(eje, C):
+    idx = np.argmin(np.abs(np.asarray(C) - 0.5))
+    return float(np.asarray(eje)[idx])
+
+
+def problema7():
+    """Ilustrativo 3: capacidad AWGN binaria, antipodal contra ortogonal."""
+    a_db = np.linspace(-10, 20, 500)
+    a = 10 ** (a_db / 20)
+    # Antipodal: L|0 ~ N(2a^2, 4a^2); ortogonal: L|0 ~ N(a^2, 2a^2)
+    C_ant = np.array([capacidad_suave(2 * x ** 2, 4 * x ** 2) for x in a])
+    C_ort = np.array([capacidad_suave(x ** 2, 2 * x ** 2) for x in a])
+    fig, ax = plt.subplots(figsize=(6.4, 3.4))
+    ax.plot(a_db, C_ant, color=COLORES[0], lw=2,
+            label="antipodal (ilustrativo 3)")
+    ax.plot(a_db, C_ort, color=COLORES[1], lw=2,
+            label="ortogonal de igual energia")
+    ax.axhline(0.5, color=COLORES[5], ls=":", lw=1)
+    cruce_ant, cruce_ort = _cruce_05(a_db, C_ant), _cruce_05(a_db, C_ort)
+    ax.plot([cruce_ant, cruce_ort], [0.5, 0.5], "o", color=COLORES[2], ms=5)
+    ax.annotate(f"{cruce_ort - cruce_ant:.2f} dB",
+                xy=(0.5 * (cruce_ant + cruce_ort), 0.53),
+                color=COLORES[2], fontsize=9, ha="center")
+    ax.set_xlabel("$A/\\sigma$ (dB)")
+    ax.set_ylabel("$C$ (bits/uso)")
+    ax.set_title("Capacidad AWGN binaria: antipodal contra ortogonal")
+    ax.legend(fontsize=8)
+    ax.grid(True, alpha=0.35)
+    fig.tight_layout()
+    guardar_fig(fig, "p07_antipodal_ortogonal.png")
+    return {"A_sigma_C0.5_antipodal_dB": cruce_ant,
+            "A_sigma_C0.5_ortogonal_dB": cruce_ort,
+            "penalizacion_dB": cruce_ort - cruce_ant}
+
+
+# ------------------------------- 8. decision dura contra decision suave
 def problema8():
-    ebn0_db = np.linspace(-2, 12, 300)
-    g = dose(ebn0_db)
-    C_ort_dura = capacidad_bsc_desde_pe(qfunc(np.sqrt(g)))
-    C_ant_dura = capacidad_bsc_desde_pe(qfunc(np.sqrt(2 * g)))
-    C_ort_suave = np.array([capacidad_suave(2 * x, 4 * x) for x in g])
-    C_ant_suave = np.array([capacidad_suave(4 * x, 8 * x) for x in g])
+    """Ilustrativo 4: capacidad con decision dura y suave, A/sigma."""
+    a_db = np.linspace(-10, 18, 400)
+    a = 10 ** (a_db / 20)
+    C_ant_dura = capacidad_bsc_desde_pe(qfunc(a))
+    C_ort_dura = capacidad_bsc_desde_pe(qfunc(a / math.sqrt(2)))
+    C_ort_suave = np.array([capacidad_suave(x ** 2, 2 * x ** 2) for x in a])
+    C_ant_suave = np.array([capacidad_suave(2 * x ** 2, 4 * x ** 2) for x in a])
     fig, ax = plt.subplots(figsize=(6.8, 3.8))
-    ax.plot(ebn0_db, C_ort_dura, "--", color=COLORES[0], lw=1.6,
+    ax.plot(a_db, C_ort_dura, "--", color=COLORES[0], lw=1.6,
             label="ortogonal, decision dura")
-    ax.plot(ebn0_db, C_ort_suave, color=COLORES[0], lw=2,
+    ax.plot(a_db, C_ort_suave, color=COLORES[0], lw=2,
             label="ortogonal, decision suave")
-    ax.plot(ebn0_db, C_ant_dura, "--", color=COLORES[1], lw=1.6,
+    ax.plot(a_db, C_ant_dura, "--", color=COLORES[1], lw=1.6,
             label="antipodal, decision dura")
-    ax.plot(ebn0_db, C_ant_suave, color=COLORES[1], lw=2,
+    ax.plot(a_db, C_ant_suave, color=COLORES[1], lw=2,
             label="antipodal, decision suave")
-    ax.set_xlabel("$E_b/N_0$ (dB)")
+    ax.set_xlabel("$A/\\sigma$ (dB)")
     ax.set_ylabel("$C$ (bits/uso)")
     ax.set_title("Capacidad con decision dura y suave")
     ax.legend(fontsize=7)
     ax.grid(True, alpha=0.35)
     fig.tight_layout()
     guardar_fig(fig, "p08_decisiones.png")
-    return {"C_ort_dura_6dB": float(capacidad_bsc_desde_pe(qfunc(np.sqrt(dose(6))))),
-            "C_ort_suave_6dB": float(capacidad_suave(2 * dose(6), 4 * dose(6))),
-            "C_ant_dura_6dB": float(capacidad_bsc_desde_pe(qfunc(np.sqrt(2 * dose(6))))),
-            "C_ant_suave_6dB": float(capacidad_suave(4 * dose(6), 8 * dose(6)))}
+    a6 = 10 ** (6 / 20)
+    return {"C_ort_dura_6dB": float(capacidad_bsc_desde_pe(qfunc(a6 / math.sqrt(2)))),
+            "C_ort_suave_6dB": float(capacidad_suave(a6 ** 2, 2 * a6 ** 2)),
+            "C_ant_dura_6dB": float(capacidad_bsc_desde_pe(qfunc(a6))),
+            "C_ant_suave_6dB": float(capacidad_suave(2 * a6 ** 2, 4 * a6 ** 2))}
 
 
 # ------------------------- 9. ortogonal coherente contra no coherente
@@ -456,46 +461,52 @@ def problema10():
     return matrices
 
 
-# --------------------------------------- 11. Hamming con senalizacion ortogonal
+# --------------------------------------- 11. Hamming (15,11) con senalizacion ortogonal
+def _cota_dura_bloque(p, k, dmin):
+    """Cota (M-1)[4p(1-p)]^(dmin/2) de las notas."""
+    return (2 ** k - 1) * (4 * p * (1 - p)) ** (dmin / 2)
+
+
 def problema11():
-    G, H = hamming_matrices(3)
-    lideres = tabla_lideres(H)
-    R = G.shape[0] / H.shape[1]
+    """Ilustrativo 10/11: Hamming (15,11) con decision dura."""
+    k, n, dmin = 11, 15, 3
+    R = k / n
     ebn0_db = np.linspace(0, 16, 161)
     g = dose(ebn0_db)
+    p_ant = qfunc(np.sqrt(2 * R * g))
     p_coh = qfunc(np.sqrt(R * g))
-    p_ncoh = 0.5 * np.exp(-R * g / 2)
-    ber_coh = np.array([ber_hamming_dura(x, G, H, lideres) for x in p_coh])
-    ber_ncoh = np.array([ber_hamming_dura(x, G, H, lideres) for x in p_ncoh])
-    ber_coh_sin = qfunc(np.sqrt(g))
-    ber_ncoh_sin = 0.5 * np.exp(-g / 2)
+    p_nc = 0.5 * np.exp(-R * g / 2)
+    c_ant_raw = _cota_dura_bloque(p_ant, k, dmin)
+    c_coh_raw = _cota_dura_bloque(p_coh, k, dmin)
+    c_nc_raw = _cota_dura_bloque(p_nc, k, dmin)
+    c_ant = np.minimum(c_ant_raw, 1.0)
+    c_coh = np.minimum(c_coh_raw, 1.0)
+    c_nc = np.minimum(c_nc_raw, 1.0)
     fig, ax = plt.subplots(figsize=(6.8, 3.8))
-    ax.semilogy(ebn0_db, ber_coh, color=COLORES[0], lw=2,
-                label="Hamming, ortogonal coherente")
-    ax.semilogy(ebn0_db, ber_ncoh, color=COLORES[1], lw=2,
-                label="Hamming, ortogonal no coherente")
-    ax.semilogy(ebn0_db, ber_coh_sin, "--", color=COLORES[0], lw=1.2,
-                label="sin codificar, coherente")
-    ax.semilogy(ebn0_db, ber_ncoh_sin, "--", color=COLORES[1], lw=1.2,
-                label="sin codificar, no coherente")
+    ax.semilogy(ebn0_db, c_ant, color=COLORES[0], lw=2,
+                label="antipodal (ilustrativo 10)")
+    ax.semilogy(ebn0_db, c_coh, color=COLORES[1], lw=2,
+                label="ortogonal coherente")
+    ax.semilogy(ebn0_db, c_nc, color=COLORES[2], lw=2,
+                label="ortogonal no coherente")
     ax.set_xlabel("$E_b/N_0$ (dB)")
-    ax.set_ylabel("BER")
-    ax.set_title("Hamming (7,4) con decision dura")
-    ax.set_ylim(1e-6, 1)
-    ax.legend(fontsize=7)
+    ax.set_ylabel("$P_e$ (cota de mensaje)")
+    ax.set_title("Hamming (15,11) con decision dura")
+    ax.set_ylim(1e-18, 1.15)
+    ax.legend(fontsize=8)
     ax.grid(True, alpha=0.3, which="both")
     fig.tight_layout()
     guardar_fig(fig, "p11_hamming_ortogonal.png")
     idx = np.argmin(np.abs(ebn0_db - 10))
-    return {"R": R, "BER_coh_10dB": float(ber_coh[idx]),
-            "BER_ncoh_10dB": float(ber_ncoh[idx]),
-            "p_coh_10dB": float(p_coh[idx])}
+    return {"R": R, "cota_ant_10dB": float(c_ant_raw[idx]),
+            "cota_coh_10dB": float(c_coh_raw[idx]),
+            "cota_nc_10dB": float(c_nc_raw[idx])}
 
 
-# --------------------------------------- 12. Monte Carlo Hamming con BPSK
-def simular_hamming_dura(ebn0_db, nbits=200000, rng=None):
+# --------------------------------------- 12. Monte Carlo Hamming (15,11) con BPSK
+def simular_hamming_dura_15(ebn0_db, nbits=300000, rng=None):
     rng = rng or RNG
-    G, H = hamming_matrices(3)
+    G, H = hamming_matrices(4)
     lideres = tabla_lideres(H)
     R = G.shape[0] / H.shape[1]
     g = dose(ebn0_db)
@@ -504,127 +515,131 @@ def simular_hamming_dura(ebn0_db, nbits=200000, rng=None):
     nblocks = nbits // G.shape[0]
     info = rng.integers(0, 2, (nblocks, G.shape[0]))
     code = codificar_bloques(info, G)
-    simbolos = 1 - 2 * code
-    y = math.sqrt(R) * simbolos + sigma * rng.standard_normal(code.shape)
+    y = math.sqrt(R) * (1 - 2 * code) + \
+        sigma * rng.standard_normal(code.shape)
     duros = (y < 0).astype(int)
     dec = decodificar_dura(duros, H, lideres)[:, :G.shape[0]]
     return float(np.sum(dec != info)) / (nblocks * G.shape[0])
 
 
 def problema12():
-    G, H = hamming_matrices(3)
-    lideres = tabla_lideres(H)
-    R = G.shape[0] / H.shape[1]
-    ebn0_db = np.arange(0, 13, 1.0)
-    mc = np.array([simular_hamming_dura(x) for x in ebn0_db])
+    """Monte Carlo del ilustrativo 10: Hamming (15,11) antipodal y dura."""
+    k, n, dmin = 11, 15, 3
+    R = k / n
+    ebn0_db = np.arange(0, 11, 1.0)
+    mc = np.array([simular_hamming_dura_15(x) for x in ebn0_db])
     p = qfunc(np.sqrt(2 * R * dose(ebn0_db)))
-    teoria = np.array([ber_hamming_dura(x, G, H, lideres) for x in p])
+    cota_raw = _cota_dura_bloque(p, k, dmin)
+    cota = np.minimum(cota_raw, 1.0)
     fig, ax = plt.subplots(figsize=(6.4, 3.6))
-    ax.semilogy(ebn0_db, teoria, color=COLORES[0], lw=2,
-                label="teoria (BSC equivalente)")
+    ax.semilogy(ebn0_db, cota, color=COLORES[0], lw=2,
+                label="cota (ilustrativo 10)")
     ax.semilogy(ebn0_db, sin_ceros(mc), "o", color=COLORES[1], ms=6,
                 label="Monte Carlo")
     ax.set_xlabel("$E_b/N_0$ (dB)")
     ax.set_ylabel("BER")
-    ax.set_title("Hamming (7,4), BPSK y decision dura")
-    ax.set_ylim(1e-6, 1)
+    ax.set_title("Hamming (15,11), BPSK y decision dura")
+    ax.set_ylim(1e-6, 1.15)
     ax.legend(fontsize=8)
     ax.grid(True, alpha=0.3, which="both")
     fig.tight_layout()
     guardar_fig(fig, "p12_hamming_mc.png")
     idx = np.argmin(np.abs(ebn0_db - 10))
-    return {"mc": mc.tolist(), "teoria": teoria.tolist(),
-            "BER_10dB": float(mc[idx]), "teoria_10dB": float(teoria[idx])}
+    return {"mc": mc.tolist(), "cota": cota_raw.tolist(),
+            "BER_10dB": float(mc[idx]), "cota_10dB": float(cota_raw[idx])}
 
 
-# ------------------------------- 13. Hamming con decision suave y ortogonal
-def simular_hamming_suave(ebn0_db, tipo, nbits=120000, rng=None):
+# ------------------------------- 13. Hamming (15,11) con decision suave
+def simular_hamming_suave_15(ebn0_db, tipo, nbits=30000, rng=None):
+    """ML por correlacion para el Hamming (15,11)."""
     rng = rng or RNG
-    G, H = hamming_matrices(3)
+    G, H = hamming_matrices(4)
     C = codewords(G)
     R = G.shape[0] / H.shape[1]
     g = dose(ebn0_db)
-    N0 = 1 / g
     nblocks = nbits // G.shape[0]
     info = rng.integers(0, 2, (nblocks, G.shape[0]))
     code = codificar_bloques(info, G)
-    if tipo == "coherente":
-        gamma = R * g
-        L = (1 - 2 * code) * 2 * gamma + math.sqrt(4 * gamma) * \
-            rng.standard_normal(code.shape)
+    if tipo == "antipodal":
+        media, var = 4 * R * g, 8 * R * g
     else:
-        amp = math.sqrt(R)
-        sigma = math.sqrt(N0 / 2)
-        n0 = sigma * (rng.standard_normal(code.shape)
-                      + 1j * rng.standard_normal(code.shape))
-        n1 = sigma * (rng.standard_normal(code.shape)
-                      + 1j * rng.standard_normal(code.shape))
-        r0 = np.abs(amp * (1 - code) + n0)
-        r1 = np.abs(amp * code + n1)
-        a = 2 * amp / N0
-        L = (np.log(i0e(a * r0)) + a * r0) - (np.log(i0e(a * r1)) + a * r1)
+        media, var = 2 * R * g, 4 * R * g
+    L = (1 - 2 * code) * media + math.sqrt(var) * \
+        rng.standard_normal(code.shape)
     dec = decodificar_suave(L, C)[:, :G.shape[0]]
     return float(np.sum(dec != info)) / (nblocks * G.shape[0])
 
 
 def problema13():
-    G, H = hamming_matrices(3)
-    lideres = tabla_lideres(H)
-    R = G.shape[0] / H.shape[1]
-    ebn0_db = np.arange(0, 13, 1.0)
-    mc_coh = np.array([simular_hamming_suave(x, "coherente") for x in ebn0_db])
-    mc_ncoh = np.array([simular_hamming_suave(x, "nocoherente") for x in ebn0_db])
+    """Ilustrativo 12 extendido a ortogonal coherente/no coherente."""
+    k, n, dmin = 11, 15, 3
+    M = 2 ** k - 1
+    R = k / n
+    ebn0_db = np.linspace(0, 16, 161)
     g = dose(ebn0_db)
-    p_coh = qfunc(np.sqrt(R * g))
-    p_ncoh = 0.5 * np.exp(-R * g / 2)
-    dura_coh = np.array([ber_hamming_dura(x, G, H, lideres) for x in p_coh])
-    dura_ncoh = np.array([ber_hamming_dura(x, G, H, lideres) for x in p_ncoh])
+    c_ant_raw = M * qfunc(np.sqrt(2 * dmin * R * g))
+    c_coh_raw = M * qfunc(np.sqrt(dmin * R * g))
+    c_nc_raw = M * 0.5 * np.exp(-dmin * R * g / 2)
+    c_ant = np.minimum(c_ant_raw, 1.0)
+    c_coh = np.minimum(c_coh_raw, 1.0)
+    c_nc = np.minimum(c_nc_raw, 1.0)
     fig, ax = plt.subplots(figsize=(6.8, 3.8))
-    ax.semilogy(ebn0_db, sin_ceros(mc_coh), "o", color=COLORES[0], ms=6,
-                label="suave, coherente (MC)")
-    ax.semilogy(ebn0_db, sin_ceros(mc_ncoh), "s", color=COLORES[1], ms=6,
-                label="suave, no coherente (MC)")
-    ax.semilogy(ebn0_db, dura_coh, "--", color=COLORES[0], lw=1.2,
-                label="dura, coherente")
-    ax.semilogy(ebn0_db, dura_ncoh, "--", color=COLORES[1], lw=1.2,
-                label="dura, no coherente")
+    ax.semilogy(ebn0_db, c_ant, color=COLORES[0], lw=2,
+                label="antipodal, suave")
+    ax.semilogy(ebn0_db, c_coh, color=COLORES[1], lw=2,
+                label="ortogonal coherente, suave")
+    ax.semilogy(ebn0_db, c_nc, color=COLORES[2], lw=2,
+                label="ortogonal no coherente, suave")
     ax.set_xlabel("$E_b/N_0$ (dB)")
-    ax.set_ylabel("BER")
-    ax.set_title("Hamming (7,4) con decision suave")
-    ax.set_ylim(1e-6, 1)
-    ax.legend(fontsize=7)
+    ax.set_ylabel("$P_e$ (cota de mensaje)")
+    ax.set_title("Hamming (15,11) con decision suave")
+    ax.set_ylim(1e-18, 1.15)
+    ax.legend(fontsize=8)
     ax.grid(True, alpha=0.3, which="both")
     fig.tight_layout()
     guardar_fig(fig, "p13_hamming_suave.png")
     idx = np.argmin(np.abs(ebn0_db - 10))
-    return {"suave_coh": mc_coh.tolist(), "suave_ncoh": mc_ncoh.tolist(),
-            "dura_coh": dura_coh.tolist(), "dura_ncoh": dura_ncoh.tolist(),
-            "suave_coh_10dB": float(mc_coh[idx]),
-            "suave_ncoh_10dB": float(mc_ncoh[idx])}
+    return {"cota_ant_10dB": float(c_ant_raw[idx]),
+            "cota_coh_10dB": float(c_coh_raw[idx]),
+            "cota_nc_10dB": float(c_nc_raw[idx])}
 
 
 def problema14():
-    ebn0_db = np.array([0, 2, 4, 6, 8, 10, 12], dtype=float)
+    """Monte Carlo del ilustrativo 12: Hamming (15,11) con decision suave."""
+    ebn0_db = np.array([0, 2, 4, 6, 8, 10], dtype=float)
     rng = np.random.default_rng(99)
-    mc_coh = np.array([simular_hamming_suave(x, "coherente", 200000, rng)
+    mc_ant = np.array([simular_hamming_suave_15(x, "antipodal", 30000, rng)
                        for x in ebn0_db])
-    mc_ncoh = np.array([simular_hamming_suave(x, "nocoherente", 200000, rng)
-                        for x in ebn0_db])
+    mc_ort = np.array([simular_hamming_suave_15(x, "ortogonal", 30000, rng)
+                       for x in ebn0_db])
+    k, n, dmin = 11, 15, 3
+    M = 2 ** k - 1
+    R = k / n
+    g = dose(ebn0_db)
+    c_ant_raw = M * qfunc(np.sqrt(2 * dmin * R * g))
+    c_ort_raw = M * qfunc(np.sqrt(dmin * R * g))
+    c_ant = np.minimum(c_ant_raw, 1.0)
+    c_ort = np.minimum(c_ort_raw, 1.0)
     fig, ax = plt.subplots(figsize=(6.8, 3.8))
-    ax.semilogy(ebn0_db, sin_ceros(mc_coh), "o", color=COLORES[0], ms=7,
-                label="suave, coherente")
-    ax.semilogy(ebn0_db, sin_ceros(mc_ncoh), "s", color=COLORES[1], ms=7,
-                label="suave, no coherente")
+    ax.semilogy(ebn0_db, c_ant, color=COLORES[0], lw=1.4,
+                label="cota antipodal")
+    ax.semilogy(ebn0_db, c_ort, color=COLORES[1], lw=1.4,
+                label="cota ortogonal")
+    ax.semilogy(ebn0_db, sin_ceros(mc_ant), "o", color=COLORES[0], ms=6,
+                label="MC antipodal")
+    ax.semilogy(ebn0_db, sin_ceros(mc_ort), "s", color=COLORES[1], ms=6,
+                label="MC ortogonal")
     ax.set_xlabel("$E_b/N_0$ (dB)")
     ax.set_ylabel("BER")
     ax.set_title("Monte Carlo de la decision suave (ilustrativo 12)")
-    ax.set_ylim(1e-6, 1)
-    ax.legend(fontsize=8)
+    ax.set_ylim(1e-6, 1.15)
+    ax.legend(fontsize=7)
     ax.grid(True, alpha=0.3, which="both")
     fig.tight_layout()
     guardar_fig(fig, "p14_hamming_suave_mc.png")
     return {"ebn0_db": ebn0_db.tolist(),
-            "mc_coh": mc_coh.tolist(), "mc_ncoh": mc_ncoh.tolist()}
+            "mc_ant": mc_ant.tolist(), "mc_ort": mc_ort.tolist(),
+            "cota_ant": c_ant_raw.tolist(), "cota_ort": c_ort_raw.tolist()}
 
 
 # ------------------------------------------------ 15-20. convolucionales
@@ -730,30 +745,28 @@ def problema15():
             "generadores": {"g1": format(G1, "03b"), "g2": format(G2, "03b")}}
 
 
-def conv_encode_g(bits, G, k):
-    """Codificador convolucional definido por la matriz G del problema 16."""
-    bits = np.asarray(bits, dtype=int)
-    G = np.asarray(G, dtype=int)
-    if k == 1:
-        # G: 4 filas = coeficientes de retardo 0..3, n=4 salidas
-        salida = []
-        estado = [0, 0, 0]
-        for u in bits:
-            reg = [u] + estado
-            salida.extend([int(np.dot(reg, G[:, j]) % 2)
-                           for j in range(4)])
-            estado = [u] + estado[:-1]
-        return np.array(salida, dtype=int)
-    # k=2: G0 = filas 0-1, G1 = filas 2-3; tasa 2/4
-    G0, G1m = G[:2, :], G[2:, :]
-    pares = bits.reshape(-1, 2)
-    salida = []
-    anterior = np.zeros(2, dtype=int)
-    for u in pares:
-        o = (u @ G0 + anterior @ G1m) % 2
-        salida.extend(o.tolist())
-        anterior = u
-    return np.array(salida, dtype=int)
+def cnv_encd(g, k0, input_bits):
+    """Codificador convolucional de las notas (equivalente a cnv_encd.m).
+
+    g es la matriz generadora n0 x (k0*L); las filas son g1,...,gn0.
+    Agrega (L-1)*k0 ceros al final para regresar al estado cero.
+    """
+    g = np.asarray(g, dtype=int)
+    inp = list(map(int, input_bits))
+    if len(inp) % k0:
+        inp += [0] * (k0 - len(inp) % k0)
+    n = len(inp) // k0
+    l = g.shape[1] // k0
+    n0 = g.shape[0]
+    u = [0] * ((l - 1) * k0) + inp + [0] * ((l - 1) * k0)
+    u1 = u[l * k0 - 1::-1]
+    for i in range(1, n + l - 1):
+        start = (i + l) * k0 - 1
+        stop = i * k0
+        u1 += u[start:stop - 1:-1]
+    uu = np.array(u1).reshape((l * k0, n + l - 1), order="F")
+    salida = (g @ uu) % 2
+    return salida.flatten(order="F").astype(int)
 
 
 def problema16():
@@ -762,8 +775,8 @@ def problema16():
                   [1, 1, 0, 1],
                   [1, 1, 1, 1]], dtype=int)
     entrada = np.array([int(c) for c in "110010101010010111101011111010"])
-    salida1 = conv_encode_g(entrada, G, k=1)
-    salida2 = conv_encode_g(entrada, G, k=2)
+    salida1 = cnv_encd(G, 1, entrada)
+    salida2 = cnv_encd(G, 2, entrada)
     fig, axes = plt.subplots(1, 3, figsize=(10.6, 3.2))
     axes[0].imshow(G, cmap="Greys", vmin=0, vmax=1, aspect="auto")
     axes[0].set_title("Matriz $G$")
@@ -899,7 +912,7 @@ def _cota_dura(A, k, n, p):
     return total / k
 
 
-def simular_conv(ebn0_db, hard, nbits=80000, rng=None):
+def simular_conv(ebn0_db, hard, nbits=200000, rng=None):
     rng = rng or RNG
     trellis = conv_trellis()
     g = dose(ebn0_db)
@@ -922,8 +935,9 @@ def simular_conv(ebn0_db, hard, nbits=80000, rng=None):
 
 def problema19():
     ebn0_db = np.arange(3, 10, 1.0)
-    hard = np.array([simular_conv(x, True) for x in ebn0_db])
-    suave = np.array([simular_conv(x, False) for x in ebn0_db])
+    rng = np.random.default_rng(2026)
+    hard = np.array([simular_conv(x, True, 500000, rng) for x in ebn0_db])
+    suave = np.array([simular_conv(x, False, 500000, rng) for x in ebn0_db])
     A, k, n = _enumerador(L=14)
     g = dose(ebn0_db)
     p = qfunc(np.sqrt(2 * (k / n) * g))
@@ -1008,49 +1022,46 @@ def problema20():
             "longitud": int(len(recibida))}
 
 
-# ------------------------------------------- 21. identidades de la ecuacion (80)
+# ------------------------------------------- 21. max* de la ecuacion (80)
+def maxstar(a, b):
+    """max*(a,b) = max(a,b) + ln(1+exp(-|a-b|)) de la Ecuacion (80)."""
+    return np.maximum(a, b) + np.log1p(np.exp(-np.abs(a - b)))
+
+
 def problema21():
     rng = np.random.default_rng(5)
     a = rng.normal(0, 5, 20000)
     b = rng.normal(0, 5, 20000)
-    lhs = np.logaddexp(a, b)
-    rhs = np.maximum(a, b) + np.log1p(np.exp(-np.abs(a - b)))
-    err_lse = float(np.max(np.abs(lhs - rhs)))
-
-    L1 = rng.normal(0, 4, 20000)
-    L2 = rng.normal(0, 4, 20000)
-    lhs_xor = 2 * np.arctanh(np.tanh(L1 / 2) * np.tanh(L2 / 2))
-    rhs_xor = np.logaddexp(L1 + L2, 0) - np.logaddexp(L1, L2)
-    err_xor = float(np.max(np.abs(lhs_xor - rhs_xor)))
-
-    L = np.linspace(-6, 6, 400)
-    tanh_id = np.tanh(L / 2)
-    tanh_exp = (np.exp(L) - 1) / (np.exp(L) + 1)
-    err_tanh = float(np.max(np.abs(tanh_id - tanh_exp)))
-
+    c = rng.normal(0, 5, 20000)
+    exacto2 = np.logaddexp(a, b)
+    exacto3 = np.logaddexp(np.logaddexp(a, b), c)
+    err2 = float(np.max(np.abs(maxstar(a, b) - exacto2)))
+    err3 = float(np.max(np.abs(maxstar(maxstar(a, b), c) - exacto3)))
+    err_asoc = float(np.max(np.abs(maxstar(maxstar(a, b), c) -
+                                maxstar(a, maxstar(b, c)))))
+    # error de la aproximacion max* ~ max
+    delta = np.linspace(0, 10, 400)
+    error_aprox = np.log1p(np.exp(-delta))
     fig, axes = plt.subplots(1, 2, figsize=(9.2, 3.6))
-    axes[0].plot(L, tanh_id, color=COLORES[0], lw=2,
-                 label=r"$\tanh(L/2)$")
-    axes[0].plot(L, tanh_exp, "o", color=COLORES[1], ms=2.5,
-                 label=r"$(e^L-1)/(e^L+1)$")
-    axes[0].set_xlabel("$L$")
-    axes[0].set_title("Identidad de la tangente hiperbolica")
+    x = np.linspace(-6, 6, 400)
+    axes[0].plot(x, maxstar(x, 0.0), color=COLORES[0], lw=2,
+                 label=r"$\max^*(x,0)$")
+    axes[0].plot(x, np.maximum(x, 0.0), "--", color=COLORES[1], lw=1.4,
+                 label=r"$\max(x,0)$")
+    axes[0].set_xlabel("$x$")
+    axes[0].set_title(r"$\max^*(x,0)$ y su version aproximada")
     axes[0].legend(fontsize=8)
     axes[0].grid(True, alpha=0.3)
-    L2fijo = 1.0
-    xx = np.linspace(-6, 6, 400)
-    y1 = 2 * np.arctanh(np.tanh(xx / 2) * np.tanh(L2fijo / 2))
-    y2 = np.logaddexp(xx + L2fijo, 0) - np.logaddexp(xx, L2fijo)
-    axes[1].plot(xx, y1, color=COLORES[0], lw=2, label="2 atanh(...)")
-    axes[1].plot(xx, y2, "--", color=COLORES[1], lw=1.4, label="log-sum-exp")
-    axes[1].set_xlabel("$L_1$")
-    axes[1].set_title(r"LLR de $X_1\oplus X_2$ con $L_2=1$")
-    axes[1].legend(fontsize=8)
+    axes[1].plot(delta, error_aprox, color=COLORES[2], lw=2)
+    axes[1].set_xlabel(r"$|x-y|$")
+    axes[1].set_ylabel(r"$\max^*-\max$")
+    axes[1].set_title("Error de la aproximacion (maximo $\\ln 2$)")
     axes[1].grid(True, alpha=0.3)
     fig.tight_layout()
     guardar_fig(fig, "p21_identidades.png")
-    return {"error_logsumexp": err_lse, "error_xor": err_xor,
-            "error_tanh": err_tanh}
+    return {"error_maxstar2": err2, "error_maxstar3": err3,
+            "error_asociatividad": err_asoc,
+            "error_maximo_aproximacion": float(np.log(2))}
 
 
 # ------------------------------------------------- 22. entrelazador aleatorio
@@ -1086,33 +1097,28 @@ def problema22():
 
 
 # ----------------------------------------------------- 23. turbo codificador
-def rsc_trellis(feedback=0b111, feedforward=0b101, K=3):
-    """Trellis del RSC sistematico (feedback, feedforward) con estado K-1."""
-    nstates = 1 << (K - 1)
-    fb = _bits_gen(feedback, K)
-    ff = _bits_gen(feedforward, K)
+def rsc_trellis():
+    """Trellis de 8 estados del RSCC 5/7 de las notas (Figura 24)."""
     trellis = []
-    for s in range(nstates):
-        estado = [(s >> (K - 2 - i)) & 1 for i in range(K - 1)]
+    for s in range(8):
+        r1, r2, r3 = (s >> 2) & 1, (s >> 1) & 1, s & 1
         fila = []
         for u in (0, 1):
-            reg = [u] + estado
-            a = sum(x * y for x, y in zip(reg, fb)) % 2
-            p = sum(x * y for x, y in zip([a] + estado, ff)) % 2
-            nuevo = [a] + estado[:-1]
-            ns = sum(b << (K - 2 - i) for i, b in enumerate(nuevo))
-            fila.append((ns, (u, p)))
+            r1t = (r3 + r2 + u) % 2
+            ns = (r1t << 2) | (r1 << 1) | r2
+            fila.append((ns, (u, (r1t + r2) % 2)))
         trellis.append(fila)
     return trellis
 
 
-def rsc_encode(bits, feedback=0b111, feedforward=0b101, K=3):
-    trellis = rsc_trellis(feedback, feedforward, K)
-    s = 0
+def rsc_encode(bits):
+    """RSCC 5/7 exacto de las notas: r1'=u+r2+r3, c2=r1'+r2."""
+    r1 = r2 = r3 = 0
     salida = []
-    for u in bits:
-        s, (sysb, p) = trellis[s][int(u)]
-        salida.append((sysb, p))
+    for u in np.asarray(bits, dtype=int):
+        r1t = (r3 + r2 + u) % 2
+        r3, r2, r1 = r2, r1, r1t
+        salida.append((u, (r1 + r3) % 2))
     return np.array(salida, dtype=int)
 
 
@@ -1239,10 +1245,13 @@ def simular_turbo(ebn0_db, iteraciones=5, N=500, nblocks=5, rng=None):
 
 def problema24():
     ebn0_db = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
-    it1 = np.array([simular_turbo(x, 1) for x in ebn0_db])
-    it5 = np.array([simular_turbo(x, 5) for x in ebn0_db])
+    rng = np.random.default_rng(2026)
+    it1 = np.array([simular_turbo(x, 1, N=1000, nblocks=10, rng=rng)
+                    for x in ebn0_db])
+    it5 = np.array([simular_turbo(x, 5, N=1000, nblocks=10, rng=rng)
+                    for x in ebn0_db])
     iteraciones = np.arange(1, 8)
-    ber_iter = np.array([simular_turbo(2.0, int(k), N=400, nblocks=4)
+    ber_iter = np.array([simular_turbo(2.0, int(k), N=800, nblocks=8, rng=rng)
                          for k in iteraciones])
     fig, axes = plt.subplots(1, 2, figsize=(9.6, 3.6))
     axes[0].semilogy(ebn0_db, sin_ceros(it1), "o-", color=COLORES[0], ms=5,

@@ -2,13 +2,14 @@
 
 **Materia:** Comunicaciones Inalámbricas
 **Equipo:** RTL-SDR (`RTL2832U` + tuner `R820T`), antena telescópica
+**Fuente:** emisora FM 91.5 MHz (no se dispone de transmisor local en 433.9 MHz)
 **Script:** [`practica3.py`](practica3.py) (Python; en este repo el análisis se hace en Python en lugar de MATLAB)
 
 ---
 
 ## 1. Objetivo
 
-Caracterizar las variaciones lentas de potencia (shadowing o desvanecimiento de gran escala) de un canal inalámbrico real: medir la potencia recibida $P_r(k)$ en 50 posiciones independientes a distancia fija (10 m), estimar la media $\mu$ y la desviación estándar $\sigma$ del shadowing, verificar si las mediciones siguen una distribución aproximadamente normal y obtener su ajuste gaussiano, complementando el modelo de pérdidas por trayectoria.
+Caracterizar las variaciones lentas de potencia (shadowing o desvanecimiento de gran escala) de un canal inalámbrico real: medir la potencia recibida $P_r(k)$ en 17 posiciones independientes usando una emisora FM como fuente, estimar la media $\mu$ y la desviación estándar $\sigma$ del shadowing local, verificar si las mediciones siguen una distribución aproximadamente normal y obtener su ajuste gaussiano, complementando el modelo de pérdidas por trayectoria.
 
 ## 2. Fundamento teórico
 
@@ -41,23 +42,23 @@ El ajuste gaussiano se obtiene por máxima verosimilitud con `scipy.stats.norm.f
 
 | Parámetro | Valor |
 |---|---|
-| Frecuencia central | 433.9 MHz (banda ISM de 433 MHz) |
+| Frecuencia central | 91.5 MHz (emisora FM; no hay transmisor local en 433.9 MHz) |
 | Sample rate | 2.4 MSPS |
 | Muestras por medición | un bloque IQ de la fuente en vivo |
-| Mediciones independientes | 50 (con `--nmed` solo cambia el tamaño de la demo `--sim`) |
-| Distancia transmisor–receptor (`--distancia`) | 10.0 m |
+| Mediciones independientes | 17 |
+| Distancia transmisor–receptor | no controlada (fuente lejana) |
 | Ganancia (`--gain`) | auto (la mayor que no recorta el ADC) |
 | Ritmo entre mediciones | manual: `ESPACIO` en cada posición |
 | Antena | telescópica del RTL-SDR |
 
 ### 3.2 Escenario
 
-Fuente transmisora fija y distancia constante de 10 m entre transmisor y receptor. La antena/receptor se reubica entre mediciones en posiciones cercanas al punto de recepción para modificar el entorno sin cambiar apreciablemente la distancia: pasillo, interior de oficina, cerca de paredes, cerca de puertas y con presencia/ausencia de personas.
+La fuente es la emisora FM de 91.5 MHz, que llega desde un transmisor lejano; la distancia no se controla. La antena/receptor se reubicó entre mediciones en posiciones cercanas dentro del mismo entorno (pasillo, interior, cerca de paredes y puertas, con presencia/ausencia de personas) para excitar el shadowing local y el multitrayecto, manteniendo la fuente fija.
 
 ### 3.3 Procedimiento
 
 1. `python3 practica3.py` abre una sola ventana en vivo con el espectro, la serie de potencias y el histograma con el ajuste gaussiano.
-2. En cada una de las 50 posiciones se pulsa `ESPACIO` para registrar $P_r(k) = 10\log_{10}(\text{mean}(|x|^2))$ del último bloque IQ; `r` reinicia las mediciones.
+2. En cada una de las 17 posiciones se pulsa `ESPACIO` para registrar $P_r(k) = 10\log_{10}(\text{mean}(|x|^2))$ del último bloque IQ; `r` reinicia las mediciones.
 3. La tecla `s` guarda las mediciones en `datos/mediciones.csv` (índice y potencia en dB).
 4. Al guardar se calculan $\mu$, $\sigma$, el ajuste gaussiano, el intervalo de confianza aproximado de $\sigma$ y la prueba de normalidad; todo se guarda en `datos/resultados.json`.
 5. La misma tecla `s` genera `figs/variacion.png` y `figs/histograma.png`.
@@ -78,40 +79,41 @@ ax.plot(x, stats.norm.pdf(x, mu_fit, sigma_fit))                               #
 
 ## 5. Resultados
 
-> **Nota:** **los resultados y figuras de esta sección corresponden a la corrida de verificación por simulación (`python3 practica3.py --sim`), no a una medición real del canal; se reemplazan por los datos de la corrida real (`python3 practica3.py`) al ejecutar la práctica con el transmisor y el RTL-SDR.**
+La corrida real se realizó con el RTL-SDR y la antena telescópica sintonizados en la emisora FM de **91.5 MHz**. Se registraron **17 posiciones** distintas dentro del mismo entorno; la fuente es lejana, así que la distancia no se controló y lo que se caracteriza es el shadowing local (no la pérdida media por trayectoria).
 
 ### 5.1 Tabla de resultados
 
 | Parámetro | Valor |
 |---|---|
-| Media µ (dB) | −49.23 |
-| Desviación σ (dB) | 5.52 |
-| σ del ajuste gaussiano (MLE) | 5.47 |
-| N mediciones | 50 |
-| Distancia | 10.0 m |
-| p-valor (Shapiro-Wilk) | 0.6166 |
-| IC 95 % aproximado de σ | [4.43, 6.62] dB |
-| Entorno (clasificado por σ) | interior con poca obstrucción |
+| Media µ (dBFS) | −50.29 |
+| Desviación σ (dB) | 6.29 |
+| σ del ajuste gaussiano (MLE) | 6.10 |
+| N mediciones | 17 |
+| Fuente | FM 91.5 MHz |
+| Distancia | no controlada (fuente lejana) |
+| p-valor (Shapiro-Wilk) | 0.6580 |
+| IC 95 % aproximado de σ | [4.11, 8.47] dB |
+| Entorno (clasificado por σ) | exterior urbano / interior con obstáculos |
 
 ### 5.2 Variación de potencia recibida
 
 ![Variación de potencia](figs/variacion.png)
 
-La potencia fluctúa alrededor de −49.2 dB con excursiones entre aproximadamente −64 y −38 dB, típicas de un canal con shadowing. No se observa tendencia creciente ni decreciente, lo que indica que la distancia se mantuvo constante.
+La potencia fluctúa alrededor de −50.3 dBFS con excursiones entre aproximadamente −60.4 y −37.8 dBFS. Esa dispersión de más de 20 dB es la firma del shadowing local y del multitrayecto al mover la antena entre posiciones. No se observa una tendencia monótona porque la distancia a la emisora no cambia de forma controlada; lo que varía es el entorno local.
 
 ### 5.3 Histograma y ajuste gaussiano
 
 ![Histograma y ajuste gaussiano](figs/histograma.png)
 
-El histograma normalizado a pdf presenta una forma acampanada, simétrica alrededor de la media, y la curva gaussiana ajustada lo sigue de cerca; no se aprecian colas pesadas ni bimodalidad marcadas.
+El histograma normalizado presenta una forma aproximadamente acampanada y la gaussiana ajustada lo sigue de cerca. Con solo 17 muestras el histograma es grueso, pero no se aprecian bimodalidades ni colas pesadas evidentes.
 
 ## 6. Análisis de resultados
 
-- **Normalidad:** el p-valor de la prueba de Shapiro-Wilk (0.6166) es muy superior a 0.05, por lo que **no se rechaza** la hipótesis de normalidad de $P_r$; las mediciones son compatibles con el modelo log-normal del shadowing. Además, $\mu_{fit} \approx \mu$ (−49.23 dB) y la diferencia entre $\sigma$ muestral (5.52 dB) y $\sigma_{fit}$ (5.47 dB) se debe solo al estimador ($N-1$ vs. máxima verosimilitud).
-- **Comparación con la literatura:** $\sigma = 5.52$ dB cae dentro del rango de **interior de oficinas (4–12 dB)** y en el borde inferior del rango de exterior urbano (6–10 dB); está por encima del espacio libre (2–4 dB). El intervalo de confianza [4.43, 6.62] dB es consistente con un ambiente interior con obstáculos moderados (paredes, muebles, puertas, personas), no con línea de vista despejada.
-- **Elementos del entorno:** las paredes, puertas y la presencia de personas son los obstáculos que más modifican la potencia recibida, porque atenúan y difractan la señal de manera distinta en cada posición aun manteniendo la misma distancia.
-- **Pérdida por trayectoria vs. shadowing:** la pérdida media $PL(d)$ decae de forma determinista con la distancia según $n$; el shadowing es la componente aleatoria $X_\sigma$ que dispersa las mediciones alrededor de esa media. El modelo completo requiere ambas.
-- **Hardware:** con `--sim` se valida todo el pipeline sin dongle. En la corrida real, el valor de $\mu$ depende de la calibración del receptor (dBFS relativos, no dBm absolutos), pero $\sigma$ es independiente de la escala y por eso es la métrica robusta del shadowing.
+- **Normalidad:** el p-valor de Shapiro-Wilk (0.6580) es muy superior a 0.05, por lo que **no se rechaza** la hipótesis de normalidad de $P_r$; las 17 mediciones son compatibles con el modelo log-normal del shadowing. La media del ajuste coincide con la muestral (−50.29 dBFS) y la diferencia entre $\sigma$ muestral (6.29 dB) y $\sigma_{fit}$ (6.10 dB) se debe al estimador ($N-1$ vs. máxima verosimilitud).
+- **Comparación con la literatura:** $\sigma = 6.29$ dB cae dentro del rango de **interior de oficinas (4–12 dB)** y en el borde inferior de exterior urbano (6–10 dB). Está por encima del espacio libre (2–4 dB), lo que es consistente con un entorno con paredes, muebles, puertas y personas. El intervalo de confianza [4.11, 8.47] dB es amplio por el tamaño de muestra, pero cubre los valores típicos de interiores.
+- **Elementos del entorno:** paredes, puertas y la presencia de personas son los obstáculos que más modifican la potencia recibida; al mover la antena cambian las atenuaciones y las fases de las réplicas multitrayecto, aunque la distancia a la emisora sea prácticamente constante.
+- **Pérdida por trayectoria vs. shadowing:** con una emisora lejana no se puede medir el exponente $n$ de path loss, porque la distancia no se controla. Esta práctica caracteriza únicamente la componente aleatoria $X_\sigma$ alrededor de la potencia media local; para el modelo completo $PL(d)$ haría falta un transmisor local a distancias conocidas.
+- **Hardware:** la corrida fue real, con el RTL-SDR y la antena; no se usó `--sim`. Las potencias son dBFS relativas al ADC del receptor, no dBm absolutos, pero $\sigma$ es independiente de la escala y por eso es la métrica robusta del shadowing.
 
 ## 7. Cuestionario
 
@@ -132,4 +134,4 @@ El histograma normalizado a pdf presenta una forma acampanada, simétrica alrede
 
 ## 8. Conclusiones
 
-Se implementó y verificó el pipeline completo de caracterización del shadowing: adquisición de $N_{med}$ mediciones IQ a distancia fija con la tecla `ESPACIO`, cálculo de $P_r(k) = 10\log_{10}(\text{mean}(|x|^2))$, estimación de $\mu$ y $\sigma$, ajuste gaussiano, prueba de normalidad y visualización. En la verificación por simulación ($\mathcal{N}(-50, 6)$ dB) se obtuvo $\mu = -49.23$ dB, $\sigma = 5.52$ dB, $p = 0.6166$, de modo que las mediciones pasan la prueba de normalidad y el valor de $\sigma$ es consistente con el parámetro simulado y con los rangos típicos de interiores (4–12 dB). El script queda listo para la corrida real (`python3 practica3.py`), donde los archivos `datos/mediciones.csv` y `datos/resultados.json` y las figuras se regenerarán con las 50 posiciones medidas; la validación sin hardware con `python3 practica3.py --selftest` confirma que la lógica estadística es correcta.
+Se ejecutó la corrida real del análisis de shadowing con el RTL-SDR y la antena telescópica, usando la emisora FM de 91.5 MHz como fuente y 17 posiciones distintas. Se obtuvo $\mu = -50.29$ dBFS, $\sigma = 6.29$ dB, $\sigma_{fit} = 6.10$ dB y $p = 0.6580$ en la prueba de Shapiro-Wilk, de modo que no se rechaza la normalidad y el valor de $\sigma$ es consistente con un entorno interior con obstáculos moderados (4–12 dB). La ausencia de un transmisor local en 433.9 MHz impide medir path loss con distancias controladas; por eso la práctica se limitó al shadowing local con una fuente FM lejana. El procedimiento queda reproducible con `python3 practica3.py -f 91.5e6 -d 0`, la tecla `ESPACIO` en cada posición y `s` para guardar.

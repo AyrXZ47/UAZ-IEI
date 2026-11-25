@@ -1,11 +1,13 @@
 {
-  "frecuencia": 433900000.0,
-  "n_muestras": 4884,
-  "media": 0.8955032229423523,
-  "std": 0.4450550377368927,
-  "sigma_rayleigh": 0.7071067690849304,
+  "frecuencia": 90000000.0,
+  "n_muestras": 24118,
+  "media": 0.8885014531533375,
+  "std": 0.45887380372430026,
+  "sigma_rayleigh": 0.7071067811865476,
   "umbral": 0.5,
-  "porcentaje_profundo": 22.37919737919738,
-  "porcentaje_teorico": 22.119922359289912,
-  "modo": "simulacion"
+  "porcentaje_profundo": 21.697487353843602,
+  "porcentaje_teorico": 22.119921692859513,
+  "modo": "real",
+  "fuente": "FM 90.0 MHz",
+  "duracion_s": 10.0
 }

@@ -42,9 +42,18 @@ def potencia_media(x):
     return float(np.mean(np.abs(x) ** 2))
 
 
-def estimar(x, x_ruido, B):
-    """Ps, Pn, SNR y capacidad de Shannon a partir de una captura y ruido."""
-    Ps, Pn = potencia_media(x), potencia_media(x_ruido)
+def potencia_banda(x, B, fs):
+    """Potencia de la componente |f| <= B/2 (canal util), no de todo el span."""
+    X = np.fft.fft(x)
+    f = np.fft.fftfreq(x.size, 1.0 / fs)
+    X[np.abs(f) > B / 2] = 0
+    y = np.fft.ifft(X)
+    return float(np.mean(np.abs(y) ** 2))
+
+
+def estimar(x, x_ruido, B, fs=2.4e6):
+    """Ps, Pn, SNR y capacidad de Shannon dentro de la banda del canal."""
+    Ps, Pn = potencia_banda(x, B, fs), potencia_banda(x_ruido, B, fs)
     snr = Ps / Pn
     C = B * np.log2(1 + snr)
     return {"Ps_dB": 10 * np.log10(Ps), "Pn_dB": 10 * np.log10(Pn),
@@ -186,7 +195,7 @@ class P7(vivo.Practica):
 
     # -- mediciones ------------------------------------------------------
     def _registrar(self, x, x_noise):
-        self.res[self.escs[self.sel]] = estimar(x, x_noise, self.args.banda)
+        self.res[self.escs[self.sel]] = estimar(x, x_noise, self.args.banda, self.app.fs)
         self._acomodar()
 
     def _medir_real(self):

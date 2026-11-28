@@ -10,7 +10,7 @@ documentada.
 | Archivo | Descripción |
 | --- | --- |
 | `main.tex` / `main.pdf` | Reporte completo (portada, FODA, Pareto, plan, bibliografía y anexos). |
-| `pareto.xlsx` | Libro de Excel: portada, tabla de Pareto con fórmulas, gráfico nativo, microdatos y FODA. |
+| `pareto.xlsx` | Libro de Excel: portada, tabla de Pareto con fórmulas, hoja de gráfico, microdatos y FODA. |
 | `datos/encuesta.csv` | Microdatos: 250 alumnos × 15 debilidades (1 = la percibe). |
 | `datos/pareto.csv` | Tabla resumen ordenada con porcentajes acumulados. |
 | `datos/generar_datos.py` | Genera el CSV, la figura y el libro de Excel. |

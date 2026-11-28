@@ -299,8 +299,9 @@ def escribir_excel(filas: list[dict]) -> None:
                                  "border": 1, "border_color": "#8ea9db"})
     f_nota = wb.add_format({"font_size": 9, "font_color": "#595959",
                             "text_wrap": True, "valign": "top"})
-    f_clave = wb.add_format({"bold": True, "align": "center", "border": 1,
-                             "border_color": "#bfbfbf", "font_color": azul})
+    f_clave = wb.add_format({"bold": True, "align": "center", "valign": "top",
+                             "border": 1, "border_color": "#bfbfbf",
+                             "font_color": azul})
     f_foda_f = wb.add_format({"bg_color": "#d9ead3", "text_wrap": True,
                               "valign": "top", "border": 1,
                               "border_color": "#bfbfbf"})
@@ -339,17 +340,24 @@ def escribir_excel(filas: list[dict]) -> None:
         ("Pareto", "Tabla de frecuencias ordenada y diagrama de Pareto (barras y porcentaje acumulado)."),
         ("Datos", "Microdatos de la encuesta: 250 alumnos y 15 debilidades (1 = la percibe)."),
         ("FODA", "Las 15 fortalezas, oportunidades, debilidades y amenazas del diagnóstico."),
+        ("Gráfico", "El diagrama de Pareto en tamaño carta, listo para imprimir o exportar."),
     ]
     for i, (hoja, desc) in enumerate(filas_portada, start=13):
         ws.write(i, 1, hoja, f_total_txt)
         ws.write(i, 2, desc, f_texto)
-    ws.merge_range("B17:C18",
+    ws.merge_range("B18:C19",
                    "Los conteos de la hoja Pareto son fórmulas que suman la hoja Datos; "
                    "si se modifica una marca, la tabla y el gráfico se recalculan.",
                    f_nota)
-    ws.set_row(13, 30)
-    ws.set_row(14, 30)
-    ws.set_row(15, 30)
+    for r in range(13, 17):
+        ws.set_row(r, 30)
+    ws.set_portrait()
+    ws.center_vertically()
+    ws.set_paper(9)
+    ws.set_margins(1.5, 1.5, 1.5, 1.5)
+    ws.fit_to_pages(1, 1)
+    ws.print_area(1, 1, 18, 2)
+    ws.set_footer("&C&P/&N")
 
     # ------------------------------------------------------------------- Pareto
     ps = wb.add_worksheet("Pareto")
@@ -394,6 +402,7 @@ def escribir_excel(filas: list[dict]) -> None:
         ps.write_formula(r, 5, f"=SUM($E$5:E{excel_row})", f_pct, f["acumulado"])
         ps.write_number(r, 6, 0.8, f_pct)
         ps.write_string(r, 7, f"{f['clave']} · {f['corto']}", f_texto)
+        ps.set_row(r, 30)
 
     ps.write(fila_total, 2, "Total de menciones", f_total_txt)
     ps.write_formula(fila_total, 3, f"=SUM(D5:D{ultima + 1})", f_total,
@@ -414,85 +423,92 @@ def escribir_excel(filas: list[dict]) -> None:
     ps.set_row(fila_total + 3, 28)
 
     # Gráfico combinado: columnas (menciones) + línea (% acumulado) + umbral 80 %.
-    grafico = wb.add_chart({"type": "column"})
-    grafico.add_series({
-        "name": "Menciones",
-        "categories": ["Pareto", primera, 7, ultima, 7],
-        "values": ["Pareto", primera, 3, ultima, 3],
-        "fill": {"color": azul},
-        "border": {"color": "#ffffff"},
-        "gap": 45,
-    })
-    linea = wb.add_chart({"type": "line"})
-    linea.add_series({
-        "name": "% acumulado",
-        "categories": ["Pareto", primera, 7, ultima, 7],
-        "values": ["Pareto", primera, 5, ultima, 5],
-        "y2_axis": True,
-        "line": {"color": "#c00000", "width": 2.0},
-        "marker": {"type": "circle", "size": 5,
-                   "fill": {"color": "#ffffff"},
-                   "border": {"color": "#c00000"}},
-    })
-    linea.add_series({
-        "name": "Umbral 80 %",
-        "categories": ["Pareto", primera, 7, ultima, 7],
-        "values": ["Pareto", primera, 6, ultima, 6],
-        "y2_axis": True,
-        "line": {"color": "#7f7f7f", "width": 1.25, "dash_type": "dash"},
-    })
-    # En los gráficos combinados de xlsxwriter, el eje secundario se toma del
-    # segundo gráfico, no del principal.
-    linea.set_y2_axis({
-        "name": "Porcentaje acumulado",
-        "name_font": {"size": 9},
-        "min": 0,
-        "max": 1,
-        "major_unit": 0.2,
-        "num_format": "0%",
-        "line": {"color": "#7f7f7f"},
-    })
-    grafico.combine(linea)
+    def crear_grafico():
+        grafico = wb.add_chart({"type": "column"})
+        grafico.add_series({
+            "name": "Menciones",
+            "categories": ["Pareto", primera, 7, ultima, 7],
+            "values": ["Pareto", primera, 3, ultima, 3],
+            "fill": {"color": azul},
+            "border": {"color": "#ffffff"},
+            "gap": 45,
+        })
+        linea = wb.add_chart({"type": "line"})
+        linea.add_series({
+            "name": "% acumulado",
+            "categories": ["Pareto", primera, 7, ultima, 7],
+            "values": ["Pareto", primera, 5, ultima, 5],
+            "y2_axis": True,
+            "line": {"color": "#c00000", "width": 2.0},
+            "marker": {"type": "circle", "size": 5,
+                       "fill": {"color": "#ffffff"},
+                       "border": {"color": "#c00000"}},
+        })
+        linea.add_series({
+            "name": "Umbral 80 %",
+            "categories": ["Pareto", primera, 7, ultima, 7],
+            "values": ["Pareto", primera, 6, ultima, 6],
+            "y2_axis": True,
+            "line": {"color": "#7f7f7f", "width": 1.25, "dash_type": "dash"},
+        })
+        # En los gráficos combinados de xlsxwriter, el eje secundario se toma
+        # del segundo gráfico, no del principal.
+        linea.set_y2_axis({
+            "name": "Porcentaje acumulado",
+            "name_font": {"size": 9},
+            "min": 0,
+            "max": 1,
+            "major_unit": 0.2,
+            "num_format": "0%",
+            "line": {"color": "#7f7f7f"},
+        })
+        grafico.combine(linea)
+        grafico.set_title({
+            "name": "Pareto de debilidades percibidas por los alumnos",
+            "name_font": {"size": 13, "bold": True, "color": azul},
+        })
+        grafico.set_x_axis({
+            "name": "Debilidades ordenadas de mayor a menor frecuencia",
+            "num_font": {"size": 7, "rotation": -45},
+            "name_font": {"size": 9},
+            "line": {"color": "#7f7f7f"},
+        })
+        grafico.set_y_axis({
+            "name": "Menciones",
+            "name_font": {"size": 9},
+            "major_gridlines": {"visible": True,
+                                "line": {"color": "#e0e0e0"}},
+            "line": {"color": "#7f7f7f"},
+        })
+        grafico.set_legend({"position": "bottom", "font": {"size": 9}})
+        grafico.set_size({"width": 1100, "height": 500})
+        grafico.set_chartarea({"border": {"color": "#bfbfbf"}})
+        return grafico
 
-    grafico.set_title({
-        "name": "Pareto de debilidades percibidas por los alumnos",
-        "name_font": {"size": 13, "bold": True, "color": azul},
-    })
-    grafico.set_x_axis({
-        "name": "Debilidades ordenadas de mayor a menor frecuencia",
-        "num_font": {"size": 7, "rotation": -45},
-        "name_font": {"size": 9},
-        "line": {"color": "#7f7f7f"},
-    })
-    grafico.set_y_axis({
-        "name": "Menciones",
-        "name_font": {"size": 9},
-        "major_gridlines": {"visible": True,
-                            "line": {"color": "#e0e0e0"}},
-        "line": {"color": "#7f7f7f"},
-    })
-    grafico.set_y2_axis({
-        "name": "Porcentaje acumulado",
-        "name_font": {"size": 9},
-        "min": 0,
-        "max": 1,
-        "major_unit": 0.2,
-        "num_format": "0%",
-        "line": {"color": "#7f7f7f"},
-    })
-    grafico.set_y2_axis({
-        "name": "Porcentaje acumulado",
-        "name_font": {"size": 9},
-        "min": 0,
-        "max": 1,
-        "major_unit": 0.2,
-        "num_format": "0%",
-        "line": {"color": "#7f7f7f"},
-    })
-    grafico.set_legend({"position": "bottom", "font": {"size": 9}})
-    grafico.set_size({"width": 940, "height": 470})
-    grafico.set_chartarea({"border": {"color": "#bfbfbf"}})
-    ps.insert_chart("J4", grafico, {"x_offset": 10, "y_offset": 5})
+    ps.insert_chart("J4", crear_grafico(), {"x_offset": 10, "y_offset": 5})
+    ps.set_landscape()
+    ps.set_paper(9)
+    ps.set_margins(0.8, 0.8, 1.2, 1.2)
+    ps.fit_to_pages(1, 1)
+    ps.print_area(0, 0, ultima, 7)
+    ps.set_footer("&C&P/&N")
+
+    # ------------------------------------------------------------------ Gráfico
+    gs = wb.add_worksheet("Gráfico")
+    gs.hide_gridlines(2)
+    gs.set_landscape()
+    gs.set_paper(9)
+    gs.set_margins(1.0, 1.0, 1.0, 1.0)
+    gs.fit_to_pages(1, 1)
+    gs.merge_range("A1:M1", "Diagrama de Pareto de las debilidades", f_titulo)
+    gs.merge_range("A2:M2",
+                   "Inseguridad de los alumnos en los horarios de entrada y salida · "
+                   "Campus Siglo XXI · 250 encuestas · 1 285 menciones",
+                   f_sub)
+    gs.insert_chart("A4", crear_grafico(), {"x_offset": 5, "y_offset": 5})
+    gs.print_area(0, 0, 28, 17)
+    gs.set_footer("&C&P/&N")
+
 
     ps.freeze_panes(4, 0)
     ps.autofilter(3, 0, ultima, 7)
@@ -520,6 +536,13 @@ def escribir_excel(filas: list[dict]) -> None:
         for j, marca in enumerate(a["marcas"]):
             ds.write_number(r, 5 + j, marca, f_centro)
     ds.autofilter(0, 0, ALUMNOS, len(encabezados_datos) - 1)
+    ds.set_landscape()
+    ds.set_paper(9)
+    ds.set_margins(0.8, 0.8, 1.0, 1.0)
+    ds.fit_to_pages(1, 0)
+    ds.repeat_rows(0)
+    ds.print_area(0, 0, ALUMNOS, len(encabezados_datos) - 1)
+    ds.set_footer("&C&P/&N")
 
     # --------------------------------------------------------------------- FODA
     fs = wb.add_worksheet("FODA")
@@ -543,6 +566,13 @@ def escribir_excel(filas: list[dict]) -> None:
             fila += 1
     fs.freeze_panes(1, 0)
     fs.autofilter(0, 0, fila - 1, 2)
+    fs.set_portrait()
+    fs.set_paper(9)
+    fs.set_margins(1.2, 1.2, 1.2, 1.2)
+    fs.fit_to_pages(1, 0)
+    fs.repeat_rows(0)
+    fs.print_area(0, 0, fila - 1, 2)
+    fs.set_footer("&C&P/&N")
 
     wb.close()
 

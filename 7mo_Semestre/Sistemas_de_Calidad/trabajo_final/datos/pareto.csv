@@ -1,0 +1,16 @@
+clave,debilidad,frecuencia,porcentaje,porcentaje_acumulado
+D1,"Iluminación insuficiente en accesos, andadores y estacionamientos",190,0.147860,0.147860
+D3,"Calles aledañas con banquetas rotas, poda excesiva y lotes baldíos",168,0.130739,0.278599
+D5,Poca presencia de seguridad en la salida del turno vespertino,150,0.116732,0.395331
+D2,Ausencia de vigilancia en los accesos peatonales en horas pico,132,0.102724,0.498054
+D6,Cámaras mal ubicadas o fuera de servicio que dejan puntos ciegos,118,0.091829,0.589883
+D7,Transporte público insuficiente y paradas alejadas o sin iluminación,104,0.080934,0.670817
+D4,Falta de control de acceso vehicular e identificación de conductores,92,0.071595,0.742412
+D8,Falta de señalización y de rutas peatonales seguras,80,0.062257,0.804669
+D9,Comunicación deficiente de los protocolos de emergencia,68,0.052918,0.857588
+D10,Puentes peatonales y pasos a desnivel inexistentes o en mal estado,56,0.043580,0.901167
+D11,"Estacionamientos sin delimitación, numeración ni control",44,0.034241,0.935409
+D12,Ausencia de programas de acompañamiento entre alumnos,34,0.026459,0.961868
+D13,Coordinación débil con la policía municipal y estatal,24,0.018677,0.980545
+D14,Mobiliario urbano vandalizado y sin mantenimiento,16,0.012451,0.992996
+D15,Falta de intendencia y vigilancia en los últimos minutos de la jornada,9,0.007004,1.000000
